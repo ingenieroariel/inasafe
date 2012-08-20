@@ -1,0 +1,567 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.safe_interface &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.safe_interface</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">**IS Safe Interface.**</span>
+
+<span class="sd">The purpose of the module is to centralise interactions between the gui</span>
+<span class="sd">package and the underlying InaSAFE packages. This should be the only place</span>
+<span class="sd">where SAFE modules are imported directly.</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com, ole.moller.nielsen@gmail.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;04/04/2012&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Standard modules</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+
+<span class="c"># SAFE functionality</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">get_admissible_plugins</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">get_function_title</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">get_plugins</span> <span class="k">as</span> <span class="n">safe_get_plugins</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">read_keywords</span><span class="p">,</span> <span class="n">bbox_intersection</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">write_keywords</span> <span class="k">as</span> <span class="n">safe_write_keywords</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">read_layer</span> <span class="k">as</span> <span class="n">safe_read_layer</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="p">(</span><span class="n">buffered_bounding_box</span><span class="p">,</span>
+                      <span class="n">verify</span> <span class="k">as</span> <span class="n">verify_util</span><span class="p">,</span>
+                      <span class="n">VerificationError</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="p">(</span><span class="n">calculate_impact</span> <span class="k">as</span> <span class="n">safe_calculate_impact</span><span class="p">,</span>
+                      <span class="n">internationalisedNames</span><span class="p">)</span>  <span class="c"># pylint: disable=</span>
+
+<span class="c"># InaSAFE GUI specific functionality</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QCoreApplication</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">KeywordNotFoundException</span><span class="p">,</span>
+                               <span class="n">StyleInfoNotFoundException</span><span class="p">,</span>
+                               <span class="n">InvalidParameterException</span><span class="p">,</span>
+                               <span class="n">InsufficientOverlapException</span><span class="p">,</span>
+                               <span class="n">InvalidBoundingBoxException</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="tr"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.tr">[docs]</a><span class="k">def</span> <span class="nf">tr</span><span class="p">(</span><span class="n">theText</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;We define a tr() alias here since the is_safe_interface implementation</span>
+<span class="sd">    below is not a class and does not inherit from QObject.</span>
+
+<span class="sd">    .. note:: see http://tinyurl.com/pyqt-differences</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       theText - string to be translated</span>
+<span class="sd">    Returns:</span>
+<span class="sd">       Translated version of the given string if available, otherwise</span>
+<span class="sd">       the original string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myContext</span> <span class="o">=</span> <span class="s">&quot;is_safe_interface&quot;</span>
+    <span class="k">return</span> <span class="n">QCoreApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="n">theText</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="verify"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.verify">[docs]</a><span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="n">theStatement</span><span class="p">,</span> <span class="n">theMessage</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is just a thin wrapper around safe.api.verify.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * theStatement - expression to verify</span>
+<span class="sd">        * theMessage - message to display on failure</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        VerificationError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">verify_util</span><span class="p">(</span><span class="n">theStatement</span><span class="p">,</span> <span class="n">theMessage</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="getOptimalExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.getOptimalExtent">[docs]</a><span class="k">def</span> <span class="nf">getOptimalExtent</span><span class="p">(</span><span class="n">theHazardGeoExtent</span><span class="p">,</span>
+                     <span class="n">theExposureGeoExtent</span><span class="p">,</span>
+                     <span class="n">theViewportGeoExtent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A helper function to determine what the optimal extent is.</span>
+<span class="sd">    Optimal extent should be considered as the intersection between</span>
+<span class="sd">    the three inputs. The inasafe library will perform various checks</span>
+<span class="sd">    to ensure that the extent is tenable, includes data from both</span>
+<span class="sd">    etc.</span>
+
+<span class="sd">    This is just a thin wrapper around safe.api.bbox_intersection.</span>
+
+<span class="sd">    Typically the result of this function will be used to clip</span>
+<span class="sd">    input layers to a commone extent before processing.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theHazardGeoExtent - an array representing the hazard layer</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+<span class="sd">        * theExposureGeoExtent - an array representing the exposure layer</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+<span class="sd">        * theViewPortGeoExtent - an array representing the viewport</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+
+<span class="sd">       ..note:: We do minimal checking as the inasafe library takes</span>
+<span class="sd">         care of it for us.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       An array containing an extent in the form [xmin, ymin, xmax, ymax]</span>
+<span class="sd">       e.g.::</span>
+
+<span class="sd">          [100.03, -1.14, 100.81, -0.73]</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Check that inputs are valid</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">theHazardGeoExtent</span><span class="p">,</span>
+              <span class="n">theExposureGeoExtent</span><span class="p">,</span>
+              <span class="n">theViewportGeoExtent</span><span class="p">]:</span>
+
+        <span class="c"># Err message</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Invalid bounding box </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">). It must &#39;</span>
+                <span class="s">&#39;be a sequence of the &#39;</span>
+               <span class="s">&#39;form [west, south, east, north]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                                                    <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidBoundingBoxException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">VerificationError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidBoundingBoxException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="c"># .. note:: The bbox_intersection function below assumes that</span>
+    <span class="c">#           all inputs are in EPSG:4326</span>
+    <span class="n">myOptimalExtent</span> <span class="o">=</span> <span class="n">bbox_intersection</span><span class="p">(</span><span class="n">theHazardGeoExtent</span><span class="p">,</span>
+                                        <span class="n">theExposureGeoExtent</span><span class="p">,</span>
+                                        <span class="n">theViewportGeoExtent</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">myOptimalExtent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># Bounding boxes did not overlap</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Bounding boxes of hazard data, exposure data &#39;</span>
+               <span class="s">&#39;and viewport did not overlap, so no computation was &#39;</span>
+               <span class="s">&#39;done. Please make sure you pan to where the data is and &#39;</span>
+               <span class="s">&#39;that hazard and exposure data overlaps.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InsufficientOverlapException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">myOptimalExtent</span>
+
+</div>
+<div class="viewcode-block" id="getBufferedExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.getBufferedExtent">[docs]</a><span class="k">def</span> <span class="nf">getBufferedExtent</span><span class="p">(</span><span class="n">theGeoExtent</span><span class="p">,</span> <span class="n">theCellSize</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Grow bounding box with one unit of resolution in each direction.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theGeoExtent - Bounding box with format [W, S, E, N]</span>
+<span class="sd">        * theCellSize - (resx, resy) Raster resolution in each direction.</span>
+
+<span class="sd">        If resolution is None bbox is returned unchanged.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Adjusted bounding box</span>
+
+<span class="sd">    Raises:</span>
+
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    Note: See docstring for underlying function buffered_bounding_box</span>
+<span class="sd">          for more details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">buffered_bounding_box</span><span class="p">(</span><span class="n">theGeoExtent</span><span class="p">,</span> <span class="n">theCellSize</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="availableFunctions"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.availableFunctions">[docs]</a><span class="k">def</span> <span class="nf">availableFunctions</span><span class="p">(</span><span class="n">theKeywordList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Query the inasafe engine to see what plugins are available.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">       theKeywordList - an optional parameter which should contain</span>
+<span class="sd">       a list of 2 dictionaries (the number of items in the list</span>
+<span class="sd">       is not enforced). The dictionaries should be obtained by using</span>
+<span class="sd">       readKeywordsFromFile e.g.::</span>
+
+<span class="sd">           myFile1 = foo.shp</span>
+<span class="sd">           myFile2 = bar.asc</span>
+<span class="sd">           myKeywords1 = readKeywordsFromFile(myFile1)</span>
+<span class="sd">           myKeywords2 = readKeywordsFromFile(myFile2)</span>
+<span class="sd">           myList = [myKeywords1, myKeywords2]</span>
+<span class="sd">           myFunctions = availableFunctions(myList)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       A dictionary of strings where each is a plugin name.</span>
+
+<span class="sd">       .. note:: If theKeywordList is not provided, all available</span>
+<span class="sd">        plugins will be returned in the list.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       NoFunctionsFoundException if no functions are found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">(</span><span class="n">theKeywordList</span><span class="p">)</span>
+        <span class="c">#if len(myDict) &lt; 1:</span>
+        <span class="c">#    myMessage = &#39;No InaSAFE impact functions could be found&#39;</span>
+        <span class="c">#    raise NoFunctionsFoundException(myMessage)</span>
+        <span class="k">return</span> <span class="n">myDict</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="readKeywordsFromLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.readKeywordsFromLayer">[docs]</a><span class="k">def</span> <span class="nf">readKeywordsFromLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">keyword</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get metadata from the keywords file associated with a layer.</span>
+
+<span class="sd">    .. note:: Requires a inasafe layer instance as parameter.</span>
+<span class="sd">    .. seealso:: getKeywordFromPath</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">       * theLayer - a InaSAFE layer (vector or raster)</span>
+<span class="sd">       * keyword - the metadata keyword to retrieve e.g. &#39;title&#39;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       A string containing the retrieved value for the keyword.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       KeywordNotFoundException if the keyword is not recognised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myValue</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">theLayer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myValue</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Keyword retrieval failed for </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">theLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(),</span> <span class="n">keyword</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="n">KeywordNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">myValue</span> <span class="ow">or</span> <span class="n">myValue</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No value was found for keyword </span><span class="si">%s</span><span class="s"> in layer </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">theLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(),</span> <span class="n">keyword</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">KeywordNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myValue</span>
+
+</div>
+<div class="viewcode-block" id="readKeywordsFromFile"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.readKeywordsFromFile">[docs]</a><span class="k">def</span> <span class="nf">readKeywordsFromFile</span><span class="p">(</span><span class="n">theLayerPath</span><span class="p">,</span> <span class="n">theKeyword</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get metadata from the keywords file associated with a local</span>
+<span class="sd">     file in the file system.</span>
+
+<span class="sd">    .. note:: Requires a str representing a file path instance</span>
+<span class="sd">              as parameter As opposed to readKeywordsFromLayer which</span>
+<span class="sd">              takes a inasafe file object as parameter.</span>
+
+<span class="sd">    .. seealso:: readKeywordsFromLayer</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">       * theLayerPath - a string representing a path to a layer</span>
+<span class="sd">           (e.g. &#39;/tmp/foo.shp&#39;, &#39;/tmp/foo.tif&#39;)</span>
+<span class="sd">       * theKeyword - optional - the metadata keyword to retrieve e.g. &#39;title&#39;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       A string containing the retrieved value for the keyword if</span>
+<span class="sd">       the keyword argument is specified, otherwise the</span>
+<span class="sd">       complete keywords dictionary is returned.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       KeywordNotFoundException if the keyword is not recognised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check the source layer path is valid</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">theLayerPath</span><span class="p">):</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Cannot get keywords from a non-existant file.&#39;</span>
+               <span class="s">&#39;</span><span class="si">%s</span><span class="s"> does not exist.&#39;</span> <span class="o">%</span> <span class="n">theLayerPath</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># check there really is a keywords file for this layer</span>
+    <span class="n">myKeywordFilePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">theLayerPath</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">myKeywordFilePath</span> <span class="o">+=</span> <span class="s">&#39;.keywords&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">myKeywordFilePath</span><span class="p">):</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No keywords file found for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">theLayerPath</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c">#now get the requested keyword using the inasafe library</span>
+    <span class="n">myDictionary</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myDictionary</span> <span class="o">=</span> <span class="n">read_keywords</span><span class="p">(</span><span class="n">myKeywordFilePath</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Keyword retrieval failed for </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">myKeywordFilePath</span><span class="p">,</span> <span class="n">theKeyword</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="n">KeywordNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># if no keyword was supplied, just return the dict</span>
+    <span class="k">if</span> <span class="n">theKeyword</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">myDictionary</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theKeyword</span> <span class="ow">in</span> <span class="n">myDictionary</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No value was found in file </span><span class="si">%s</span><span class="s"> for keyword </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeywordFilePath</span><span class="p">,</span> <span class="n">theKeyword</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">KeywordNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myValue</span> <span class="o">=</span> <span class="n">myDictionary</span><span class="p">[</span><span class="n">theKeyword</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">return</span> <span class="n">myValue</span>
+
+</div>
+<div class="viewcode-block" id="writeKeywordsToFile"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.writeKeywordsToFile">[docs]</a><span class="k">def</span> <span class="nf">writeKeywordsToFile</span><span class="p">(</span><span class="n">theFilename</span><span class="p">,</span> <span class="n">theKeywords</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Thin wrapper around the safe write_keywords function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * thePath - str representing path to layer that must be written.</span>
+<span class="sd">          If the file does not end in .keywords, its extension will be</span>
+<span class="sd">          stripped off and the basename + .keywords will be used as the file.</span>
+<span class="sd">        * theKeywords - a dictionary of keywords to be written</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myBasename</span><span class="p">,</span> <span class="n">myExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">theFilename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s">&#39;keywords&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">myExtension</span><span class="p">:</span>
+        <span class="n">theFilename</span> <span class="o">=</span> <span class="n">myBasename</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">safe_write_keywords</span><span class="p">(</span><span class="n">theKeywords</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="getStyleInfo"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.getStyleInfo">[docs]</a><span class="k">def</span> <span class="nf">getStyleInfo</span><span class="p">(</span><span class="n">theLayer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get styleinfo associated with a layer.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">       * theLayer - InaSAFE layer (raster or vector)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       A list of dictionaries containing styleinfo info for a layer.</span>
+
+<span class="sd">    Raises:</span>
+
+<span class="sd">       * StyleInfoNotFoundException if the style is not found.</span>
+<span class="sd">       * InvalidParameterException if the paramers are not correct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theLayer</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="s">&#39;get_style_info&#39;</span><span class="p">):</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Argument &quot;</span><span class="si">%s</span><span class="s">&quot; was not a valid layer instance&#39;</span> <span class="o">%</span>
+               <span class="n">theLayer</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">StyleInfoNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myValue</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">get_style_info</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Styleinfo retrieval failed for </span><span class="si">%s</span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">theLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="n">StyleInfoNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">myValue</span> <span class="ow">or</span> <span class="n">myValue</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No styleInfo was found for layer </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">theLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="n">StyleInfoNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myValue</span>
+
+</div>
+<div class="viewcode-block" id="makeAscii"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.makeAscii">[docs]</a><span class="k">def</span> <span class="nf">makeAscii</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert QgsString to ASCII&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s">&#39;NFKD&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+</div>
+<div class="viewcode-block" id="readSafeLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.readSafeLayer">[docs]</a><span class="k">def</span> <span class="nf">readSafeLayer</span><span class="p">(</span><span class="n">thePath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Thin wrapper around the safe read_layer function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        thePath - str representing path to layer that must be opened.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A safe readSafeLayer object is returned.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">safe_read_layer</span><span class="p">(</span><span class="n">makeAscii</span><span class="p">(</span><span class="n">thePath</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="getSafeImpactFunctions"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.getSafeImpactFunctions">[docs]</a><span class="k">def</span> <span class="nf">getSafeImpactFunctions</span><span class="p">(</span><span class="n">theFunction</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Thin wrapper around the safe impact_functions function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        theFunction - optional str giving a specific plugins name that should</span>
+<span class="sd">        be fetched.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A safe impact function is returned</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">safe_get_plugins</span><span class="p">(</span><span class="n">makeAscii</span><span class="p">(</span><span class="n">theFunction</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="getFunctionTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.getFunctionTitle">[docs]</a><span class="k">def</span> <span class="nf">getFunctionTitle</span><span class="p">(</span><span class="n">theFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Thin wrapper around the safe get_function_title.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * theFunction - SAFE impact function instance to be used</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The title of a safe impact function is returned</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># FIXME (Ole): I don&#39;t think we have to do try-except-raise.</span>
+    <span class="c">#              It would be the same just to call the function</span>
+    <span class="c">#              and let Python&#39;s normal exception handling</span>
+    <span class="c">#              propagate exceptions (just saving some lines and</span>
+    <span class="c">#              complexity)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">theFunction</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="calculateSafeImpact"><a class="viewcode-back" href="../../api-docs/safe_qgis/safe_interface.html#safe_qgis.safe_interface.calculateSafeImpact">[docs]</a><span class="k">def</span> <span class="nf">calculateSafeImpact</span><span class="p">(</span><span class="n">theLayers</span><span class="p">,</span> <span class="n">theFunction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Thin wrapper around the safe calculate_impact function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * theLayers - a list of layers to be used. They should be ordered</span>
+<span class="sd">          with hazard layer first and exposure layer second.</span>
+<span class="sd">        * theFunction - SAFE impact function instance to be used</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A safe impact function is returned</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">safe_calculate_impact</span><span class="p">(</span><span class="n">theLayers</span><span class="p">,</span> <span class="n">theFunction</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

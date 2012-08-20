@@ -1,0 +1,292 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Maintaining the documentation &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Reporting bugs and getting help" href="bug_reporting.html" />
+    <link rel="prev" title="Version Control" href="version_control.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="bug_reporting.html" title="Reporting bugs and getting help"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="version_control.html" title="Version Control"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="maintaining-the-documentation">
+<h1>Maintaining the documentation<a class="headerlink" href="#maintaining-the-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The documentation for InaSAFE is written using ReSTructured text (.rst)
+and the Sphinx documenation builder. The best way to learn how to write .rst
+is to look at the source of existing documentation - the markup syntax is
+very simple. There are a number of useful tags that you can use to make
+your documentation clear and visually interesting, the more commonly used in
+this document are listed below. For a more detailed list, please visit
+the <a class="reference external" href="http://sphinx.pocoo.org/markup/inline.html">Spinx Inline Markup page</a></p>
+<p>A complete list of supported .rst markup is also available
+<a class="reference external" href="http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#block-quotes">here</a>.</p>
+<div class="section" id="common-tags">
+<h2>Common tags<a class="headerlink" href="#common-tags" title="Permalink to this headline">¶</a></h2>
+<p>Here are some common useful tags:</p>
+<div class="highlight-python"><pre>Heading
+=======
+
+SubHeading
+----------
+
+Sub subheading
+..............
+
+`web link&lt;http://foo.org&gt;`_
+
+:doc:filename  (rst file without  extension)
+
+*italics*
+
+**bold**
+
+.. note:: Note in a little call out box
+
+.. todo:: Todo item in a call out box
+
+.. table:: table title
+
+============  ================
+  Key         Allowed Values
+============  ================
+units         m
+units         wet/dry
+units         feet
+============  ================
+
+:menuselection:`Plugins --&gt; Manage Plugins`
+
+:kbd:`Control-x Control-f`
+
+:guilabel:`Ok Button`</pre>
+</div>
+<div class="section" id="creating-api-documentation">
+<span id="api-documentation-howto-label"></span><h3>Creating API Documentation<a class="headerlink" href="#creating-api-documentation" title="Permalink to this headline">¶</a></h3>
+<p>Each class method and function in the code base must include a docstring
+explaining its usage and purpose as per the example listed below (taken from
+the riab.py setupI18n method):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;Setup internationalisation for the plugin.</span>
+
+<span class="sd">See if QGIS wants to override the system locale</span>
+<span class="sd">and then see if we can get a valid translation file</span>
+<span class="sd">for whatever locale is effectively being used.</span>
+
+<span class="sd">Args:</span>
+<span class="sd">   thePreferredLocale - optional parameter which if set</span>
+<span class="sd">   will override any other way of determining locale.</span>
+<span class="sd">Returns:</span>
+<span class="sd">   None.</span>
+<span class="sd">Raises:</span>
+<span class="sd">   no exceptions explicitly raised.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>There should be a blank line between each paragraph and before the Args option.</p>
+<p>Where multiple inputs or outputs are used, a ReSTructured text bullet list
+should be used to list them.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can use any ReSTructured text withing the docstring to deliver
+rich markup in the final API documentation outputs.</p>
+</div>
+<p>In order for a new module&#8217;s documentation to appear in the API docs, the
+following steps are required:</p>
+<ul class="simple">
+<li>Create a new file in <tt class="file docutils literal"><span class="pre">docs/source/api-docs/&lt;package_name&gt;</span></tt>
+named after the module. For example, for the gui/riab.py module we would
+create <tt class="file docutils literal"><span class="pre">docs/source/api-docs/gui/riab.rst</span></tt> (note the .rst extension).
+See below for an example of its contents</li>
+<li>Add the new file to the API docs master index
+(<tt class="file docutils literal"><span class="pre">docs/source/api-docs/index.rst</span></tt>).
+The .rst extension is not needed or desired when adding to the index list.</li>
+<li>Regenerate the documentation using the <strong class="command">make docs</strong> command from
+the top level directory in the source tree.</li>
+<li>Add the new .rst file and generated html files to the revision control system.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is probably most expedient to simply copy and rename one of the
+existing API documentation files and replace the python module paths therein.</p>
+</div>
+<p>An example of the contents of a module&#8217;s API .rst if provided below:</p>
+<div class="highlight-python"><pre>Module: riab
+============
+This page contains the documentation for the  InaSAFE code **riab**
+module.
+
+.. automodule:: gui.riab
+   :members:</pre>
+</div>
+<p>A couple of things should be noted here:</p>
+<ul class="simple">
+<li>Sphinx provides automodule and autoclass directives. We have opted to use
+<strong>automodule</strong> for all API documentation because autoclass requires that
+each class be enumerated and anonymous functions need to be explicitly listed.</li>
+<li>Automodule must point to a fully qualified python module path.</li>
+<li>The <strong>members</strong> directive instructs autodocs to enumerate all classes and
+functions in that module.</li>
+</ul>
+<p>Once the new document has been added and the documentation generated, you
+should see it appear in the API section of the InaSAFE documentation.</p>
+</div>
+<div class="section" id="documenting-new-features">
+<span id="documenting-new-features-howto-label"></span><h3>Documenting new features<a class="headerlink" href="#documenting-new-features" title="Permalink to this headline">¶</a></h3>
+<p>New features should be well documented and that documentation should be made
+available uder the <tt class="file docutils literal"><span class="pre">user-docs</span></tt> subfolder of the sphinx sources tree.</p>
+<p>For example, when the keywords editor dialog feature was introduced, we created
+a new sphinx document <tt class="file docutils literal"><span class="pre">docs/sources/user-docs/keywords.rst</span></tt> which
+documents this new feature. Additionally, the help button is set to launch
+the help dialog in the context of the new help document e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">showHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;Load the help text for the keywords gui&quot;&quot;&quot;</span>
+   <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span> <span class="o">=</span> <span class="n">RiabHelp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">(),</span> <span class="s">&#39;keywords&#39;</span><span class="p">)</span>
+   <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Where the &#8216;keywords&#8217; parameter indicates the user-docs/*.rst document that
+should be opened when the help button is clicked. The general style and
+approach used in existing documentation should inform your documentation
+process so that all the documentation is constent.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Maintaining the documentation</a><ul>
+<li><a class="reference internal" href="#common-tags">Common tags</a><ul>
+<li><a class="reference internal" href="#creating-api-documentation">Creating API Documentation</a></li>
+<li><a class="reference internal" href="#documenting-new-features">Documenting new features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="version_control.html"
+                        title="previous chapter">Version Control</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bug_reporting.html"
+                        title="next chapter">Reporting bugs and getting help</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/maintaining_documentation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="bug_reporting.html" title="Reporting bugs and getting help"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="version_control.html" title="Version Control"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

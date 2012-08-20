@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.impact_calculator &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.keyword_io" href="keyword_io.html" />
+    <link rel="prev" title="Module: safe_qgis.help" href="help.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="help.html" title="Module: safe_qgis.help"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-impact-calculator">
+<h1>Module:  safe_qgis.impact_calculator<a class="headerlink" href="#module-safe-qgis-impact-calculator" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.impact_calculator</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.impact_calculator"></span><p>InaSAFE Disaster risk assessment tool developed by AusAid -
+<strong>ISImpactCalculator.</strong></p>
+<p>The module provides a high level interface for running SAFE scenarios.</p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator">
+<em class="property">class </em><tt class="descclassname">safe_qgis.impact_calculator.</tt><tt class="descname">ImpactCalculator</tt><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to compute an impact scenario. We inherit from QObject
+so that we can use Qt translation self.tr calls.</p>
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.exposureLayer">
+<tt class="descname">exposureLayer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.exposureLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.exposureLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessor for the exposure layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>A QgsMapLayer or None depending on if the layer is set</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.function">
+<tt class="descname">function</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessor for the function layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>An inasafe function or None depending on if the layer is set</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.getRunner">
+<tt class="descname">getRunner</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.getRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.getRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factory to create a new runner thread.
+Requires three parameters to be set before execution
+can take place:</p>
+<ul class="simple">
+<li>Hazard layer - a path to a raster (string)</li>
+<li>Exposure layer - a path to a vector hazard layer (string).</li>
+<li>Function - a function name that defines how the Hazard assessment
+will be computed (string).</li>
+</ul>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>InsufficientParametersException if not all parameters are
+set.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.hazardLayer">
+<tt class="descname">hazardLayer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.hazardLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.hazardLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessor for the hazard layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>A QgsMapLayer or None depending on if the layer is set</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.setExposureLayer">
+<tt class="descname">setExposureLayer</tt><big>(</big><em>theLayerPath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.setExposureLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.setExposureLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutator for Exposure layer property (e.g. buildings or
+features that will be affected).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theLayerPath - This should be a string representing a
+path to a file which can be loaded as a SAFE readlayer instance.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.setFunction">
+<tt class="descname">setFunction</tt><big>(</big><em>theFunctionName</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.setFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.setFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutator: function layer. Function property (specifies which
+inasafe function to use to process the hazard and exposure
+layers with.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFunctionName - This should be a string containing the name of a
+valid SAFE impact_function.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator.ImpactCalculator.setHazardLayer">
+<tt class="descname">setHazardLayer</tt><big>(</big><em>theLayerPath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator.html#ImpactCalculator.setHazardLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator.ImpactCalculator.setHazardLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutator: hazard layer. Hazard layer property  (e.g. a flood depth
+raster). This should be a SAFE readlayer instance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theLayerPath - This should be a string representing a
+path to a file which can be loaded as a SAFE readlayer instance.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="help.html"
+                        title="previous chapter">Module:  safe_qgis.help</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="keyword_io.html"
+                        title="next chapter">Module:  safe_qgis.keyword_io</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/impact_calculator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="help.html" title="Module: safe_qgis.help"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

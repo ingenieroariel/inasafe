@@ -1,0 +1,343 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_safe_interface &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_safe_interface</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">**SAFE Interface test suite.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;04/04/2012&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getOptimalExtent</span><span class="p">,</span>
+                                   <span class="n">availableFunctions</span><span class="p">,</span>
+                                   <span class="n">readKeywordsFromFile</span><span class="p">,</span>
+                                   <span class="n">readSafeLayer</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">KeywordNotFoundException</span><span class="p">,</span>
+                               <span class="n">InsufficientOverlapException</span><span class="p">,</span>
+                               <span class="n">InvalidBoundingBoxException</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">TESTDATA</span><span class="p">,</span> <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">EXPDATA</span>
+
+
+<div class="viewcode-block" id="SafeInterfaceTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_safe_interface.html#safe_qgis.test_safe_interface.SafeInterfaceTest">[docs]</a><span class="k">class</span> <span class="nc">SafeInterfaceTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the SAFE API Wrapper&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SafeInterfaceTest.setUp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_safe_interface.html#safe_qgis.test_safe_interface.SafeInterfaceTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setup test before each unit&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Padang_WGS84.shp&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                                            <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterTsunamiPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                                <span class="s">&#39;tsunami_max_inundation_depth_utm56s.tif&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterExposurePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                                             <span class="s">&#39;tsunami_building_exposure.shp&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterPopulationPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">EXPDATA</span><span class="p">,</span> <span class="s">&#39;glp10ag.asc&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SafeInterfaceTest.test_getOptimalExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_safe_interface.html#safe_qgis.test_safe_interface.SafeInterfaceTest.test_getOptimalExtent">[docs]</a>    <span class="k">def</span> <span class="nf">test_getOptimalExtent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Optimal extent is calculated correctly</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">exposure_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Population_2010.asc&#39;</span><span class="p">)</span>
+        <span class="n">hazard_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                                   <span class="s">&#39;Lembang_Earthquake_Scenario.asc&#39;</span><span class="p">)</span>
+
+        <span class="c"># Expected data</span>
+        <span class="n">haz_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bounding_box&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">105.3000035</span><span class="p">,</span>
+                                         <span class="o">-</span><span class="mf">8.3749994999999995</span><span class="p">,</span>
+                                         <span class="mf">110.2914705</span><span class="p">,</span>
+                                         <span class="o">-</span><span class="mf">5.5667784999999999</span><span class="p">),</span>
+                        <span class="s">&#39;resolution&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0083330000000000001</span><span class="p">,</span>
+                                       <span class="mf">0.0083330000000000001</span><span class="p">)}</span>
+
+        <span class="n">exp_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bounding_box&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">94.972335000000001</span><span class="p">,</span>
+                                         <span class="o">-</span><span class="mf">11.009721000000001</span><span class="p">,</span>
+                                         <span class="mf">141.0140016666665</span><span class="p">,</span>
+                                         <span class="mf">6.0736123333332639</span><span class="p">),</span>
+                        <span class="s">&#39;resolution&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0083333333333333003</span><span class="p">,</span>
+                                       <span class="mf">0.0083333333333333003</span><span class="p">)}</span>
+
+        <span class="c"># Verify relevant metada is ok</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">hazard_path</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">exposure_path</span><span class="p">)</span>
+
+        <span class="n">hazard_bbox</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_bounding_box</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">hazard_bbox</span><span class="p">,</span> <span class="n">haz_metadata</span><span class="p">[</span><span class="s">&#39;bounding_box&#39;</span><span class="p">],</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">exposure_bbox</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_bounding_box</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">exposure_bbox</span><span class="p">,</span> <span class="n">exp_metadata</span><span class="p">[</span><span class="s">&#39;bounding_box&#39;</span><span class="p">],</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">hazard_res</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">hazard_res</span><span class="p">,</span> <span class="n">haz_metadata</span><span class="p">[</span><span class="s">&#39;resolution&#39;</span><span class="p">],</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">exposure_res</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">exposure_res</span><span class="p">,</span> <span class="n">exp_metadata</span><span class="p">[</span><span class="s">&#39;resolution&#39;</span><span class="p">],</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="c"># First, do some examples that produce valid results</span>
+        <span class="n">ref_res</span> <span class="o">=</span> <span class="p">[</span><span class="mf">105.3000035</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.3749995</span><span class="p">,</span> <span class="mf">110.2914705</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5667785</span><span class="p">]</span>
+        <span class="n">view_port</span> <span class="o">=</span> <span class="p">[</span><span class="mf">94.972335</span><span class="p">,</span> <span class="o">-</span><span class="mf">11.009721</span><span class="p">,</span> <span class="mf">141.014002</span><span class="p">,</span> <span class="mf">6.073612</span><span class="p">]</span>
+
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">hazard_bbox</span><span class="p">,</span> <span class="n">exposure_bbox</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">ref_res</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">hazard_bbox</span><span class="p">,</span> <span class="n">exposure_bbox</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">ref_res</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="n">view_port</span> <span class="o">=</span> <span class="p">[</span><span class="mf">105.3000035</span><span class="p">,</span>
+                     <span class="o">-</span><span class="mf">8.3749994999999995</span><span class="p">,</span>
+                     <span class="mf">110.2914705</span><span class="p">,</span>
+                     <span class="o">-</span><span class="mf">5.5667784999999999</span><span class="p">]</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">hazard_bbox</span><span class="p">,</span> <span class="n">exposure_bbox</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">ref_res</span><span class="p">,</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">)</span>
+
+        <span class="c"># Then one where boxes don&#39;t overlap</span>
+        <span class="n">view_port</span> <span class="o">=</span> <span class="p">[</span><span class="mf">105.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.3</span><span class="p">,</span> <span class="mf">110.29</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">hazard_bbox</span><span class="p">,</span> <span class="n">exposure_bbox</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InsufficientOverlapException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find expected error message in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s">&#39;did not overlap&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Non ovelapping bounding boxes should have raised &#39;</span>
+                   <span class="s">&#39;an exception&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+        <span class="c"># Try with wrong input data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">haz_metadata</span><span class="p">,</span> <span class="n">exp_metadata</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidBoundingBoxException</span><span class="p">:</span>
+            <span class="c">#good this was expected</span>
+            <span class="k">pass</span>
+        <span class="k">except</span> <span class="n">InsufficientOverlapException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find expected error message in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s">&#39;Invalid&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Wrong input data should have raised an exception&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">getOptimalExtent</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidBoundingBoxException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find expected error message in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s">&#39;Invalid&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Wrong input data should have raised an exception&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">getOptimalExtent</span><span class="p">(</span><span class="s">&#39;aoeush&#39;</span><span class="p">,</span> <span class="s">&#39;oeuuoe&#39;</span><span class="p">,</span> <span class="n">view_port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidBoundingBoxException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find expected error message in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s">&#39;Invalid&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Wrong input data should have raised an exception&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SafeInterfaceTest.test_availableFunctions"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_safe_interface.html#safe_qgis.test_safe_interface.SafeInterfaceTest.test_availableFunctions">[docs]</a>    <span class="k">def</span> <span class="nf">test_availableFunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check we can get the available functions from the impact calculator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myList</span> <span class="o">=</span> <span class="n">availableFunctions</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;No functions available (len=</span><span class="si">%s</span><span class="s">s)&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Also test if it works when we give it two layers</span>
+        <span class="c"># to see if we can determine which functions will</span>
+        <span class="c"># work for them.</span>
+        <span class="n">myKeywords1</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">)</span>
+        <span class="n">myKeywords2</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span><span class="p">)</span>
+        <span class="c"># We need to explicitly add the layer type to each keyword list</span>
+        <span class="n">myKeywords1</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;raster&#39;</span>
+        <span class="n">myKeywords2</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;vector&#39;</span>
+
+        <span class="n">myList</span> <span class="o">=</span> <span class="p">[</span><span class="n">myKeywords1</span><span class="p">,</span> <span class="n">myKeywords2</span><span class="p">]</span>
+        <span class="n">myList</span> <span class="o">=</span> <span class="n">availableFunctions</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;No functions available (len=</span><span class="si">%s</span><span class="s">s)&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="SafeInterfaceTest.test_getKeywordFromFile"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_safe_interface.html#safe_qgis.test_safe_interface.SafeInterfaceTest.test_getKeywordFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">test_getKeywordFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get keyword from a filesystem file&#39;s .keyword file.&quot;&quot;&quot;</span>
+
+        <span class="n">myKeyword</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">,</span> <span class="s">&#39;category&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedKeyword</span> <span class="o">=</span> <span class="s">&#39;hazard&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">DB: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeyword</span><span class="p">,</span> <span class="n">myExpectedKeyword</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeyword</span> <span class="o">==</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Test we get an exception if keyword is not found</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myKeyword</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">,</span> <span class="s">&#39;boguskeyword&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">KeywordNotFoundException</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c"># this is good</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Request for bogus keyword raised incorrect &#39;</span>
+                         <span class="s">&#39;exception type: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">)</span>
+
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;An earthquake in Padang like in 2009&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">Got:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myKeywords</span><span class="p">,</span>
+                                                 <span class="n">myExpectedKeywords</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterPopulationPath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;population&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;density&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;People&#39;</span><span class="p">}</span>
+
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;itb&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+
+        <span class="c">#  tsunami example (one layer is UTM)</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterTsunamiPath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;Tsunami Max Inundation&#39;</span><span class="p">,</span>
+                               <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;tsunami&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;m&#39;</span><span class="p">}</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterExposurePath</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">SafeInterfaceTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

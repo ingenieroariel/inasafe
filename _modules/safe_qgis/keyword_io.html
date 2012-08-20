@@ -1,0 +1,606 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.keyword_io &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.keyword_io</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">  **IS Keyword IO implementation.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;29/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span> <span class="kn">as</span> <span class="nn">sqlite</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QSettings</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="n">QgsMapLayer</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">HashNotFoundException</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">KeywordNotFoundException</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="p">(</span><span class="n">verify</span><span class="p">,</span>
+                               <span class="n">readKeywordsFromFile</span><span class="p">,</span>
+                               <span class="n">writeKeywordsToFile</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="n">qgisVersion</span>
+
+
+<div class="viewcode-block" id="KeywordIO"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO">[docs]</a><span class="k">class</span> <span class="nc">KeywordIO</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for doing keyword read/write operations. It abstracts away</span>
+<span class="sd">    differences between using SAFE to get keywords from a .keywords file</span>
+<span class="sd">    and this plugins implemenation of keyword caching in a local sqlite db</span>
+<span class="sd">    used for supporting keywords for remote datasources.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for the KeywordIO object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># path to sqlite db path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordDbPath</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupKeywordDbPath</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="KeywordIO.setKeywordDbPath"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.setKeywordDbPath">[docs]</a>    <span class="k">def</span> <span class="nf">setKeywordDbPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the path for the keyword database (sqlite) that should be used</span>
+<span class="sd">        to search for keywords for non local datasets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            thePath - a valid path to a sqlite database. The database does</span>
+<span class="sd">            not need to exist already, but the user should be able to write</span>
+<span class="sd">            to the path provided.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordDbPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">thePath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.readKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.readKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theLayer</span><span class="p">,</span> <span class="n">theKeyword</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read keywords for a datasource and return them as a dictionary.</span>
+<span class="sd">        This is a wrapper method that will &#39;do the right thing&#39; to fetch</span>
+<span class="sd">        keywords for the given datasource. In particular, if the datasource</span>
+<span class="sd">        is remote (e.g. a database connection) it will fetch the keywords from</span>
+<span class="sd">        the keywords store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theLayer - A QGIS QgsMapLayer instance.</span>
+<span class="sd">            * theKeyword - optional - will extract only the specified keyword</span>
+<span class="sd">              from the keywords dict.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A dict if theKeyword is omitted, otherwise the value for the</span>
+<span class="sd">            given key if it is present.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Propogates any exception from the underlying reader delegate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mySource</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">areKeywordsFileBased</span><span class="p">(</span><span class="n">theLayer</span><span class="p">)</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">myFlag</span><span class="p">:</span>
+                <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">mySource</span><span class="p">,</span> <span class="n">theKeyword</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readKeywordFromUri</span><span class="p">(</span><span class="n">mySource</span><span class="p">,</span> <span class="n">theKeyword</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">myKeywords</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.writeKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.writeKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">writeKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theLayer</span><span class="p">,</span> <span class="n">theKeywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write keywords for a datasource.</span>
+<span class="sd">        This is a wrapper method that will &#39;do the right thing&#39; to store</span>
+<span class="sd">        keywords for the given datasource. In particular, if the datasource</span>
+<span class="sd">        is remote (e.g. a database connection) it will write the keywords from</span>
+<span class="sd">        the keywords store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theLayer - A QGIS QgsMapLayer instance.</span>
+<span class="sd">            * theKeywords - a dict containing all the keywords to be written</span>
+<span class="sd">              for the layer.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mySource</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">areKeywordsFileBased</span><span class="p">(</span><span class="n">theLayer</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">myFlag</span><span class="p">:</span>
+                <span class="n">writeKeywordsToFile</span><span class="p">(</span><span class="n">mySource</span><span class="p">,</span> <span class="n">theKeywords</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writeKeywordsForUri</span><span class="p">(</span><span class="n">mySource</span><span class="p">,</span> <span class="n">theKeywords</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.copyKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.copyKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">copyKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theSourceLayer</span><span class="p">,</span>
+                     <span class="n">theDestinationFile</span><span class="p">,</span> <span class="n">theExtraKeywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper to copy the keywords file from a source dataset</span>
+<span class="sd">        to a destination dataset.</span>
+
+<span class="sd">        e.g.::</span>
+
+<span class="sd">            copyKeywords(&#39;foo.shp&#39;, &#39;bar.shp&#39;)</span>
+
+<span class="sd">        Will result in the foo.keywords file being copied to bar.keyword.</span>
+
+<span class="sd">        Optional argument extraKeywords is a dictionary with additional</span>
+<span class="sd">        keywords that will be added to the destination file</span>
+<span class="sd">        e.g::</span>
+
+<span class="sd">            copyKeywords(&#39;foo.shp&#39;, &#39;bar.shp&#39;, {&#39;resolution&#39;: 0.01})</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theSourceLayer - A QGIS QgsMapLayer instance.</span>
+<span class="sd">            * theDestinationFile - the output filename that should be used</span>
+<span class="sd">              to store the keywords in. It can be a .shp or a .keywords for</span>
+<span class="sd">              exampled since the suffix will always be replaced with .keywords.</span>
+<span class="sd">            * theExtraKeywords - a dict containing all the extra keywords to be</span>
+<span class="sd">              written for the layer. The written keywords will consist of any</span>
+<span class="sd">              original keywords from the source layer&#39;s keywords file and</span>
+<span class="sd">              and the extra keywords (which will replace the source layers</span>
+<span class="sd">              keywords if the key is identical).</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="n">theSourceLayer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">theExtraKeywords</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">theExtraKeywords</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Expected extraKeywords to be a dictionary. Got </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">theExtraKeywords</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">theExtraKeywords</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="n">myMessage</span><span class="p">)</span>
+        <span class="c"># compute the output keywords file name</span>
+        <span class="n">myDestinationBase</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">theDestinationFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">myNewDestination</span> <span class="o">=</span> <span class="n">myDestinationBase</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span>
+        <span class="c"># write the extra keywords into the source dict</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">theExtraKeywords</span><span class="p">:</span>
+                <span class="n">myKeywords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">theExtraKeywords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">writeKeywordsToFile</span><span class="p">(</span><span class="n">myNewDestination</span><span class="p">,</span> <span class="n">myKeywords</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Failed to copy keywords file from :&#39;</span>
+                           <span class="s">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">to\</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                   <span class="p">(</span><span class="n">theSourceLayer</span><span class="o">.</span><span class="n">source</span><span class="p">(),</span> <span class="n">myNewDestination</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">return</span>
+<span class="c"># methods below here should be considered private</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.defaultKeywordDbPath"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.defaultKeywordDbPath">[docs]</a>    <span class="k">def</span> <span class="nf">defaultKeywordDbPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper to get the default path for the keywords file (which is</span>
+<span class="sd">        &lt;plugin dir&gt;/keywords.db)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A string representing the path to where the keywords file is to be.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myParentDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myParentDir</span><span class="p">,</span> <span class="s">&#39;keywords.db&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.setupKeywordDbPath"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.setupKeywordDbPath">[docs]</a>    <span class="k">def</span> <span class="nf">setupKeywordDbPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper to set the active path for the keywords. Called at init time,</span>
+<span class="sd">        you can override this path by calling setKeywordDbPath.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A string representing the path to where the keywords file is to be.</span>
+<span class="sd">            If the user has never specified what this path is, the</span>
+<span class="sd">            defaultKeywordDbPath is returned.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mySettings</span> <span class="o">=</span> <span class="n">QSettings</span><span class="p">()</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                                <span class="s">&#39;inasafe/keywordCachePath&#39;</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">defaultKeywordDbPath</span><span class="p">())</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordDbPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.openConnection"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.openConnection">[docs]</a>    <span class="k">def</span> <span class="nf">openConnection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open an sqlite connection to the keywords database.</span>
+<span class="sd">        By default the keywords database will be used in the plugin dir,</span>
+<span class="sd">        unless an explicit path has been set using setKeywordDbPath, or</span>
+<span class="sd">        overridden in QSettings. If the db does not exist it will</span>
+<span class="sd">        be created.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            thePath - path to the desired sqlite db to use.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            An sqlite.Error is raised if anything goes wrong</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywordDbPath</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.closeConnection"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.closeConnection">[docs]</a>    <span class="k">def</span> <span class="nf">closeConnection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given an sqlite3 connection, close it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.getCursor"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.getCursor">[docs]</a>    <span class="k">def</span> <span class="nf">getCursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a cursor for the active connection. The cursor can be used to</span>
+<span class="sd">        execute arbitrary queries against the database. This method also checks</span>
+<span class="sd">        that the keywords table exists in the schema, and if not, it creates</span>
+<span class="sd">        it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theConnection - a valid, open sqlite3 database connection.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            a valid cursor opened against the connection.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            An sqlite.Error will be raised if anything goes wrong</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">openConnection</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myCursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;SELECT SQLITE_VERSION()&#39;</span><span class="p">)</span>
+            <span class="n">myData</span> <span class="o">=</span> <span class="n">myCursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="c">#print &quot;SQLite version: %s&quot; % myData</span>
+            <span class="c"># Check if we have some tables, if not create them</span>
+            <span class="n">mySQL</span> <span class="o">=</span> <span class="s">&#39;select sql from sqlite_master where type = </span><span class="se">\&#39;</span><span class="s">table</span><span class="se">\&#39;</span><span class="s">;&#39;</span>
+            <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mySQL</span><span class="p">)</span>
+            <span class="n">myData</span> <span class="o">=</span> <span class="n">myCursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="c">#print &quot;Tables: %s&quot; % myData</span>
+            <span class="k">if</span> <span class="n">myData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c">#print &#39;No tables found&#39;</span>
+                <span class="n">mySQL</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;create table keyword (hash varchar(32) primary key,&#39;</span>
+                         <span class="s">&#39;dict text);&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="n">mySQL</span>
+                <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mySQL</span><span class="p">)</span>
+                <span class="n">myData</span> <span class="o">=</span> <span class="n">myCursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#print &#39;Keywords table already exists&#39;</span>
+                <span class="k">pass</span>
+            <span class="k">return</span> <span class="n">myCursor</span>
+        <span class="k">except</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.areKeywordsFileBased"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.areKeywordsFileBased">[docs]</a>    <span class="k">def</span> <span class="nf">areKeywordsFileBased</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theLayer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find out if keywords should be read/written to file or our keywords</span>
+<span class="sd">          db.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theLayer - A QGIS QgsMapLayer instance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if keywords are storedin a file next to the dataset,</span>
+<span class="sd">            else False if the dataset is remove e.g. a database.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># determine which keyword lookup system to use (file base or cache db)</span>
+        <span class="c"># based on the layer&#39;s provider type. True indicates we should use the</span>
+        <span class="c"># datasource as a file and look for a keywords file, false and we look</span>
+        <span class="c"># in the keywords db.</span>
+        <span class="n">myProviderType</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">myVersion</span> <span class="o">=</span> <span class="n">qgisVersion</span><span class="p">()</span>
+        <span class="c"># check for old raster api with qgis &lt; 1.8</span>
+        <span class="c"># ..todo:: Add test for plugin layers too</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">myVersion</span> <span class="o">&lt;</span> <span class="mi">10800</span> <span class="ow">and</span>
+                <span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">RasterLayer</span><span class="p">):</span>
+            <span class="n">myProviderType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">providerKey</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myProviderType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">providerType</span><span class="p">())</span>
+
+        <span class="n">myProviderDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ogr&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;gdal&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;gpx&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s">&#39;wms&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s">&#39;spatialite&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s">&#39;delimitedtext&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;postgres&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+        <span class="n">myFileBasedKeywords</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">myProviderType</span> <span class="ow">in</span> <span class="n">myProviderDict</span><span class="p">:</span>
+            <span class="n">myFileBasedKeywords</span> <span class="o">=</span> <span class="n">myProviderDict</span><span class="p">[</span><span class="n">myProviderType</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">myFileBasedKeywords</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.getHashForDatasource"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.getHashForDatasource">[docs]</a>    <span class="k">def</span> <span class="nf">getHashForDatasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theDataSource</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given a datasource, return its hash.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">hashlib</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">myHash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">theDataSource</span><span class="p">)</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="n">myHash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">myHash</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.deleteKeywordsForUri"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.deleteKeywordsForUri">[docs]</a>    <span class="k">def</span> <span class="nf">deleteKeywordsForUri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theUri</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete keywords for a URI in the keywords database.</span>
+<span class="sd">        A hash will be constructed from the supplied uri and a lookup made</span>
+<span class="sd">        in a local SQLITE database for the keywords. If there is an existing</span>
+<span class="sd">        record for the hash, the entire record will be erased.</span>
+
+<span class="sd">        .. seealso:: writeKeywordsForUri, readKeywordsForUri</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">           * theUri -  a str representing a layer uri as parameter.</span>
+<span class="sd">             .e.g. &#39;dbname=\&#39;osm\&#39; host=localhost port=5432 user=\&#39;foo\&#39;</span>
+<span class="sd">             password=\&#39;bar\&#39; sslmode=disable key=\&#39;id\&#39; srid=4326</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">           None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHashForDatasource</span><span class="p">(</span><span class="n">theUri</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myCursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCursor</span><span class="p">()</span>
+            <span class="c">#now see if we have any data for our hash</span>
+            <span class="n">mySQL</span> <span class="o">=</span> <span class="s">&#39;delete from keyword where hash = </span><span class="se">\&#39;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">myHash</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&#39;</span><span class="s">;&#39;</span>
+            <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mySQL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;SQLITE Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closeConnection</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.writeKeywordsForUri"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.writeKeywordsForUri">[docs]</a>    <span class="k">def</span> <span class="nf">writeKeywordsForUri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theUri</span><span class="p">,</span> <span class="n">theKeywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write keywords for a URI into the keywords database. All the</span>
+<span class="sd">        keywords for the uri should be written in a single operation.</span>
+<span class="sd">        A hash will be constructed from the supplied uri and a lookup made</span>
+<span class="sd">        in a local SQLITE database for the keywords. If there is an existing</span>
+<span class="sd">        record it will be updated, if not, a new one will be created.</span>
+
+<span class="sd">        .. seealso:: readKeywordFromUri, deleteKeywordsForUri</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">           * theUri -  a str representing a layer uri as parameter.</span>
+<span class="sd">             .e.g. &#39;dbname=\&#39;osm\&#39; host=localhost port=5432 user=\&#39;foo\&#39;</span>
+<span class="sd">             password=\&#39;bar\&#39; sslmode=disable key=\&#39;id\&#39; srid=4326</span>
+<span class="sd">           * keywords - mandatory - the metadata keyword to retrieve e.g.</span>
+<span class="sd">             &#39;title&#39;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           A string containing the retrieved value for the keyword if</span>
+<span class="sd">           the keyword argument is specified, otherwise the</span>
+<span class="sd">           complete keywords dictionary is returned.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">           KeywordNotFoundException if the keyword is not recognised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHashForDatasource</span><span class="p">(</span><span class="n">theUri</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myCursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCursor</span><span class="p">()</span>
+            <span class="c">#now see if we have any data for our hash</span>
+            <span class="n">mySQL</span> <span class="o">=</span> <span class="s">&#39;select dict from keyword where hash = </span><span class="se">\&#39;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">myHash</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&#39;</span><span class="s">;&#39;</span>
+            <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mySQL</span><span class="p">)</span>
+            <span class="n">myData</span> <span class="o">=</span> <span class="n">myCursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="n">myPickle</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">theKeywords</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">myData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c">#insert a new rec</span>
+                <span class="c">#myCursor.execute(&#39;insert into keyword(hash) values(:hash);&#39;,</span>
+                <span class="c">#             {&#39;hash&#39;: myHash})</span>
+                <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;insert into keyword(hash, dict) values(&#39;</span>
+                                 <span class="s">&#39;:hash, :dict);&#39;</span><span class="p">,</span>
+                             <span class="p">{</span><span class="s">&#39;hash&#39;</span><span class="p">:</span> <span class="n">myHash</span><span class="p">,</span> <span class="s">&#39;dict&#39;</span><span class="p">:</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Binary</span><span class="p">(</span><span class="n">myPickle</span><span class="p">)})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#update existing rec</span>
+                <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;update keyword set dict=? where hash = ?;&#39;</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">sqlite</span><span class="o">.</span><span class="n">Binary</span><span class="p">(</span><span class="n">myPickle</span><span class="p">),</span> <span class="n">myHash</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;SQLITE Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closeConnection</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="KeywordIO.readKeywordFromUri"><a class="viewcode-back" href="../../api-docs/safe_qgis/keyword_io.html#safe_qgis.keyword_io.KeywordIO.readKeywordFromUri">[docs]</a>    <span class="k">def</span> <span class="nf">readKeywordFromUri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theUri</span><span class="p">,</span> <span class="n">theKeyword</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get metadata from the keywords file associated with a</span>
+<span class="sd">        non local layer (e.g. postgresql connection).</span>
+
+<span class="sd">        A hash will be constructed from the supplied uri and a lookup made</span>
+<span class="sd">        in a local SQLITE database for the keywords. If there is an existing</span>
+<span class="sd">        record it will be returned, if not and error will be thrown.</span>
+
+<span class="sd">        .. seealso:: writeKeywordsForUri,deleteKeywordsForUri</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">           * theUri -  a str representing a layer uri as parameter.</span>
+<span class="sd">             .e.g. &#39;dbname=\&#39;osm\&#39; host=localhost port=5432 user=\&#39;foo\&#39;</span>
+<span class="sd">             password=\&#39;bar\&#39; sslmode=disable key=\&#39;id\&#39; srid=4326</span>
+<span class="sd">           * keyword - optional - the metadata keyword to retrieve e.g. &#39;title&#39;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           A string containing the retrieved value for the keyword if</span>
+<span class="sd">           the keyword argument is specified, otherwise the</span>
+<span class="sd">           complete keywords dictionary is returned.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">           KeywordNotFoundException if the keyword is not found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHashForDatasource</span><span class="p">(</span><span class="n">theUri</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openConnection</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myCursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCursor</span><span class="p">()</span>
+            <span class="c">#now see if we have any data for our hash</span>
+            <span class="n">mySQL</span> <span class="o">=</span> <span class="s">&#39;select dict from keyword where hash = </span><span class="se">\&#39;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">myHash</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&#39;</span><span class="s">;&#39;</span>
+            <span class="n">myCursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mySQL</span><span class="p">)</span>
+            <span class="n">myData</span> <span class="o">=</span> <span class="n">myCursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+            <span class="c">#unpickle it to get our dict back</span>
+            <span class="k">if</span> <span class="n">myData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HashNotFoundException</span><span class="p">(</span><span class="s">&#39;No hash found for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myHash</span><span class="p">)</span>
+            <span class="n">myData</span> <span class="o">=</span> <span class="n">myData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># first field</span>
+            <span class="n">myDict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">myData</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">theKeyword</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">myDict</span>
+            <span class="k">if</span> <span class="n">theKeyword</span> <span class="ow">in</span> <span class="n">myDict</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">myDict</span><span class="p">[</span><span class="n">theKeyword</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">KeywordNotFoundException</span><span class="p">(</span><span class="s">&#39;No hash found for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myHash</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">sqlite</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error </span><span class="si">%s</span><span class="s">:&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closeConnection</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

@@ -1,0 +1,289 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_keyword_io &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_keyword_io</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="c"># Add parent directory to path to make test aware of other modules</span>
+<span class="c"># We should be able to remove this now that we use env vars. TS</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsDataSourceURI</span><span class="p">,</span> <span class="n">QgsVectorLayer</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getQgisTestApp</span><span class="p">,</span> <span class="n">loadLayer</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.keyword_io</span> <span class="kn">import</span> <span class="n">KeywordIO</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">HashNotFoundException</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="n">getTempDir</span>
+
+<span class="c"># For testing and demoing</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">TESTDATA</span>
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+<span class="c"># Don&#39;t change this, not even formatting, you will break tests!</span>
+<span class="n">PG_URI</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&#39;dbname=</span><span class="se">\&#39;</span><span class="s">osm</span><span class="se">\&#39;</span><span class="s"> host=localhost port=5432 user=</span><span class="se">\&#39;</span><span class="s">foo</span><span class="se">\&#39;</span><span class="s"></span>
+<span class="s">         password=</span><span class="se">\&#39;</span><span class="s">bar</span><span class="se">\&#39;</span><span class="s"> sslmode=disable key=</span><span class="se">\&#39;</span><span class="s">id</span><span class="se">\&#39;</span><span class="s"> srid=4326</span>
+<span class="s">         type=MULTIPOLYGON table=&quot;valuations_parcel&quot; (geometry) sql=&#39;&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="KeywordIOTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest">[docs]</a><span class="k">class</span> <span class="nc">KeywordIOTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests for reading and writing of raster and vector data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span> <span class="o">=</span> <span class="n">KeywordIO</span><span class="p">()</span>
+        <span class="n">myUri</span> <span class="o">=</span> <span class="n">QgsDataSourceURI</span><span class="p">()</span>
+        <span class="n">myUri</span><span class="o">.</span><span class="n">setDatabase</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;jk.sqlite&#39;</span><span class="p">))</span>
+        <span class="n">myUri</span><span class="o">.</span><span class="n">setDataSource</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;osm_buildings&#39;</span><span class="p">,</span> <span class="s">&#39;Geometry&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sqliteLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">myUri</span><span class="o">.</span><span class="n">uri</span><span class="p">(),</span> <span class="s">&#39;OSM Buildings&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;spatialite&#39;</span><span class="p">)</span>
+        <span class="n">myHazardPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileRasterLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="n">myHazardPath</span><span class="p">,</span> <span class="n">theDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileVectorLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;Padang_WGS84.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectedSqliteKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;OSM&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectedVectorKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;itb&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectedRasterKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;An earthquake in Padang &#39;</span>
+                                                 <span class="s">&#39;like in 2009&#39;</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="KeywordIOTest.test_getHashForDatasource"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_getHashForDatasource">[docs]</a>    <span class="k">def</span> <span class="nf">test_getHashForDatasource</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test we can reliably get a hash for a uri&quot;&quot;&quot;</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">getHashForDatasource</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">)</span>
+        <span class="n">myExpectedHash</span> <span class="o">=</span> <span class="s">&#39;7cc153e1b119ca54a91ddb98a56ea95e&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&quot;Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myHash</span><span class="p">,</span> <span class="n">myExpectedHash</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myHash</span> <span class="o">==</span> <span class="n">myExpectedHash</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordIOTest.test_writeReadKeywordFromUri"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_writeReadKeywordFromUri">[docs]</a>    <span class="k">def</span> <span class="nf">test_writeReadKeywordFromUri</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test we can set and get keywords for a non local datasource&quot;&quot;&quot;</span>
+        <span class="n">myHandle</span><span class="p">,</span> <span class="n">myFilename</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s">&#39;.db&#39;</span><span class="p">,</span> <span class="s">&#39;keywords_&#39;</span><span class="p">,</span>
+                                            <span class="n">getTempDir</span><span class="p">())</span>
+
+        <span class="c"># Ensure the file is deleted before we try to write to it</span>
+        <span class="c"># fixes windows specific issue where you get a message like this</span>
+        <span class="c"># ERROR 1: c:\temp\inasafe\clip_jpxjnt.shp is not a directory.</span>
+        <span class="c"># This is because mkstemp creates the file handle and leaves</span>
+        <span class="c"># the file open.</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">myHandle</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;itb&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+        <span class="c"># SQL insert test</span>
+        <span class="c"># On first write schema is empty and there is no matching hash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">setKeywordDbPath</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">writeKeywordsForUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">)</span>
+        <span class="c"># SQL Update test</span>
+        <span class="c"># On second write schema is populated and we update matching hash</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;OSM&#39;</span><span class="p">,</span>  <span class="c"># &lt;--note the change here!</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">writeKeywordsForUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">)</span>
+        <span class="c"># Test getting all keywords</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywordFromUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">DB: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myFilename</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="c"># Test getting just a single keyword</span>
+        <span class="n">myKeyword</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywordFromUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">,</span> <span class="s">&#39;datatype&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedKeyword</span> <span class="o">=</span> <span class="s">&#39;OSM&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">DB: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeyword</span><span class="p">,</span> <span class="n">myExpectedKeyword</span><span class="p">,</span> <span class="n">myFilename</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeyword</span> <span class="o">==</span> <span class="n">myExpectedKeyword</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="c"># Test deleting keywords actually does delete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">deleteKeywordsForUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myKeyword</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywordFromUri</span><span class="p">(</span><span class="n">PG_URI</span><span class="p">,</span> <span class="s">&#39;datatype&#39;</span><span class="p">)</span>
+            <span class="c">#if the above didnt cause an exception then bad</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected a HashNotFoundException to be raised&#39;</span>
+            <span class="k">assert</span> <span class="n">myMessage</span>
+        <span class="k">except</span> <span class="n">HashNotFoundException</span><span class="p">:</span>
+            <span class="c">#we expect this outcome so good!</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="KeywordIOTest.test_areKeywordsFileBased"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_areKeywordsFileBased">[docs]</a>    <span class="k">def</span> <span class="nf">test_areKeywordsFileBased</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Can we correctly determine if keywords should be written to file or</span>
+<span class="sd">        to database?&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">areKeywordsFileBased</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqliteLayer</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">areKeywordsFileBased</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileRasterLayer</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">areKeywordsFileBased</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileVectorLayer</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="KeywordIOTest.test_readRasterFileKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_readRasterFileKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">test_readRasterFileKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Can we read raster file keywords using generic readKeywords method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileRasterLayer</span><span class="p">)</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expectedRasterKeywords</span>
+        <span class="n">mySource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileRasterLayer</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Source: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">mySource</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordIOTest.test_readVectorFileKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_readVectorFileKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">test_readVectorFileKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Can we read vector file keywords with the generic readKeywords</span>
+<span class="sd">        method &quot;&quot;&quot;</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileVectorLayer</span><span class="p">)</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expectedVectorKeywords</span>
+        <span class="n">mySource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileVectorLayer</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Source: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">mySource</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordIOTest.test_readDBKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keyword_io.html#safe_qgis.test_keyword_io.KeywordIOTest.test_readDBKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">test_readDBKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Can we read sqlite keywords with the generic readKeywords method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myLocalPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span>
+                                   <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;jk.sqlite&#39;</span><span class="p">)</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;test_keywords.db&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">setKeywordDbPath</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+        <span class="c"># We need to make a local copy of the dataset so</span>
+        <span class="c"># that we can use a local path that will hash properly on the</span>
+        <span class="c"># database to return us the correct / valid keywords record.</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;jk.sqlite&#39;</span><span class="p">),</span> <span class="n">myLocalPath</span><span class="p">)</span>
+        <span class="n">myUri</span> <span class="o">=</span> <span class="n">QgsDataSourceURI</span><span class="p">()</span>
+        <span class="c"># always use relative path!</span>
+        <span class="n">myUri</span><span class="o">.</span><span class="n">setDatabase</span><span class="p">(</span><span class="s">&#39;../jk.sqlite&#39;</span><span class="p">)</span>
+        <span class="n">myUri</span><span class="o">.</span><span class="n">setDataSource</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;osm_buildings&#39;</span><span class="p">,</span> <span class="s">&#39;Geometry&#39;</span><span class="p">)</span>
+        <span class="c"># create a local version that has the relative url</span>
+        <span class="n">mySqliteLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">myUri</span><span class="o">.</span><span class="n">uri</span><span class="p">(),</span> <span class="s">&#39;OSM Buildings&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;spatialite&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedSource</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;dbname=</span><span class="se">\&#39;</span><span class="s">../jk.sqlite</span><span class="se">\&#39;</span><span class="s"> table=&quot;osm_buildings&quot;&#39;</span>
+             <span class="s">&#39; (Geometry) sql=&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got source: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">mySqliteLayer</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">myExpectedSource</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mySqliteLayer</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="o">==</span> <span class="n">myExpectedSource</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="n">mySqliteLayer</span><span class="p">)</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expectedSqliteKeywords</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">mySource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sqliteLayer</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myLocalPath</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got: </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Expected </span><span class="si">%s</span><span class="se">\n\n</span><span class="s">Source: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">mySource</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">KeywordIOTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

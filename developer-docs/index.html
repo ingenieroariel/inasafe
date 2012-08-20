@@ -1,0 +1,314 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>InaSAFE developer documentation &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="next" title="Development under Gnu/Linux" href="platform_linux.html" />
+    <link rel="prev" title="Whats new?" href="../user-docs/changelog.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_linux.html" title="Development under Gnu/Linux"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../user-docs/changelog.html" title="Whats new?"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="project-name-developer-documentation">
+<h1>InaSAFE developer documentation<a class="headerlink" href="#project-name-developer-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Additional useful links for developers:</p>
+<ul class="simple">
+<li>GitHub site for InaSAFE : <a class="reference external" href="https://github.com/AIFDR/inasafe/">https://github.com/AIFDR/inasafe/</a></li>
+<li>Continuous Integration testbed for InaSAFE : <a class="reference external" href="http://jenkins.linfiniti.com/job/InaSAFE/">http://jenkins.linfiniti.com/job/InaSAFE/</a></li>
+<li>QGIS Plugin Home Page : <a class="reference external" href="http://plugins.qgis.org/plugins/inasafe/">http://plugins.qgis.org/plugins/inasafe/</a></li>
+<li>InaSAFE Ohloh Project Stats : <a class="reference external" href="https://www.ohloh.net/p/inasafe">https://www.ohloh.net/p/inasafe</a></li>
+</ul>
+<p>Developer Documentation Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platform_linux.html">Development under Gnu/Linux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="platform_linux.html#quick-installation-guide-linux-debian-based">Quick Installation Guide - Linux (Debian based)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform_linux.html#manual-installation-guide-linux-debian-based">Manual Installation Guide - Linux (Debian based)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#cloning-the-source-code-from-git">Cloning the source code from git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#qgis-installed-in-a-non-standard-location">QGIS installed in a non-standard location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#adding-inasafe-to-your-python-path">Adding inasafe to your python path:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#running-tests">Running tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#achievements">Achievements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_linux.html#developing-using-eclipse-linux">Developing using Eclipse (Linux)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#creating-a-project">Creating a project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#remote-debugging-with-eclipse">Remote Debugging with Eclipse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_linux.html#running-unit-tests-from-the-ide">Running Unit tests from the IDE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform_windows.html">Development under MS Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#installation-of-version-control-tools">Installation of version control tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#setup-msysgit">Setup msysgit</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#check-out-the-code-and-the-test-data">Check out the code and the test data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#clone-the-code-repository">Clone the code repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#checkout-the-test-data">Checkout the test data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#windows-caveats">Windows Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#command-line-environment-setup">Command line environment setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#create-a-shell-launcher">Create a shell launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#verifying-your-system-path">Verifying your system path</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#nose-testing-tools">Nose testing tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#installing-pip">Installing pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#installing-nose">Installing nose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#running-tests-using-nose">Running tests using nose</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#building-sphinx-documentation">Building sphinx documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#installing-sphinx">Installing sphinx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#building-the-documentation">Building the documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#viewing-the-documentation">Viewing the documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="platform_windows.html#developing-using-eclipse-windows">Developing using Eclipse (Windows)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#installing-eclipse">Installing Eclipse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#installing-pydev">Installing PyDev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#custom-eclipse-launcher">Custom Eclipse Launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#creating-a-project">Creating a project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#remote-debugging-with-eclipse">Remote Debugging with Eclipse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform_windows.html#running-unit-tests-from-the-ide">Running Unit tests from the IDE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding_standards.html">Coding Standards</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coding_standards.html#code-style">Code Style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="coding_standards.html#human-interface-guidelines">Human Interface Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="coding_standards.html#code-statistics">Code statistics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="i18n.html">Internationalisation Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#quick-reference">Quick Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#translation-of-strings-in-the-gui-module">Translation of strings in the gui module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#translation-of-strings-not-in-the-gui-such-as-impact-functions">Translation of strings <em>not</em> in the gui such as impact functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#translation-of-strings-that-appear-at-runtime">Translation of strings that appear at runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#make-translations">Make translations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#qgis-plugin">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#preparing-for-a-release">Preparing for a release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#adding-a-new-language">Adding a new language</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#inasafe-library-translations">InaSAFE Library Translations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#low-level-gettext-usage">Low level gettext usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#library-release-label">Preparing for a release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#id2">Adding a new language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="i18n.html#adding-a-new-source-file-for-translation">Adding a new source file for translation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#sphinx-translation">Sphinx Translation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="version_control.html">Version Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="version_control.html#branching-guide">Branching guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="version_control.html#process-for-developers-adding-a-new-feature">Process for developers adding a new feature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="version_control.html#process-for-checking-out-the-release-branch-and-applying-a-fix">Process for checking out the release branch and applying a fix:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="version_control.html#to-checkout-someone-else-s-fork">To checkout someone else&#8217;s fork:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="version_control.html#windows-specific-notes">Windows Specific Notes:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="maintaining_documentation.html">Maintaining the documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="maintaining_documentation.html#common-tags">Common tags</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="maintaining_documentation.html#creating-api-documentation">Creating API Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="maintaining_documentation.html#documenting-new-features">Documenting new features</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bug_reporting.html">Reporting bugs and getting help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preparing_a_release.html">Preparing a release</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#release-numbering">Release numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#issue-completion">Issue completion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#branching">Branching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#updating-the-source-version-number">Updating the source version number</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#pep8-and-pep257-compliance">PEP8 and PEP257 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#check-for-assert-statements">Check for assert statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#compile-qt-resources-and-user-interface-files">Compile Qt resources and user interface files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#hig-compliance">HIG Compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#unit-testing">Unit Testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#user-acceptance-testing">User Acceptance Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#document-new-features">Document new features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#api-documentation">API Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#update-the-changelog">Update the changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preparing_a_release.html#finalise-translations">Finalise translations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#compile-the-sphinx-documentation">Compile the sphinx documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#update-plugin-metadata">Update plugin metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#generate-a-test-package">Generate a test package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#branch-the-release">Branch the release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#tag-the-release">Tag the release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#upload-the-package">Upload the package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preparing_a_release.html#press-announcements">Press announcements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jenkins_ci.html">Continuous Integration Testing with Jenkins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jenkins_ci.html#installation-procedure-jenkins-server">Installation procedure - Jenkins server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#dns-and-reverse-proxy">DNS and Reverse Proxy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jenkins_ci.html#configure-the-server">Configure the server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#enable-plugins">Enable Plugins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#lock-down-access">Lock down access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#other-configuration-options">Other Configuration options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jenkins_ci.html#creating-the-jenkins-farminfo-job">Creating the Jenkins Farminfo Job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jenkins_ci.html#server-configuration-in-the-shell">Server Configuration in the shell</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#create-an-ssh-key-for-jenkins">Create an ssh key for Jenkins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#project-setup">Project setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#github-hook-setup">GitHub Hook Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jenkins_ci.html#testing-on-jenkins-server">Testing on Jenkins server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jenkins_ci.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-does-the-documentation-work">How does the documentation work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-replace-a-string-across-multiple-files">How do I replace a string across multiple files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-did-you-embed-the-git-version-sha1-into-each-py-file">How did you embed the git version SHA1 into each .py file?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="todo.html">Todo List</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../user-docs/changelog.html"
+                        title="previous chapter">Whats new?</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="platform_linux.html"
+                        title="next chapter">Development under Gnu/Linux</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_linux.html" title="Development under Gnu/Linux"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../user-docs/changelog.html" title="Whats new?"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

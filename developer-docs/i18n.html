@@ -1,0 +1,448 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Internationalisation Support &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Version Control" href="version_control.html" />
+    <link rel="prev" title="Coding Standards" href="coding_standards.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="version_control.html" title="Version Control"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="coding_standards.html" title="Coding Standards"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="internationalisation-support">
+<h1>Internationalisation Support<a class="headerlink" href="#internationalisation-support" title="Permalink to this headline">¶</a></h1>
+<p>This document is divided into three parts:</p>
+<ul class="simple">
+<li>Quick reference - use this is you just want to quickly remember how to mark
+a word or phrase for translation</li>
+<li>QGIS Plugin - this is in-depth information on how the translation framework
+is set up for Qt based code components</li>
+<li>Library - this is in-depth information on how the translation framework is
+set up for the pure python library implementation.</li>
+</ul>
+<div class="section" id="quick-reference">
+<h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Permalink to this headline">¶</a></h2>
+<p>The translation system works differently for different parts of the project:</p>
+<ul class="simple">
+<li>Strings that appear in the InaSAFE graphical user interface (gui module). These include buttons, help strings, menu items etc</li>
+<li>Strings that appear in the Python code which constitutes the rest of InaSAFE including the impact functions</li>
+<li>Strings that appear in data and keywords used by InaSAFE</li>
+</ul>
+<p>Flagging strings for translation is done differently for these three cases
+and are treated separately in the next three sections. However, making and
+deploying the translations is unified and takes care of all three and
+described in section &#8220;Make translations&#8221; below.</p>
+<div class="section" id="translation-of-strings-in-the-gui-module">
+<h3>Translation of strings in the gui module<a class="headerlink" href="#translation-of-strings-in-the-gui-module" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Classes and anonymous functions that do not inherit from the class QObject
+should use the format
+<tt class="samp docutils literal"><span class="pre">QCoreApplication.translate('Riab',</span> <span class="pre">'Translations</span> <span class="pre">loaded')</span></tt></li>
+<li>Classes that inherit from QObject should use the form <tt class="samp docutils literal"><span class="pre">self.tr('foo')</span></tt></li>
+<li>String replacement arguments should be provided using the QString
+<tt class="samp docutils literal"><span class="pre">arg</span></tt> method. Example: <tt class="samp docutils literal"><span class="pre">self.tr('Error:</span> <span class="pre">%1').arg(message)</span></tt></li>
+</ul>
+</div>
+<div class="section" id="translation-of-strings-not-in-the-gui-such-as-impact-functions">
+<h3>Translation of strings <em>not</em> in the gui such as impact functions<a class="headerlink" href="#translation-of-strings-not-in-the-gui-such-as-impact-functions" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">Import the gettext helper e.g:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">All strings should be wrapped using the _ helper e.g:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">_</span><span class="p">(</span><span class="s">&#39;Are there enough shelters available for </span><span class="si">%i</span><span class="s"> people?&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">displaced</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">The library will use at run-time the <tt class="samp docutils literal"><span class="pre">LANG</span></tt> environment variable which
+should be set to the iso code e.g. &#8216;id&#8217; for &#8216;Indonesia&#8217; of the Locale
+you wish to use. This is done automatically for you by the QGIS Plugin, but
+if you are using the riab library in another context, be sure to set it before
+using any libary functions if you want them to return translated strings e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;LANG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;id&#39;</span>
+<span class="c"># do stuff with riab lib</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="translation-of-strings-that-appear-at-runtime">
+<h3>Translation of strings that appear at runtime<a class="headerlink" href="#translation-of-strings-that-appear-at-runtime" title="Permalink to this headline">¶</a></h3>
+<p>This applies e.g. to titles of layers or attribute names in data.</p>
+<p>The translation system works by scanning the Python code for strings marked as described above. However, it has know way of knowing about titles of layers or names that appear in datasets processed by InaSAFE. However, if such names are known a priori they can be made visible to the translation system as follows:</p>
+<ul>
+<li><p class="first">Edit the file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">common</span><span class="o">/</span><span class="n">dynamic_translations</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>and add the name to the dictionary &#8220;names&#8221;. E.g. <tt class="samp docutils literal"><span class="pre">'college'</span> <span class="pre">=</span> <span class="pre">_('college')</span></tt></p>
+</li>
+<li><p class="first">Update the translation strings as described in the section below</p>
+</li>
+<li><p class="first">Make impact functions refer to the dynamic translations e.g. as in this example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">common.dynamic_translations</span> <span class="kn">import</span> <span class="n">names</span> <span class="k">as</span> <span class="n">internationalised_values</span>
+
+<span class="k">if</span> <span class="n">building_type</span> <span class="ow">in</span> <span class="n">internationalised_values</span><span class="p">:</span>
+    <span class="n">building_type</span> <span class="o">=</span> <span class="n">internationalised_values</span><span class="p">[</span><span class="n">building_type</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="make-translations">
+<h2>Make translations<a class="headerlink" href="#make-translations" title="Permalink to this headline">¶</a></h2>
+<p>When new strings have been added as described above the procedure to translate them is (example is given for LANG=id):</p>
+<ul class="simple">
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">update-translation-strings</span></tt> to collect all strings marked for translation</li>
+<li>Using either an editor or the tool Qt Linguist provide translations in the files<ul>
+<li>i18n/id/LC_MESSAGES/inasafe.po</li>
+<li>gui/i18n/inasafe_id.ts</li>
+</ul>
+</li>
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">compile-translation-strings</span></tt> to make the translations available to InaSAFE</li>
+</ul>
+</div>
+<div class="section" id="qgis-plugin">
+<h2>QGIS Plugin<a class="headerlink" href="#qgis-plugin" title="Permalink to this headline">¶</a></h2>
+<p>The QGIS Plugin uses QtLinguist. this free, open source application can
+be downloaded and used to translate the Qt translation files.</p>
+<div class="section" id="preparing-for-a-release">
+<h3>Preparing for a release<a class="headerlink" href="#preparing-for-a-release" title="Permalink to this headline">¶</a></h3>
+<p>As developer, before a release you should do:</p>
+<ul class="simple">
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">update-translation-strings</span></tt> to update the translation files</li>
+<li>distribute the .ts files under <tt class="samp docutils literal"><span class="pre">gui/i18n</span></tt> to the translators</li>
+<li>instruct them to open the .ts file for their locale with QtLinguist</li>
+<li>commit the returned file from the translator when all strings have been
+translated</li>
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">compile-translation-strings</span></tt> to create binary loadable
+translations</li>
+<li>ensure the .qm files are distributed with the release (the .ts files do not
+need to be released)</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Translators should take heed - when refreshing the .ts file in
+QtLinguist, the file <em>must be closed</em> (<em class="menuselection">File ‣ Close</em>) and
+then reopened. Simply loading doing (<em class="menuselection">File ‣ Open</em>) and
+choosing the same file you already have in the workspace will not refresh the
+workspace with any new changes that appeared on disk.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>make update-translation-strings</em> is non destructive. That is,
+you can safely run it as many times as you like, new strings will be added
+to it, deprecated strings will be left in place and already translated
+strings will remain translated.</p>
+</div>
+</div>
+<div class="section" id="adding-a-new-language">
+<h3>Adding a new language<a class="headerlink" href="#adding-a-new-language" title="Permalink to this headline">¶</a></h3>
+<p>To add a new language, edit the <tt class="samp docutils literal"><span class="pre">gui/riab.pro</span></tt> file and append the new
+locale to the bottom of the file. For example, to add South African english
+as a new locale, change this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">TRANSLATIONS</span> <span class="o">=</span> <span class="n">i18n</span><span class="o">/</span><span class="n">riab_id</span><span class="o">.</span><span class="n">ts</span>
+</pre></div>
+</div>
+<p>to this:</p>
+<div class="highlight-python"><pre>TRANSLATIONS = i18n/riab_id.ts\
+               i18n/riab_en_ZA.ts</pre>
+</div>
+<p>Save and close the .pro file. Next run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">update-translation-strings</span></tt>
+to generate the new .ts file under gui/i18n. Don&#8217;t forget to <tt class="samp docutils literal"><span class="pre">git</span> <span class="pre">add</span></tt>
+the new file and place it under version control.</p>
+</div>
+</div>
+<div class="section" id="inasafe-library-translations">
+<h2>InaSAFE Library Translations<a class="headerlink" href="#inasafe-library-translations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="low-level-gettext-usage">
+<h3>Low level gettext usage<a class="headerlink" href="#low-level-gettext-usage" title="Permalink to this headline">¶</a></h3>
+<p>Translation is done using gettext.</p>
+<p>Create the initial .po file:</p>
+<div class="highlight-python"><pre>xgettext -d id -o i18n/id/LC_MESSAGES/riab.po i18ntest.py</pre>
+</div>
+<p>After you create the initial .pot, you need to specify the characterset and
+encoding for that file (by editing it with a text editor). For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&quot;Content-Type: text/plain; charset=UTF-8</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="s">&quot;Content-Transfer-Encoding: 8bit</span><span class="se">\n</span><span class="s">&quot;</span>
+</pre></div>
+</div>
+<p>If you add strings to the file, update the .pot file by adding -j option:</p>
+<div class="highlight-python"><pre>xgettext -j -d id -o i18n/id/LC_MESSAGES/riab.po i18ntest.py</pre>
+</div>
+<p>Next, you can make the .po files available to translators. Recent versions of
+QtLinguist support translations of .po files, so you can use a similar process
+to that described in the gui section above.</p>
+<p>When the .po file has been updated, it should be committed to the git
+repository (e.g. via a pull request from the user&#8217;s repository clone, or by
+emailing the .po file to a developer). After receiving an updated .po file,
+it should be compiled to a <tt class="samp docutils literal"><span class="pre">.mo</span></tt> file (which is a binary representation
+of the strings):</p>
+<div class="highlight-python"><pre>msgfmt -o i18n/id/LC_MESSAGES/riab.mo i18n/id/LC_MESSAGES/riab.po</pre>
+</div>
+<p>The <tt class="samp docutils literal"><span class="pre">msgfmt</span></tt> command accepts one or more input files which can be
+merged into a single <tt class="samp docutils literal"><span class="pre">.mo</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">These functions are wrapped as make scripts so you should not need to
+use them on a day to day basis.</p>
+</div>
+</div>
+<div class="section" id="library-release-label">
+<span id="id1"></span><h3>Preparing for a release<a class="headerlink" href="#library-release-label" title="Permalink to this headline">¶</a></h3>
+<p>As developer, before a release you should do:</p>
+<ul class="simple">
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">update-translation-strings</span></tt> to update the translation files</li>
+<li>distribute the .po files under <tt class="samp docutils literal"><span class="pre">i18n/&lt;locale&gt;/LC_MESSAGES/riab.po</span></tt> to
+the translators</li>
+<li>instruct them to open the .po file for their locale with QtLinguist</li>
+<li>commit the returned file from the translator when all strings have been
+translated</li>
+<li>run <tt class="samp docutils literal"><span class="pre">make</span> <span class="pre">compile-translation-strings</span></tt> to create binary loadable
+translations (.mo files)</li>
+<li>ensure the .mo files are distributed with the release (the .po files do not
+need to be released)</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Translators should take heed - when refreshing the .po file in
+QtLinguist, the file <em>must be closed</em> (<em class="menuselection">File ‣ Close</em>) and
+then reopened. Simply loading doing (<em class="menuselection">File &#8211;&lt; Open</em>) and
+choosing the same file you already have in the workspace will not refresh the
+workspace with any new changes that appeared on disk.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>make update-translation-strings</em> is non destructive. That is,
+you can safely run it as many times as you like, new strings will be added
+to it, deprecated strings will be left in place and already translated
+strings will remain translated.</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Adding a new language<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>To add a new language, edit the <tt class="samp docutils literal"><span class="pre">Makefile</span></tt> file and append the new
+locale to the bottom of the file. For example, to add South African english
+as a new locale, change this section:</p>
+<div class="highlight-python"><pre>update-translation-strings: compile</pre>
+</div>
+<p>copy one of the existing stanzas e.g.:</p>
+<div class="highlight-python"><pre>xgettext -j -d id -o i18n/id/LC_MESSAGES/riab.po \
+   storage/test_io.py \
+   impact_functions/flood/flood_building_impact.py</pre>
+</div>
+<p>Save and close the Makefile file. Next you need to create the initial translation
+stringlist for that locale by creating a locale directory and running the
+command above without the <tt class="samp docutils literal"><span class="pre">-j</span></tt> (j is for &#8216;join&#8217; which merges old content
+with new, avoiding destroying previous translated strings). So for example you
+would run from the command line:</p>
+<div class="highlight-python"><pre>mkdir -p i18n/en_ZA/LC_MESSAGES/
+xgettext -d id -o i18n/en_ZA/LC_MESSAGES/riab.po \
+   storage/test_io.py \
+   impact_functions/flood/flood_building_impact.py</pre>
+</div>
+<p>The above adding a hypothetical new translation for South African English. After
+the inital creation of your .po files using the above commands, you can update
+them anytime the strings in the library have been changed by doing:</p>
+<div class="highlight-python"><pre>make update-translation-strings`</pre>
+</div>
+<p>to generate the updated .po file under i18n/en_ZA/LC_MESSAGES. Don&#8217;t forget to
+<tt class="samp docutils literal"><span class="pre">git</span> <span class="pre">add</span></tt> the new directory and file and place them under version control.</p>
+<p>To convert the .po file to a binary .mo file (which is used at runtime for the
+actual translation), follow the <a class="reference internal" href="#library-release-label"><em>Preparing for a release</em></a> section above.</p>
+</div>
+<div class="section" id="adding-a-new-source-file-for-translation">
+<h3>Adding a new source file for translation<a class="headerlink" href="#adding-a-new-source-file-for-translation" title="Permalink to this headline">¶</a></h3>
+<p>To add a new source file, edit the <tt class="samp docutils literal"><span class="pre">Makefile</span></tt> file and append the new
+sourcefile to the bottom of the file list in the
+<tt class="samp docutils literal"><span class="pre">update-translation-strings</span></tt> section. For example:</p>
+<div class="highlight-python"><pre>xgettext -j -d id -o i18n/id/LC_MESSAGES/riab.po \
+   storage/test_io.py \
+   impact_functions/flood/flood_building_impact.py</pre>
+</div>
+<p>Would become:</p>
+<div class="highlight-python"><pre>xgettext -j -d id -o i18n/id/LC_MESSAGES/riab.po \
+   storage/test_io.py \
+   impact_functions/flood/flood_building_impact.py \
+   impact_functions/flood/flood_population_fatality</pre>
+</div>
+<p>The above adding the impact_function <em>flood_population_fatality</em> to the list of
+translatable source files. Now run:</p>
+<div class="highlight-python"><pre>make update-translation-strings`</pre>
+</div>
+<p>to generate the updated .po file and make it available to translators. When the
+translated file is returned, convert the .po file to a binary .mo file (which is
+used at runtime for the actual translation), then follow the
+<a class="reference internal" href="#library-release-label"><em>Preparing for a release</em></a> section above.</p>
+</div>
+</div>
+<div class="section" id="sphinx-translation">
+<h2>Sphinx Translation<a class="headerlink" href="#sphinx-translation" title="Permalink to this headline">¶</a></h2>
+<p>Generic documentation on how to translate sphinx documentation is available
+<cite>here &lt;http://sphinx.pocoo.org/latest/intl.html&gt;</cite>-.</p>
+<p>Initial notes on the process:</p>
+<div class="highlight-python"><pre>cd docs
+make gettext</pre>
+</div>
+<p>Which will create pot files which can be found under build/locale. Note that
+this make target needs to be tweaked so that it builds a unique directory
+for each supported locale.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Internationalisation Support</a><ul>
+<li><a class="reference internal" href="#quick-reference">Quick Reference</a><ul>
+<li><a class="reference internal" href="#translation-of-strings-in-the-gui-module">Translation of strings in the gui module</a></li>
+<li><a class="reference internal" href="#translation-of-strings-not-in-the-gui-such-as-impact-functions">Translation of strings <em>not</em> in the gui such as impact functions</a></li>
+<li><a class="reference internal" href="#translation-of-strings-that-appear-at-runtime">Translation of strings that appear at runtime</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#make-translations">Make translations</a></li>
+<li><a class="reference internal" href="#qgis-plugin">QGIS Plugin</a><ul>
+<li><a class="reference internal" href="#preparing-for-a-release">Preparing for a release</a></li>
+<li><a class="reference internal" href="#adding-a-new-language">Adding a new language</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#inasafe-library-translations">InaSAFE Library Translations</a><ul>
+<li><a class="reference internal" href="#low-level-gettext-usage">Low level gettext usage</a></li>
+<li><a class="reference internal" href="#library-release-label">Preparing for a release</a></li>
+<li><a class="reference internal" href="#id2">Adding a new language</a></li>
+<li><a class="reference internal" href="#adding-a-new-source-file-for-translation">Adding a new source file for translation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sphinx-translation">Sphinx Translation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="coding_standards.html"
+                        title="previous chapter">Coding Standards</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="version_control.html"
+                        title="next chapter">Version Control</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/i18n.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="version_control.html" title="Version Control"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="coding_standards.html" title="Coding Standards"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

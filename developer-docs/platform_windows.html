@@ -1,0 +1,709 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development under MS Windows &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Coding Standards" href="coding_standards.html" />
+    <link rel="prev" title="Development under Gnu/Linux" href="platform_linux.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="coding_standards.html" title="Coding Standards"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_linux.html" title="Development under Gnu/Linux"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="development-under-ms-windows">
+<h1>Development under MS Windows<a class="headerlink" href="#development-under-ms-windows" title="Permalink to this headline">¶</a></h1>
+<p>In this document we will walk you through the different activities you will
+need to do as a windows developer wishing to work on the InaSAFE codebase.</p>
+<div class="section" id="installation-of-version-control-tools">
+<h2>Installation of version control tools<a class="headerlink" href="#installation-of-version-control-tools" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setup-msysgit">
+<h3>Setup msysgit<a class="headerlink" href="#setup-msysgit" title="Permalink to this headline">¶</a></h3>
+<p>To check out the code for development, you first need to install a git client.
+We cover msysgit here, but you can also use
+<a class="reference external" href="http://code.google.com/p/tortoisegit/downloads/list">tortoisegit</a>
+if you prefer (although the tortoise git procedure is not covered here).</p>
+<p>To install msysgit (which is a command line git client), download the latest
+version of the software from the
+<a class="reference external" href="http://code.google.com/p/msysgit/downloads/list">msysgit web site</a>.
+There is no need to get the &#8216;full install&#8217; - just fetching the latest &#8216;preview&#8217;
+is good enough. For example at the time of writing I downloaded
+<tt class="samp docutils literal"><span class="pre">Git-1.7.9-preview20120201.exe</span></tt>. The download is around 14mb in size.</p>
+<p>Once the file is downloaded, run it and respond to the installer prompts as
+illustrated below:</p>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step1.jpg" src="../_images/msysgit-step1.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step2.jpg" src="../_images/msysgit-step2.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step3.jpg" src="../_images/msysgit-step3.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step4.jpg" src="../_images/msysgit-step4.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step5.jpg" src="../_images/msysgit-step5.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step6.jpg" src="../_images/msysgit-step6.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step7.jpg" src="../_images/msysgit-step7.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step8.jpg" src="../_images/msysgit-step8.jpg" />
+</div>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step9.jpg" src="../_images/msysgit-step9.jpg" />
+</div>
+</div>
+</div>
+<div class="section" id="check-out-the-code-and-the-test-data">
+<h2>Check out the code and the test data<a class="headerlink" href="#check-out-the-code-and-the-test-data" title="Permalink to this headline">¶</a></h2>
+<p>In this section we actually check out the source code and the test data
+using the tools we installed above.</p>
+<div class="section" id="clone-the-code-repository">
+<h3>Clone the code repository<a class="headerlink" href="#clone-the-code-repository" title="Permalink to this headline">¶</a></h3>
+<p>First open a GIT bash prompt as illustrated below:</p>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step10.jpg" src="../_images/msysgit-step10.jpg" />
+</div>
+<p>The repository can now be cloned by issuing the commands listed below.:</p>
+<div class="highlight-python"><pre>cd  /c/Documents\ and\ Settings/&lt;your username&gt;/
+
+mkdir -p .qgis/python/plugins
+
+cd .qgis/python/plugins/
+
+git clone https://&lt;your username&gt;@github.com/AIFDR/inasafe.git inasafe-dev</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The items in angle brackets above should be replaced with your
+personal details as required.</p>
+</div>
+<p>When the final command above runs, you should see something like this in the
+console when the clone process is completed:</p>
+<div class="highlight-python"><pre>$ git clone https://timlinux@github.com/AIFDR/inasafe.git inasafe-dev
+Cloning into 'inasafe'...
+remote: Counting objects: 5002, done.
+remote: Compressing objects: 100% (1526/1526), done.
+remote: Total 5002 (delta 3505), reused 4835 (delta 3338)
+Receiving objects: 100% (5002/5002), 2.38 MiB | 7 KiB/s, done.
+Resolving deltas: 100% (3505/3505), done.</pre>
+</div>
+</div>
+<div class="section" id="checkout-the-test-data">
+<h3>Checkout the test data<a class="headerlink" href="#checkout-the-test-data" title="Permalink to this headline">¶</a></h3>
+<p>To check out the test data from git, first open a GIT bash prompt as illustrated below:</p>
+<div class="figure align-center">
+<img alt="../_images/msysgit-step10.jpg" src="../_images/msysgit-step10.jpg" />
+</div>
+<p>The repository can now be cloned by issuing the commands listed below. (Already completed in previous step):</p>
+<div class="highlight-python"><pre>cd  /c/Documents\ and\ Settings/&lt;your username&gt;/.qgis/python/plugins/
+
+git clone https://&lt;your username&gt;@github.com/AIFDR/inasafe_data.git inasafe_data</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The items in angle brackets above should be replaced with your
+personal details as required.</p>
+</div>
+<p>When the final command above runs, you should see something like this in the
+console when the clone process is completed:</p>
+<div class="highlight-python"><pre>$ git clone https://timlinux@github.com/AIFDR/inasafe_data.git inasafe_data
+Cloning into 'inasafe_data'...
+remote: Counting objects: 5002, done.
+remote: Compressing objects: 100% (1526/1526), done.
+remote: Total 5002 (delta 3505), reused 4835 (delta 3338)
+Receiving objects: 100% (5002/5002), 2.38 MiB | 7 KiB/s, done.
+Resolving deltas: 100% (3505/3505), done.</pre>
+</div>
+</div>
+<div class="section" id="install-qgis">
+<h3>Install QGIS<a class="headerlink" href="#install-qgis" title="Permalink to this headline">¶</a></h3>
+<p>Download the latest QGIS &#8216;standalone&#8217; installer from <a class="reference external" href="http://download.qgis.org">http://download.qgis.org</a>
+and install it by running the installation wizard and accepting the defaults
+throughout.</p>
+<p>After opening QGIS (<em class="menuselection">Start ‣ All Programs ‣ Quantum GIS Lisboa ‣ Quantum GIS Desktop (1.8.0)</em>)
+you need to enable the plugin from the plugin menu by doing <em class="menuselection">Plugins ‣ Manage Plugins</em>
+and then search for the InaSAFE plugin in the list and enable it.</p>
+</div>
+<div class="section" id="windows-caveats">
+<h3>Windows Caveats<a class="headerlink" href="#windows-caveats" title="Permalink to this headline">¶</a></h3>
+<p>Our primary development platform is Linux (specifically Ubuntu Linux). Some
+features of the development environment - particularly the <strong>Make</strong> tools do not
+run on Windows. Some helper scripts have been written to substitute for make
+but they do not have feature parity with the make scripts.</p>
+</div>
+</div>
+<div class="section" id="command-line-environment-setup">
+<span id="windows-commandline-setup"></span><h2>Command line environment setup<a class="headerlink" href="#command-line-environment-setup" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-a-shell-launcher">
+<h3>Create a shell launcher<a class="headerlink" href="#create-a-shell-launcher" title="Permalink to this headline">¶</a></h3>
+<p>A command line environment is useful for running unit tests and for developing
+and testing standalone scripts written to use the InaSAFE libraries.</p>
+<p>We will create a custom shell launcher that will give you a python
+shell environment using the python that comes bundled with QGIS, and that sets
+various paths and evironment variables so everything works as expected. Save the
+following listing in &lt;QGIS Install Dir&gt;/bin/python-shell.bat:</p>
+<div class="highlight-python"><pre>@echo off
+SET OSGEO4W_ROOT=C:\PROGRA~1\QUANTU~1
+call "%OSGEO4W_ROOT%"\bin\o4w_env.bat
+call "%OSGEO4W_ROOT%"\apps\grass\grass-6.4.2\etc\env.bat
+@echo off
+SET GDAL_DRIVER_PATH=%OSGEO4W_ROOT%\bin\gdalplugins\1.9
+path %PATH%;%OSGEO4W_ROOT%\apps\qgis\bin
+path %PATH%;%OSGEO4W_ROOT%\apps\grass\grass-6.4.2\lib
+path %PATH%;"%OSGEO4W_ROOT%\apps\Python27\Scripts\"
+
+set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\qgis\python;
+set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\Python27\Lib\site-packages
+set QGISPATH=%OSGEO4W_ROOT%\apps\qgis
+cd "%HOMEPATH%\.qgis\python\plugins\inasafe-dev"
+start "Quantum GIS Shell" /B "cmd.exe" %*</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The QGISPATH environment variable should be unquoted!.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You may need to replace PROGRA~1 above with PROGRA~2 if you are
+on 64bit windows.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This script is for QGIS 1.8. You may need to do some adjustment if you are using another version of QGIS</p>
+</div>
+<p>For easy access to this shell launcher, right click on the qgis-shell.bat script
+and (without releasing your initial right click) drag with the file onto your
+start / windows button in the bottom left corner of the screen.</p>
+</div>
+<div class="section" id="verifying-your-system-path">
+<h3>Verifying your system path<a class="headerlink" href="#verifying-your-system-path" title="Permalink to this headline">¶</a></h3>
+<p>To verify your path, launch your python shell (by clicking the python-shell.bat)
+and then start a python shell. Now enter the follow simple script:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">item</span>
+</pre></div>
+</div>
+<p>Which should produce output like this:</p>
+<div class="highlight-python"><pre>C:\Users\inasafe\.qgis\python\plugins\inasafe-dev
+C:\PROGRA~1\Quantum GIS Lisboa\apps\qgis\python
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\Lib\site-packages
+C:\PROGRA~1\Quantum GIS Lisboa\bin\python27.zip
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\DLLs
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\plat-win
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\lib-tk
+C:\PROGRA~1\Quantum GIS Lisboa\bin
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\PIL
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\win32
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\win32\lib
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\Pythonwin
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\wx-2.8-msw-unicode</pre>
+</div>
+<p>It is particularly the second and third lines that you need to have in place
+so that the QGIS libs can found. Now dow a simple test to see if you can import
+the QGIS libs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="nb">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Assuming you get no error messages, you have a functional python command
+line environment which you can use to test QGIS functionality with.</p>
+</div>
+</div>
+<div class="section" id="nose-testing-tools">
+<h2>Nose testing tools<a class="headerlink" href="#nose-testing-tools" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installing-pip">
+<span id="windows-pip-setup"></span><h3>Installing pip<a class="headerlink" href="#installing-pip" title="Permalink to this headline">¶</a></h3>
+<p>We need to install easy_install so that we can install pip so that we can
+install nosetests and other python tools. Under windows you need to run a little
+script to install easy_install and then use easy_install to install pypi.
+Download the script on
+<a class="reference external" href="http://pypi.python.org/pypi/setuptools#windows">this page</a> called ez_setup.py
+and save it somewhere familiar e.g. <tt class="samp docutils literal"><span class="pre">c:temp</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you use windows 32bit, do not download the .exe file as said on
+<a class="reference external" href="http://pypi.python.org/pypi/setuptools#windows">the page</a>, but just download the ez_setup.py</p>
+</div>
+<p>Next launch the shell (python-shell.bat as described in
+<a class="reference internal" href="#windows-commandline-setup"><em>Command line environment setup</em></a>) <strong>as administrator</strong> (by right clicking the
+file and choosing run as administrator). Then from the command line, launch
+<strong class="command">ez_setup.py</strong> by typing this:</p>
+<div class="highlight-python"><pre>python c:\temp\ez_setup.py</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You will need to launch the shell as administrator whenever you
+need to install python packages by pypi.</p>
+</div>
+<p>Now in the same shell, use easy setup to install pip (make sure you have added
+the QGIS scripts dir to your shell launcher&#8217;s - which should be the case if
+you have followed the notes in <a class="reference internal" href="#windows-commandline-setup"><em>Command line environment setup</em></a>):</p>
+<div class="highlight-python"><pre>easy_install pip</pre>
+</div>
+<p>If the installation goes successfully, you should see output like this:</p>
+<div class="highlight-python"><pre>Searching for pip
+Reading http://pypi.python.org/simple/pip/
+Reading http://pip.openplans.org
+Reading http://www.pip-installer.org
+Best match: pip 1.1
+Downloading http://pypi.python.org/packages/source/p/pip/pip-1.1.tar.gz#md5=62a9f08dd5dc69d76734568a6c040508
+Processing pip-1.1.tar.gz
+Running pip-1.1\setup.py -q bdist_egg --dist-dir c:\users\timsut~1\appdata\local
+\temp\easy_install--zkw-t\pip-1.1\egg-dist-tmp-mgb9he
+warning: no files found matching '*.html' under directory 'docs'
+warning: no previously-included files matching '*.txt' found under directory 'docs\_build'
+no previously-included directories found matching 'docs\_build\_sources'
+Adding pip 1.1 to easy-install.pth file
+Installing pip-script.py script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+Installing pip.exe script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+Installing pip.exe.manifest script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+Installing pip-2.5-script.py script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+Installing pip-2.5.exe script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+Installing pip-2.5.exe.manifest script to C:\PROGRA~2\QUANTU~1\apps\Python25\Scripts
+
+Installed c:\progra~2\quantu~1\apps\python25\lib\site-packages\pip-1.1-py2.5.egg
+Processing dependencies for pip
+Finished processing dependencies for pip</pre>
+</div>
+</div>
+<div class="section" id="installing-nose">
+<h3>Installing nose<a class="headerlink" href="#installing-nose" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/">Nose</a> is a tool for
+automation of running python unit tests. With nose you can run a whole batch
+of tests in one go. With the nosecover plugin you can also generate coverage
+reports which will indicate how many lines of your code actually have been
+tested.</p>
+<p>To install these tools, launch your python prompt as administrator and then do:</p>
+<div class="highlight-python"><pre>pip install nose nose-cov</pre>
+</div>
+</div>
+<div class="section" id="running-tests-using-nose">
+<h3>Running tests using nose<a class="headerlink" href="#running-tests-using-nose" title="Permalink to this headline">¶</a></h3>
+<p>Once they are installed, you can run the nose tests from windows by going to
+the plugin directory/inasafe-dev folder (in your python-shell.bat shell session) and running:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">runtests</span><span class="o">.</span><span class="n">bat</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="building-sphinx-documentation">
+<h2>Building sphinx documentation<a class="headerlink" href="#building-sphinx-documentation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://sphinx.pocoo.org">Sphinx</a> is a tool for building documentation that
+has been written in the ReSTructured text markup language (a simple wiki like
+format). You can build the sphinx documentation under windows using a helper
+script provided in the docs directory of the InaSAFE source directory,
+but first you need to actually install sphinx.</p>
+<div class="section" id="installing-sphinx">
+<h3>Installing sphinx<a class="headerlink" href="#installing-sphinx" title="Permalink to this headline">¶</a></h3>
+<p>Launch your QGIS python shell environment (see <a class="reference internal" href="#windows-pip-setup"><em>Installing pip</em></a>) as
+administrator and then run the following command:</p>
+<div class="highlight-python"><pre>pip install sphinx</pre>
+</div>
+<p>The cloud-sptheme package installs the sphinx theme we are using.</p>
+</div>
+<div class="section" id="building-the-documentation">
+<h3>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h3>
+<p>To build the documentation, open a QGIS python shell (no need to be admin) and
+go into your inasafe-dev/docs directory. Now run the following command:</p>
+<div class="highlight-python"><pre>make.bat html</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only the html make target has been tested. To use other make targets
+you may need to perform further system administrative tasks.</p>
+</div>
+</div>
+<div class="section" id="viewing-the-documentation">
+<h3>Viewing the documentation<a class="headerlink" href="#viewing-the-documentation" title="Permalink to this headline">¶</a></h3>
+<p>The documentation can be viewed from withing QGIS by clicking the <em class="guilabel">help</em>
+button on the InaSAFE dock panel, or you can view it in your browser by
+opening a url similar to this one:</p>
+<div class="highlight-python"><pre>file:///C:/Users/Tim%20Sutton/.qgis/python/plugins/inasafe/docs/_build/html/index.html</pre>
+</div>
+</div>
+</div>
+<div class="section" id="developing-using-eclipse-windows">
+<h2>Developing using Eclipse (Windows)<a class="headerlink" href="#developing-using-eclipse-windows" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is optional - you can use any environment you like for editing
+python, or even a simple text editor.</p>
+</div>
+<p>If you wish to use an IDE for development, please refer to
+<a class="reference external" href="http://linfiniti.com/2011/12/remote-debugging-qgis-python-plugins-with-pydev/">this article</a>
+for detailed information on how to get the basic Eclipse with PyDev setup.</p>
+<div class="section" id="installing-eclipse">
+<h3>Installing Eclipse<a class="headerlink" href="#installing-eclipse" title="Permalink to this headline">¶</a></h3>
+<p>You can download and install eclipse by getting the latest installer at
+<a class="reference external" href="http://eclipse.org">eclipse.org</a>. Just run the installer accepting all
+defaults.</p>
+</div>
+<div class="section" id="installing-pydev">
+<h3>Installing PyDev<a class="headerlink" href="#installing-pydev" title="Permalink to this headline">¶</a></h3>
+<p>With Eclipse running, click  on <em class="menuselection">Help ‣ Eclipse Marketplace</em>
+and from the resulting dialog that appears, type <tt class="kbd docutils literal"><span class="pre">PyDev</span></tt> into the search
+box and then click <em class="guilabel">Go</em>. On the search results page, choose PyDev
+and click the <em class="guilabel">Install</em> button next to it. Agree to the license terms
+and accept the aptana certificate, then restart Eclipse as requested.</p>
+</div>
+<div class="section" id="custom-eclipse-launcher">
+<h3>Custom Eclipse Launcher<a class="headerlink" href="#custom-eclipse-launcher" title="Permalink to this headline">¶</a></h3>
+<p>You need to create a custom Eclipse launcher in order to use Eclipse PyDev. The
+process is similar to <a class="reference internal" href="#windows-commandline-setup"><em>Command line environment setup</em></a> in that you need to
+create a custom batch file that launches eclipse only after the osgeo4w
+environment has been imported. Here are the typical contexts of the file:</p>
+<div class="highlight-python"><pre>@echo off
+
+SET OSGEO4W_ROOT=C:\PROGRA~2\QUANTU~1
+call "%OSGEO4W_ROOT%"\bin\o4w_env.bat
+call "%OSGEO4W_ROOT%"\apps\grass\grass-6.4.2\etc\env.bat
+@echo off
+SET GDAL_DRIVER_PATH=%OSGEO4W_ROOT%\bin\gdalplugins\1.8
+path %PATH%;%OSGEO4W_ROOT%\apps\qgis\bin;%OSGEO4W_ROOT%\apps\grass\grass-6.4.2\lib
+set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\qgis\python;
+set PYTHONPATH=%PYTHONPATH%;%OSGEO4W_ROOT%\apps\Python27\Lib\site-packages
+set QGISPATH=%OSGEO4W_ROOT%\apps\qgis
+"C:\Progra~2\eclipse\eclipse.exe"</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Use the path where your eclipse was extracted. Also note that PROGRA~2 may
+be PROGRA~1 in 32bit windows.</p>
+</div>
+<p>Save this file under &lt;QGIS Install Dir&gt;/bin/python-shell.bat and then right-drag
+it from explorer to your Windows start button to create an easily accessible
+shortcut to eclipse.</p>
+</div>
+<div class="section" id="creating-a-project">
+<h3>Creating a project<a class="headerlink" href="#creating-a-project" title="Permalink to this headline">¶</a></h3>
+<p>The procedure for doing this is to do:
+<em class="menuselection">File ‣ New ‣ Project...</em> and
+then from the resulting dialog do <em class="menuselection">PyDev ‣ PyDev Project</em>.</p>
+<p>In the resulting project dialog, set the following details:</p>
+<ul class="simple">
+<li><em class="guilabel">Project name:</em> : <tt class="kbd docutils literal"><span class="pre">inasafe</span></tt></li>
+<li><em class="guilabel">Use default</em> : <tt class="kbd docutils literal"><span class="pre">uncheck</span></tt></li>
+<li>:guilabel (windows):<cite>Directory</cite> :
+<tt class="kbd docutils literal"><span class="pre">C:\Users\&lt;user&gt;\.qgis\python\plugins\inasafe\</span></tt></li>
+<li><em class="guilabel">Choose project type</em> : <tt class="kbd docutils literal"><span class="pre">Python</span></tt></li>
+<li><em class="guilabel">Grammar Version</em> : <tt class="kbd docutils literal"><span class="pre">2.7</span></tt></li>
+<li><em class="guilabel">Add project directory to PYTHONPATH?</em> : <tt class="kbd docutils literal"><span class="pre">check</span></tt></li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The python shipped with QGIS for windows is version 2.7 so you should
+avoid using any additions to the python spec introduced in later versions.</p>
+</div>
+<p>At this point you should should click the link entitled &#8216;Please configure an interpreter
+in related preferences before continuing.&#8217; And on the resulting dialog do:</p>
+<ul class="simple">
+<li><em class="guilabel">Python Interpreters: New...</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>In the dialog that appears do:</p>
+<ul class="simple">
+<li><em class="guilabel">Interpreter Name</em> : <tt class="kbd docutils literal"><span class="pre">QGIS</span> <span class="pre">Python</span> <span class="pre">2.7</span></tt></li>
+<li><em class="guilabel">Interpreter Executable</em> :
+<tt class="kbd docutils literal"><span class="pre">C:\Program</span> <span class="pre">Files</span> <span class="pre">(x86)\Quantum</span> <span class="pre">GIS</span> <span class="pre">Lisboa\bin\python.exe</span></tt></li>
+<li><em class="guilabel">OK Button</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>Another dialog will appear. Tick the first entry in the list that points to
+your:</p>
+<div class="highlight-python"><pre>C:\\users\\inasafe\\Downloads\\eclipse\\plugins\\org.python.pydev
+_2.6.0.2012062818\\pysrc</pre>
+</div>
+<p>The resulting list of python paths should look something like this:</p>
+<div class="highlight-python"><pre>C:\Program Files\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\DLLs
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\plat-win
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\lib-tk
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\win32
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\win32\lib
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\Pythonwin
+C:\PROGRA~1\Quantum GIS Lisboa\apps\Python27\lib\site-packages\wx-2.8-msw-unicode</pre>
+</div>
+<p>Click on the <em class="guilabel">New folder</em> button and add the QGIS python dir:</p>
+<div class="highlight-python"><pre>C:\Program Files\Quantum GIS Lisboa\apps\qgis\python</pre>
+</div>
+<ul class="simple">
+<li><em class="guilabel">OK Button</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>You will be returned to the Python Interpreters list and should see an entry for
+<strong>QGIS Python 2.7</strong> listed there. Now do in the <strong>Environment</strong> tab:</p>
+<p><em class="guilabel">New</em></p>
+<p>In the dialog that appears</p>
+<p><em class="guilabel">Name</em> : <tt class="kbd docutils literal"><span class="pre">QGISPATH</span></tt>
+<em class="guilabel">Value</em> : <tt class="kbd docutils literal"><span class="pre">C:\PROGRA~1\QUANTU~1\apps\qgis</span></tt></p>
+<p>Then click ok to close the environment variable editor.</p>
+<ul class="simple">
+<li><em class="guilabel">Ok</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>Then click finsih to finish the new project dialog
+.</p>
+<ul class="simple">
+<li><em class="guilabel">Finish</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+</div>
+<div class="section" id="remote-debugging-with-eclipse">
+<h3>Remote Debugging with Eclipse<a class="headerlink" href="#remote-debugging-with-eclipse" title="Permalink to this headline">¶</a></h3>
+<p>For remote debugging, you should add pydevd to your PYTHONPATH before starting
+<em>QGIS</em>. Under Windows, the best way to do this is to add the following line to
+<strong class="command">qgis.bat</strong> under C:Program Files (x86)Quantum GIS Wroclawbin:</p>
+<div class="highlight-python"><pre>SET PYTHONPATH=%PYTHONPATH%;C:\Progra~1\eclipse\plugins\org.python.pydev.debug_2.3.0.2011121518\pysrc</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>(1) You need to add a settrace() line at the point in your code where
+you would like to initiate remote debugging. After that, you can insert
+eclipse debugger breakpoints as per normal.</p>
+<p>(2) If you are running with remote debugging enabled, be sure to start the
+PyDev debug server first before launching the Risk-in-a-box QGIS plugin
+otherwise QGIS will likely crash when it can&#8217;t find the debug server.</p>
+<p>(3) Place the above PYTHONPATH command before the final line that launches
+QGIS!</p>
+<p class="last">(4) The exact path used will vary on your system - check in your eclipse
+plugins folder for &#8220;org.python.pydev.debug_&lt;some date&gt; to identify the
+correct path.</p>
+</div>
+<p>To initiate a remote debugging session, add the settrace() directive to your
+source file and then start the python remote debugging service from the PyDev
+debug perspective. Then launch QGIS (or your command line application) and
+use the application until the settrace line is encountered. QGIS will appear
+to freeze - this is normal. Now switch to Eclipse and you should see the
+settrace line has been highlighted in green and you can step through the code
+using standard Eclipse debugging tools (done most easily from the debugging
+perspective).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Always remove or comment out settrace() when are done debugging!</p>
+</div>
+</div>
+<div class="section" id="running-unit-tests-from-the-ide">
+<h3>Running Unit tests from the IDE<a class="headerlink" href="#running-unit-tests-from-the-ide" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="using-pydev-s-build-in-test-runner">
+<h4>Using PyDev&#8217;s build in test runner<a class="headerlink" href="#using-pydev-s-build-in-test-runner" title="Permalink to this headline">¶</a></h4>
+<p>Python has very good integrated support for unit testing. The first thing
+you should do after setting up the IDE project is to run the tests. You can run
+tests in the following ways:</p>
+<ul class="simple">
+<li>For the entire inasafe package</li>
+<li>For individual sub packages (e.g. engine, gui, storage, impact_functions)</li>
+<li>for an individual test module within a package</li>
+<li>for an class within a test module</li>
+<li>for an individual method within a test class</li>
+</ul>
+<p>You can view these individual entities by browsing and expanding nodes in the
+project panel in the left of the IDE.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you run the test suite for the entire inasafe package, it
+will mistakenly treat the sphinx documentation conf.py (docs.source.conf)
+as a test and fail for that test. This is &#8216;normal&#8217; and can be ignored.</p>
+</div>
+</div>
+<div class="section" id="setting-pydev-to-use-the-nose-test-runner">
+<h4>Setting PyDev to use the Nose test runner<a class="headerlink" href="#setting-pydev-to-use-the-nose-test-runner" title="Permalink to this headline">¶</a></h4>
+<p>You can also configure Eclipse to run the tests using nose (which is
+recommended). To do this first do:</p>
+<p><em class="menuselection">Window ‣ Preferences ‣ PyDev &#8211; PyUnit</em></p>
+<p>Now set <em class="guilabel">TestRunner</em> to <tt class="kbd docutils literal"><span class="pre">Nosetests</span></tt> and set the following
+options:</p>
+<div class="highlight-python"><pre>-v --with-id --with-coverage --cover-package=storage,engine,impact_functions,gui</pre>
+</div>
+<p>As with using Pydev&#8217;s built in test runner, you can also run any module, class
+etc. while using the nose test runner by right clicking on the item in the
+PyDev package explorer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Actually, we can run the test runner until this step. But, we got a
+problem, so you need to install python in your windows machine.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development under MS Windows</a><ul>
+<li><a class="reference internal" href="#installation-of-version-control-tools">Installation of version control tools</a><ul>
+<li><a class="reference internal" href="#setup-msysgit">Setup msysgit</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#check-out-the-code-and-the-test-data">Check out the code and the test data</a><ul>
+<li><a class="reference internal" href="#clone-the-code-repository">Clone the code repository</a></li>
+<li><a class="reference internal" href="#checkout-the-test-data">Checkout the test data</a></li>
+<li><a class="reference internal" href="#install-qgis">Install QGIS</a></li>
+<li><a class="reference internal" href="#windows-caveats">Windows Caveats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#command-line-environment-setup">Command line environment setup</a><ul>
+<li><a class="reference internal" href="#create-a-shell-launcher">Create a shell launcher</a></li>
+<li><a class="reference internal" href="#verifying-your-system-path">Verifying your system path</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nose-testing-tools">Nose testing tools</a><ul>
+<li><a class="reference internal" href="#installing-pip">Installing pip</a></li>
+<li><a class="reference internal" href="#installing-nose">Installing nose</a></li>
+<li><a class="reference internal" href="#running-tests-using-nose">Running tests using nose</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-sphinx-documentation">Building sphinx documentation</a><ul>
+<li><a class="reference internal" href="#installing-sphinx">Installing sphinx</a></li>
+<li><a class="reference internal" href="#building-the-documentation">Building the documentation</a></li>
+<li><a class="reference internal" href="#viewing-the-documentation">Viewing the documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#developing-using-eclipse-windows">Developing using Eclipse (Windows)</a><ul>
+<li><a class="reference internal" href="#installing-eclipse">Installing Eclipse</a></li>
+<li><a class="reference internal" href="#installing-pydev">Installing PyDev</a></li>
+<li><a class="reference internal" href="#custom-eclipse-launcher">Custom Eclipse Launcher</a></li>
+<li><a class="reference internal" href="#creating-a-project">Creating a project</a></li>
+<li><a class="reference internal" href="#remote-debugging-with-eclipse">Remote Debugging with Eclipse</a></li>
+<li><a class="reference internal" href="#running-unit-tests-from-the-ide">Running Unit tests from the IDE</a><ul>
+<li><a class="reference internal" href="#using-pydev-s-build-in-test-runner">Using PyDev&#8217;s build in test runner</a></li>
+<li><a class="reference internal" href="#setting-pydev-to-use-the-nose-test-runner">Setting PyDev to use the Nose test runner</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="platform_linux.html"
+                        title="previous chapter">Development under Gnu/Linux</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="coding_standards.html"
+                        title="next chapter">Coding Standards</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/platform_windows.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="coding_standards.html" title="Coding Standards"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_linux.html" title="Development under Gnu/Linux"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

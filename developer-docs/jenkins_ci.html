@@ -1,0 +1,486 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Continuous Integration Testing with Jenkins &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Frequently Asked Questions" href="faq.html" />
+    <link rel="prev" title="Preparing a release" href="preparing_a_release.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="faq.html" title="Frequently Asked Questions"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="preparing_a_release.html" title="Preparing a release"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="continuous-integration-testing-with-jenkins">
+<h1>Continuous Integration Testing with Jenkins<a class="headerlink" href="#continuous-integration-testing-with-jenkins" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This documentation is Copyright Linfiniti Consulting CC. June 2012
+and has been included here to provide provenance, and adapted for the
+InaSAFE project.</p>
+</div>
+<p><a class="reference external" href="http://jenkins-ci.org/">Jenkins</a> is an automated build and test server.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">These notes are a port of notes kept during setup of Jenkins
+for some django projects and were written after the fact. As such, they
+need to be proof read and validated on a new server instance.</p>
+</div>
+<div class="section" id="installation-procedure-jenkins-server">
+<h2>Installation procedure - Jenkins server<a class="headerlink" href="#installation-procedure-jenkins-server" title="Permalink to this headline">¶</a></h2>
+<p>The install procedure is described at <a class="reference external" href="http://pkg.jenkins-ci.org/debian/">http://pkg.jenkins-ci.org/debian/</a>.</p>
+<p>To start, do this:</p>
+<div class="highlight-python"><pre>wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -</pre>
+</div>
+<p>Now add this to your <tt class="file docutils literal"><span class="pre">/etc/apt/sources.list</span></tt>:</p>
+<div class="highlight-python"><pre>deb http://pkg.jenkins-ci.org/debian binary/</pre>
+</div>
+<p>Now do:</p>
+<div class="highlight-python"><pre>sudo apt-get update
+sudo apt-get install jenkins</pre>
+</div>
+<div class="section" id="dns-and-reverse-proxy">
+<h3>DNS and Reverse Proxy<a class="headerlink" href="#dns-and-reverse-proxy" title="Permalink to this headline">¶</a></h3>
+<p>I set up the following subdomain <a class="reference external" href="http://jenkins.linfiniti.com">http://jenkins.linfiniti.com</a></p>
+<p>Now create a virtual host on the server&#8217;s apache installation to reverse
+proxy by creating this file:
+<tt class="file docutils literal"><span class="pre">/etc/apache2/sites-available/3-jenkins.linfiniti.com</span></tt> which should
+contain:</p>
+<div class="highlight-python"><pre>&lt;VirtualHost *:80&gt;
+  ServerAdmin tim@linfiniti.com
+  ServerName jenkins.linfiniti.com
+
+  ProxyPass         / http://localhost:8080/
+  ProxyPassReverse  / http://localhost:8080/
+  ProxyRequests     Off
+
+  # Local reverse proxy authorization override
+  # Most unix distribution deny proxy by default
+  # (ie /etc/apache2/mods-enabled/proxy.conf in Ubuntu)
+  &lt;Proxy http://localhost:8080/*&gt;
+    Order deny,allow
+    Allow from all
+  &lt;/Proxy&gt;
+  # Possible values include: debug, info, notice, warn, error, crit,
+  # alert, emerg.
+  LogLevel warn
+
+  ErrorLog /var/log/apache2/jenkins.linfiniti.error.log
+  CustomLog /var/log/apache2/jenkins.linfiniti.access.log combined
+  ServerSignature Off
+
+&lt;/VirtualHost&gt;</pre>
+</div>
+<p>Now enable this vhost:</p>
+<div class="highlight-python"><pre>sudo a2ensite 3-jenkins.linfiniti.com
+sudo /etc/init.d/apache reload</pre>
+</div>
+</div>
+</div>
+<div class="section" id="configure-the-server">
+<h2>Configure the server<a class="headerlink" href="#configure-the-server" title="Permalink to this headline">¶</a></h2>
+<p>Go to <a class="reference external" href="http://jenkins.linfiniti.com">http://jenkins.linfiniti.com</a> and log in as an admin user.</p>
+<div class="section" id="enable-plugins">
+<h3>Enable Plugins<a class="headerlink" href="#enable-plugins" title="Permalink to this headline">¶</a></h3>
+<p><em class="menuselection">Jenkins ‣ Manage Jenkins ‣ Manage Plugins</em> or go to
+<a class="reference external" href="http://jenkins.linfiniti.com/pluginManager/">http://jenkins.linfiniti.com/pluginManager/</a>.</p>
+<p>Enable the following plugins:</p>
+<ul class="simple">
+<li>External Monitor Job Type Plugin</li>
+<li>LDAP Plugin</li>
+<li>pam-auth</li>
+<li>javadoc</li>
+<li>ant</li>
+<li>Jenkins Subversion Plug-in</li>
+<li>Jenkins GIT plugin</li>
+<li>Maven Integration plugin</li>
+<li>Jenkins SLOCCount Plug-in</li>
+<li>Jenkins Sounds plugin</li>
+<li>Jenkins Translation Assistance plugin</li>
+<li>ruby-runtime</li>
+<li>Jenkins CVS Plug-in</li>
+<li>Coverage/Complexity Scatter Plot PlugIn</li>
+<li>Status Monitor Plugin</li>
+<li>Git Parameter Plug-In</li>
+<li>github-api</li>
+<li>GitHub plugin</li>
+<li>Jenkins Violations plugin</li>
+<li>git-notes Plugin</li>
+<li>Twitter plugin</li>
+<li>Jenkins Cobertura Plugin</li>
+<li>Jenkins Gravatar plugin</li>
+<li>Jenkins SSH Slaves plugin</li>
+</ul>
+</div>
+<div class="section" id="lock-down-access">
+<h3>Lock down access<a class="headerlink" href="#lock-down-access" title="Permalink to this headline">¶</a></h3>
+<p>We are hosting private repositories on the server so we want to make everything
+private. To do that we do:
+<em class="menuselection">Jenkins ‣ Manage Jenkins ‣ Configure System</em> or go to
+<a class="reference external" href="http://jenkins.linfiniti.com/configure">http://jenkins.linfiniti.com/configure</a>.</p>
+<p>Under <em class="guilabel">Access control - Security Realm</em>, check
+<em class="guilabel">Jenkins&#8217;s own user database</em>.</p>
+<p>Under <em class="guilabel">Authorization</em> check
+<em class="guilabel">Project-based Matrix Authorization Strategy</em>, then add your admin
+users only here, giving them all permissions. We will add less priveledged users
+on a project by project basis.</p>
+</div>
+<div class="section" id="other-configuration-options">
+<h3>Other Configuration options<a class="headerlink" href="#other-configuration-options" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><em class="guilabel">Jenkins URL</em> set to <tt class="kbd docutils literal"><span class="pre">http://jenkins.linfiniti.com/</span></tt></li>
+<li><em class="guilabel">Sender E-mail Address</em> set to <tt class="kbd docutils literal"><span class="pre">Linfiniti</span> <span class="pre">Jenkins</span> <span class="pre">&lt;jenkins&#64;linfiniti.com&gt;</span></tt></li>
+<li><em class="guilabel">GitHub Web Hook</em> set to <tt class="kbd docutils literal"><span class="pre">Manually</span> <span class="pre">manage</span> <span class="pre">hook</span> <span class="pre">URLs</span></tt></li>
+</ul>
+</div>
+</div>
+<div class="section" id="creating-the-jenkins-farminfo-job">
+<h2>Creating the Jenkins Farminfo Job<a class="headerlink" href="#creating-the-jenkins-farminfo-job" title="Permalink to this headline">¶</a></h2>
+<p>Create a new Job (project):</p>
+<p><em class="menuselection">Jenkins ‣ New Job</em> or go to
+<a class="reference external" href="http://jenkins.linfiniti.com/view/All/newJob">http://jenkins.linfiniti.com/view/All/newJob</a>.</p>
+<p>Here is a log of the options we set for the Jenkins job:</p>
+<ul class="simple">
+<li><em class="guilabel">Project Name</em> set to <tt class="kbd docutils literal"><span class="pre">InaSAFE</span></tt> (don&#8217;t use spaces for the
+project name!).</li>
+<li>Check <em class="guilabel">Enable project-based security</em> then add an entry for
+<strong>Anonymous</strong> with <tt class="kbd docutils literal"><span class="pre">Job:</span> <span class="pre">Read</span></tt> and <tt class="kbd docutils literal"><span class="pre">Job</span> <span class="pre">Discover</span></tt> permissions
+only. This will allow anonymous read-only access to the project.</li>
+<li><em class="guilabel">GitHub project</em> set to <tt class="kbd docutils literal"><span class="pre">https://github.com/AIFDR/inasafe/</span></tt></li>
+<li><em class="guilabel">Source Code Management</em> check <em class="guilabel">Git</em> and set to
+<tt class="kbd docutils literal"><span class="pre">git&#64;github.com:AIFDR/inasafe.git</span></tt></li>
+<li><em class="guilabel">Branch Specifier (blank for default)</em> set to <tt class="kbd docutils literal"><span class="pre">master</span></tt></li>
+<li><em class="guilabel">Repository browser</em> set to <tt class="kbd docutils literal"><span class="pre">auto</span></tt></li>
+<li><em class="guilabel">Build Triggers</em> set to
+<tt class="kbd docutils literal"><span class="pre">Build</span> <span class="pre">when</span> <span class="pre">a</span> <span class="pre">change</span> <span class="pre">is</span> <span class="pre">pushed</span> <span class="pre">to</span> <span class="pre">GitHub</span></tt> - this will cause the project
+to build every time a new commit is pushed to GitHub. We also need to setup
+a GitHub hook to do this which is described further down.</li>
+</ul>
+<p><strong>Build Actions</strong></p>
+<ul>
+<li><p class="first"><em class="guilabel">Build</em> add an <tt class="kbd docutils literal"><span class="pre">Execute</span> <span class="pre">Shell</span></tt> step and set the script as
+follows:</p>
+<div class="highlight-python"><pre>export PYTHONPATH=/usr/local/qgis1.8/share/qgis/python/
+export LD_LIBRARY_PATH=/usr/local/qgis1.8/lib
+export QGISPATH=/usr/local/qgis1.8/
+
+# Make sure data dir is current and synced it its git clone
+scripts/update-test-data.sh
+
+#Go on with metrics and tests
+make jenkins-pyflakes
+make jenkins-pep8
+make jenkins-pylint
+make jenkins-sloccount
+make jenkins-test</pre>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In this server instance we are using a hand built QGIS. The initial
+3 export lines may not be needed if you are using a package build QGIS
+installation.</p>
+</div>
+<ul class="simple">
+<li><em class="guilabel">Add build step</em> set to <tt class="kbd docutils literal"><span class="pre">play</span> <span class="pre">a</span> <span class="pre">sound</span></tt> and choose a sound
+which will play when the build completes (optional)</li>
+</ul>
+<p><strong>Post-build Actions</strong></p>
+<p>Add the following actions and settings:</p>
+<ul>
+<li><p class="first"><em class="guilabel">Publish Cobertura Coverage Report</em> set
+<em class="guilabel">Cobertura xml report pattern</em> to <tt class="kbd docutils literal"><span class="pre">coverage.xml</span></tt>.
+For the rest take the defaults or tweak them as you like.</p>
+</li>
+<li><dl class="first docutils">
+<dt><em class="guilabel">Publish JUnit test result report</em> set <em class="guilabel">Test report XMLs</em></dt>
+<dd><p class="first last">to <tt class="kbd docutils literal"><span class="pre">nosetests.xml</span></tt>. I also disabled
+<em class="guilabel">Retain long standard output/error</em> (you can enable it temporarily
+while debugging server side build issues).</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><em class="guilabel">Publish SLOCCount analysis reports</em> set
+<em class="guilabel">SLOCcount reports</em> to <tt class="kbd docutils literal"><span class="pre">sloccount.sc</span></tt></p>
+</li>
+<li><dl class="first docutils">
+<dt><em class="guilabel">Report Violations</em> set the following:</dt>
+<dd><ul class="first last simple">
+<li><em class="guilabel">pep8</em> to <tt class="kbd docutils literal"><span class="pre">pep8.log</span></tt></li>
+<li><em class="guilabel">pylint</em> to <tt class="kbd docutils literal"><span class="pre">pylint.log</span></tt></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first"><em class="guilabel">Email notification</em> set <em class="guilabel">Recipients</em> to
+<tt class="kbd docutils literal"><span class="pre">tim&#64;linfiniti.com</span></tt>. Add any additional recipients as
+needed (space delimited). Also I set <em class="guilabel">Send e-mail for every
+unstable build</em> checked
+and <em class="guilabel">Send separate e-mails to individuals who broke the build</em>
+checked.</p>
+</li>
+<li><p class="first"><em class="guilabel">Jenkins Sounds</em> set <em class="guilabel">Failure</em> to <tt class="kbd docutils literal"><span class="pre">argh(wave)</span></tt></p>
+</li>
+<li><p class="first"><em class="guilabel">Jenkins Sounds</em> set <em class="guilabel">Success</em> to <tt class="kbd docutils literal"><span class="pre">Yahoo.Yodel(wave)</span></tt></p>
+</li>
+<li><p class="first"><em class="guilabel">Publish Coverage / Complexity Scatter Plot</em> check
+<em class="guilabel">Locate the graph at the topmost of Jenkins project page</em></p>
+</li>
+<li><p class="first"><em class="guilabel">Status Monitor</em> enable (this is optional)</p>
+</li>
+</ul>
+<p>Click <em class="guilabel">Save</em></p>
+</div>
+<div class="section" id="server-configuration-in-the-shell">
+<h2>Server Configuration in the shell<a class="headerlink" href="#server-configuration-in-the-shell" title="Permalink to this headline">¶</a></h2>
+<p>We need to do the following on the server as the jenkins user:</p>
+<div class="section" id="create-an-ssh-key-for-jenkins">
+<h3>Create an ssh key for Jenkins<a class="headerlink" href="#create-an-ssh-key-for-jenkins" title="Permalink to this headline">¶</a></h3>
+<p>This key will be used to enable Jenkins access to private repos on GitHub. You
+only need to do this once on the server for each project:</p>
+<div class="highlight-python"><pre>sudo su - jenkins
+jenkins@maps:~$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/jenkins/.ssh/id_rsa_inasafe):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /var/lib/jenkins/.ssh/id_rsa_inasafe.
+Your public key has been saved in /var/lib/jenkins/.ssh/id_rsa_inasafe.pub.
+The key fingerprint is:
+29:7e:b6:f5:18:5e:cb:e7:f6:b7:84:e1:f5:66:31:41 jenkins@maps.linfiniti.com
+The key's randomart image is:
++--[ RSA 2048]----+
+|               E |
+|              .  |
+|               . |
+|         .      .|
+|      . S    . + |
+|     . .    . + +|
+|      . o o .o .+|
+|       o + * .+o.|
+|        . o ++.o+|
++++++++++++++++++++</pre>
+</div>
+<p>Here&#8217;s our key:</p>
+<div class="highlight-python"><pre>cat .ssh/id_rsa_inasafe.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5f7il/lmIUQeIrcQ3f10krOOjLSwPhpJB5G6T
+LG1Dtxoyb/o/XgxPOjNfVfoVNLhB7AVp6I/IsrK3KvO8wkuOVWQ5Q5p3ntPnT6eX62JTLAlPeOGo
+MX0Iq1Vs6cOAhNK11uMfXwdUk//cht3zSlb6GLeg7mTNw/JGPAzJV4YkCcIK87H3e1ClYEU+7Kzb
+lbGKBfXWxgUPIHVRfwVZJZwbCgt1hBSBs7nJFmLqC654rRxhpFAWi72/Go79AW+YEDWUOOSZEsGc
+aT0kJ4mrks0nOMwAhcimcFqfdmmwOqIXgLPm/1jG78z08zGYhNiLOcaZDj1ULnQNmAtDx0/rCOuL
+jenkins@maps.linfiniti.com</pre>
+</div>
+<p>You need to create an ssh host alias so that when doing a git checkout, the
+correct keypair is used. Add this to the <tt class="file docutils literal"><span class="pre">~/.ssh/config</span></tt> of the jenkins
+user:</p>
+<div class="highlight-python"><pre>Host InaSAFEGitHub
+     IdentityFile /home/jenkins/.ssh/id_rsa_inasafe
+     HostName github.com</pre>
+</div>
+<p>Now go to <a class="reference external" href="https://github.com/AIFDR/inasafe/admin/keys">https://github.com/AIFDR/inasafe/admin/keys</a> and add the above
+key as a deploy key.</p>
+<p>Next we add the github key to the Jenkins user&#8217;s allowed hosts. The easiest way
+to do this is just to make a temporary clone of the repo. Again this only needs
+to be done once and then Jenkins will work for all github projects.</p>
+<p>Back on the server:</p>
+<div class="highlight-python"><pre>jenkins@maps:~$ cd /tmp/
+jenkins@maps:/tmp$ git clone git@InaSAFEGitHub:timlinux/inasafe.git
+Cloning into inasafe...
+The authenticity of host 'github.com (207.97.227.239)' can't be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)? yes</pre>
+</div>
+<p>Also you should set the Jenkins git user and email:</p>
+<div class="highlight-python"><pre>jenkins@maps:~$ git config --global user.email "jenkins@linfiniti.com"
+jenkins@maps:~$ git config --global user.name "Jenkins Build Server @Linfiniti2"</pre>
+</div>
+</div>
+<div class="section" id="project-setup">
+<h3>Project setup<a class="headerlink" href="#project-setup" title="Permalink to this headline">¶</a></h3>
+<p>Try to do an intial build. It will fail because we have to copy the InaSAFE
+test data into the job directory. Use the same procedure as above to add
+ad deploy key to the inasafe-data repo and then clone it (as jenkins user):</p>
+<div class="highlight-python"><pre>cd ~/jobs/InaSAFE/
+git clone git@InaSAFEDataGitHub:timlinux/inasafe-data.git</pre>
+</div>
+</div>
+<div class="section" id="github-hook-setup">
+<h3>GitHub Hook Setup<a class="headerlink" href="#github-hook-setup" title="Permalink to this headline">¶</a></h3>
+<p>In GitHub hooks, enable Jenkins (GitHub plugin) and set the url to:</p>
+<div class="highlight-python"><pre>http://jenkins.linfiniti.com/github-webhook/</pre>
+</div>
+</div>
+<div class="section" id="testing-on-jenkins-server">
+<h3>Testing on Jenkins server<a class="headerlink" href="#testing-on-jenkins-server" title="Permalink to this headline">¶</a></h3>
+<p>Simply commit something and push it to the server. Turn the speakers on
+on your desktop with the Jenkins page (<a class="reference external" href="http://jenkins.linfiniti.com">http://jenkins.linfiniti.com</a>) open
+and you should hear a cheer or a groan depending on whether the test passes
+or fails.</p>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p>Here are some useful resources we found while getting things set up.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://hustoknow.blogspot.com/2011/02/setting-up-django-nose-on-hudson.html">http://hustoknow.blogspot.com/2011/02/setting-up-django-nose-on-hudson.html</a></li>
+<li><a class="reference external" href="http://www.alexconrad.org/2011/10/jenkins-and-python.html">http://www.alexconrad.org/2011/10/jenkins-and-python.html</a></li>
+<li><a class="reference external" href="http://hustoknow.blogspot.com/2011/02/setting-up-django-nose-on-hudson.html">http://hustoknow.blogspot.com/2011/02/setting-up-django-nose-on-hudson.html</a></li>
+<li><a class="reference external" href="http://blog.jvc26.org/2011/06/13/jenkins-ci-and-django-howto">http://blog.jvc26.org/2011/06/13/jenkins-ci-and-django-howto</a></li>
+<li><a class="reference external" href="https://sites.google.com/site/kmmbvnr/home/django-jenkins-tutorial">https://sites.google.com/site/kmmbvnr/home/django-jenkins-tutorial</a> (probably
+the most usful article I found)</li>
+<li><a class="reference external" href="http://blog.mathieu-leplatre.info/django-et-jenkins-fr.html">http://blog.mathieu-leplatre.info/django-et-jenkins-fr.html</a> (in French)</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Continuous Integration Testing with Jenkins</a><ul>
+<li><a class="reference internal" href="#installation-procedure-jenkins-server">Installation procedure - Jenkins server</a><ul>
+<li><a class="reference internal" href="#dns-and-reverse-proxy">DNS and Reverse Proxy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configure-the-server">Configure the server</a><ul>
+<li><a class="reference internal" href="#enable-plugins">Enable Plugins</a></li>
+<li><a class="reference internal" href="#lock-down-access">Lock down access</a></li>
+<li><a class="reference internal" href="#other-configuration-options">Other Configuration options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-the-jenkins-farminfo-job">Creating the Jenkins Farminfo Job</a></li>
+<li><a class="reference internal" href="#server-configuration-in-the-shell">Server Configuration in the shell</a><ul>
+<li><a class="reference internal" href="#create-an-ssh-key-for-jenkins">Create an ssh key for Jenkins</a></li>
+<li><a class="reference internal" href="#project-setup">Project setup</a></li>
+<li><a class="reference internal" href="#github-hook-setup">GitHub Hook Setup</a></li>
+<li><a class="reference internal" href="#testing-on-jenkins-server">Testing on Jenkins server</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#further-reading">Further Reading</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="preparing_a_release.html"
+                        title="previous chapter">Preparing a release</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="faq.html"
+                        title="next chapter">Frequently Asked Questions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/jenkins_ci.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="faq.html" title="Frequently Asked Questions"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="preparing_a_release.html" title="Preparing a release"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

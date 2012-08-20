@@ -1,0 +1,532 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.clipper &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.clipper</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">  **ISClipper implementation.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">   it under the terms of the GNU General Public License as published by</span>
+<span class="sd">   the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">   (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;20/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">CalledProcessError</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QCoreApplication</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsCoordinateTransform</span><span class="p">,</span>
+                       <span class="n">QgsCoordinateReferenceSystem</span><span class="p">,</span>
+                       <span class="n">QgsRectangle</span><span class="p">,</span>
+                       <span class="n">QgsMapLayer</span><span class="p">,</span>
+                       <span class="n">QgsFeature</span><span class="p">,</span>
+                       <span class="n">QgsVectorFileWriter</span><span class="p">,</span>
+                       <span class="n">QgsGeometry</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="n">verify</span><span class="p">,</span> <span class="n">readKeywordsFromFile</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.keyword_io</span> <span class="kn">import</span> <span class="n">KeywordIO</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">InvalidParameterException</span><span class="p">,</span>
+                           <span class="n">NoFeaturesInExtentException</span><span class="p">,</span>
+                           <span class="n">InvalidProjectionException</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="n">getTempDir</span>
+
+
+<div class="viewcode-block" id="tr"><a class="viewcode-back" href="../../api-docs/safe_qgis/clipper.html#safe_qgis.clipper.tr">[docs]</a><span class="k">def</span> <span class="nf">tr</span><span class="p">(</span><span class="n">theText</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;We define a tr() alias here since the ClipperTest implementation below</span>
+<span class="sd">    is not a class and does not inherit from QObject.</span>
+
+<span class="sd">    .. note:: see http://tinyurl.com/pyqt-differences</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       theText - string to be translated</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       Translated version of the given string if available, otherwise</span>
+<span class="sd">       the original string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myContext</span> <span class="o">=</span> <span class="s">&quot;ClipperTest&quot;</span>
+    <span class="k">return</span> <span class="n">QCoreApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="n">theText</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="clipLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis/clipper.html#safe_qgis.clipper.clipLayer">[docs]</a><span class="k">def</span> <span class="nf">clipLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">theExtent</span><span class="p">,</span> <span class="n">theCellSize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theExtraKeywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip a Hazard or Exposure layer to the extents provided.</span>
+
+<span class="sd">    .. note:: Will delegate to clipVectorLayer or clipRasterLayer as needed.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theLayer - a valid QGIS vector or raster layer</span>
+<span class="sd">        * theExtent - an array representing the exposure layer</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+<span class="sd">        * theCellSize - cell size which the layer should be resampled to.</span>
+<span class="sd">            This argument will be ignored for vector layers and if not provided</span>
+<span class="sd">            for a raster layer, the native raster cell size will be used.</span>
+<span class="sd">        * theExtraKeywords - Optional keywords dictionary to be added to</span>
+<span class="sd">                          output layer</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the output clipped layer (placed in the</span>
+<span class="sd">        system temp dir). The output layer will be reprojected to EPSG:4326</span>
+<span class="sd">        if needed.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">VectorLayer</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_clipVectorLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">theExtent</span><span class="p">,</span>
+                                <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">theExtraKeywords</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_clipRasterLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">theExtent</span><span class="p">,</span> <span class="n">theCellSize</span><span class="p">,</span>
+                                <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">theExtraKeywords</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_clipVectorLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">theExtent</span><span class="p">,</span>
+                     <span class="n">theExtraKeywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip a Hazard or Exposure layer to the</span>
+<span class="sd">    extents of the current view frame. The layer must be a</span>
+<span class="sd">    vector layer or an exception will be thrown.</span>
+
+<span class="sd">    The output layer will always be in WGS84/Geographic.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theLayer - a valid QGIS vector layer in EPSG:4326</span>
+<span class="sd">        * theExtent -  an array representing the exposure layer</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+<span class="sd">        * theExtraKeywords - any additional keywords over and above the</span>
+<span class="sd">          original keywords that should be associated with the cliplayer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the output clipped layer (placed in the</span>
+<span class="sd">        system temp dir).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theLayer</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">theExtent</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Layer or Extent passed to clip is None.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">!=</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">VectorLayer</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Expected a vector layer but received a </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="n">myHandle</span><span class="p">,</span> <span class="n">myFilename</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s">&#39;.shp&#39;</span><span class="p">,</span> <span class="s">&#39;clip_&#39;</span><span class="p">,</span>
+                                            <span class="n">getTempDir</span><span class="p">())</span>
+
+    <span class="c"># Ensure the file is deleted before we try to write to it</span>
+    <span class="c"># fixes windows specific issue where you get a message like this</span>
+    <span class="c"># ERROR 1: c:\temp\inasafe\clip_jpxjnt.shp is not a directory.</span>
+    <span class="c"># This is because mkstemp creates the file handle and leaves</span>
+    <span class="c"># the file open.</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">myHandle</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+
+    <span class="c"># Get the clip extents in the layer&#39;s native CRS</span>
+    <span class="n">myGeoCrs</span> <span class="o">=</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="p">()</span>
+    <span class="n">myGeoCrs</span><span class="o">.</span><span class="n">createFromId</span><span class="p">(</span><span class="mi">4326</span><span class="p">,</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="o">.</span><span class="n">EpsgCrsId</span><span class="p">)</span>
+    <span class="n">myXForm</span> <span class="o">=</span> <span class="n">QgsCoordinateTransform</span><span class="p">(</span><span class="n">myGeoCrs</span><span class="p">,</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">crs</span><span class="p">())</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="n">theExtent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="n">theExtent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">myProjectedExtent</span> <span class="o">=</span> <span class="n">myXForm</span><span class="o">.</span><span class="n">transformBoundingBox</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+    <span class="c"># Get vector layer</span>
+    <span class="n">myProvider</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">dataProvider</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">myProvider</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Could not obtain data provider from &#39;</span>
+               <span class="s">&#39;layer &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># get the layer field list, select by our extent then write to disk</span>
+    <span class="c"># .. todo:: FIXME - for different geometry types we should implement</span>
+    <span class="c">#    different clipping behaviour e.g. reject polygons that</span>
+    <span class="c">#    intersect the edge of the bbox. Tim</span>
+    <span class="n">myAttributes</span> <span class="o">=</span> <span class="n">myProvider</span><span class="o">.</span><span class="n">attributeIndexes</span><span class="p">()</span>
+    <span class="n">myFetchGeometryFlag</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">myUseIntersectFlag</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">myProvider</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">myAttributes</span><span class="p">,</span>
+                      <span class="n">myProjectedExtent</span><span class="p">,</span>
+                      <span class="n">myFetchGeometryFlag</span><span class="p">,</span>
+                      <span class="n">myUseIntersectFlag</span><span class="p">)</span>
+
+    <span class="n">myFieldList</span> <span class="o">=</span> <span class="n">myProvider</span><span class="o">.</span><span class="n">fields</span><span class="p">()</span>
+
+    <span class="n">myWriter</span> <span class="o">=</span> <span class="n">QgsVectorFileWriter</span><span class="p">(</span><span class="n">myFilename</span><span class="p">,</span>
+                                   <span class="s">&#39;UTF-8&#39;</span><span class="p">,</span>
+                                   <span class="n">myFieldList</span><span class="p">,</span>
+                                   <span class="n">theLayer</span><span class="o">.</span><span class="n">wkbType</span><span class="p">(),</span>
+                                   <span class="n">myGeoCrs</span><span class="p">,</span>
+                                   <span class="s">&#39;ESRI Shapefile&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">myWriter</span><span class="o">.</span><span class="n">hasError</span><span class="p">()</span> <span class="o">!=</span> <span class="n">QgsVectorFileWriter</span><span class="o">.</span><span class="n">NoError</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Error when creating shapefile: &lt;br&gt;Filename:&#39;</span>
+               <span class="s">&#39;</span><span class="si">%s</span><span class="s">&lt;br&gt;Error: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="n">myFilename</span><span class="p">,</span> <span class="n">myWriter</span><span class="o">.</span><span class="n">hasError</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># Reverse the coordinate xform now so that we can convert</span>
+    <span class="c"># geometries from layer crs to geocrs.</span>
+    <span class="n">myXForm</span> <span class="o">=</span> <span class="n">QgsCoordinateTransform</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">crs</span><span class="p">(),</span> <span class="n">myGeoCrs</span><span class="p">)</span>
+    <span class="c"># Retrieve every feature with its geometry and attributes</span>
+    <span class="n">myFeature</span> <span class="o">=</span> <span class="n">QgsFeature</span><span class="p">()</span>
+    <span class="n">myCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">myProvider</span><span class="o">.</span><span class="n">nextFeature</span><span class="p">(</span><span class="n">myFeature</span><span class="p">):</span>
+        <span class="n">myGeometry</span> <span class="o">=</span> <span class="n">myFeature</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
+        <span class="c"># Loop through the parts adding them to the output file</span>
+        <span class="c"># we ALWAYS write out single part features</span>
+        <span class="n">myGeometryList</span> <span class="o">=</span> <span class="n">explodeMultiPartGeometry</span><span class="p">(</span><span class="n">myGeometry</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">myPart</span> <span class="ow">in</span> <span class="n">myGeometryList</span><span class="p">:</span>
+            <span class="n">myPart</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">myXForm</span><span class="p">)</span>
+            <span class="n">myFeature</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">myPart</span><span class="p">)</span>
+            <span class="n">myWriter</span><span class="o">.</span><span class="n">addFeature</span><span class="p">(</span><span class="n">myFeature</span><span class="p">)</span>
+        <span class="n">myCount</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">del</span> <span class="n">myWriter</span>  <span class="c"># Flush to disk</span>
+
+    <span class="k">if</span> <span class="n">myCount</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No features fall within the clip extents. &#39;</span>
+                       <span class="s">&#39;Try panning / zooming to an area containing data &#39;</span>
+                       <span class="s">&#39;and then try to run your analysis again.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">NoFeaturesInExtentException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="n">myKeywordIO</span> <span class="o">=</span> <span class="n">KeywordIO</span><span class="p">()</span>
+    <span class="n">myKeywordIO</span><span class="o">.</span><span class="n">copyKeywords</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">myFilename</span><span class="p">,</span>
+                  <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">theExtraKeywords</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">myFilename</span>  <span class="c"># Filename of created file</span>
+
+
+<div class="viewcode-block" id="explodeMultiPartGeometry"><a class="viewcode-back" href="../../api-docs/safe_qgis/clipper.html#safe_qgis.clipper.explodeMultiPartGeometry">[docs]</a><span class="k">def</span> <span class="nf">explodeMultiPartGeometry</span><span class="p">(</span><span class="n">theGeom</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a multipart geometry to a list of single parts. This method was</span>
+<span class="sd">    adapted from Carson Farmer&#39;s fTools doGeometry implementation in QGIS.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       theGeom - A geometry - if it is multipart it will be exploded.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of single part geometries</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myMultiGeometry</span> <span class="o">=</span> <span class="n">QgsGeometry</span><span class="p">()</span>
+    <span class="n">myParts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">isMultipart</span><span class="p">():</span>
+            <span class="n">myMultiGeometry</span> <span class="o">=</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">asMultiPoint</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">myMultiGeometry</span><span class="p">:</span>
+                <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QgsGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">fromPoint</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theGeom</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">isMultipart</span><span class="p">():</span>
+            <span class="n">myMultiGeometry</span> <span class="o">=</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">asMultiPolyline</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">myMultiGeometry</span><span class="p">:</span>
+                <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QgsGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">fromPolyline</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theGeom</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">isMultipart</span><span class="p">():</span>
+            <span class="n">myMultiGeometry</span> <span class="o">=</span> <span class="n">theGeom</span><span class="o">.</span><span class="n">asMultiPolygon</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">myMultiGeometry</span><span class="p">:</span>
+                <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QgsGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">fromPolygon</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theGeom</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myParts</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_clipRasterLayer</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">theExtent</span><span class="p">,</span> <span class="n">theCellSize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">theExtraKeywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip a Hazard or Exposure raster layer to the extents provided. The</span>
+<span class="sd">    layer must be a raster layer or an exception will be thrown.</span>
+
+<span class="sd">    .. note:: The extent *must* be in EPSG:4326.</span>
+
+<span class="sd">    The output layer will always be in WGS84/Geographic.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theLayer - a valid QGIS raster layer in EPSG:4326</span>
+<span class="sd">        * theExtent -  an array representing the exposure layer</span>
+<span class="sd">           extents in the form [xmin, ymin, xmax, ymax]. It is assumed</span>
+<span class="sd">           that the coordinates are in EPSG:4326 although currently</span>
+<span class="sd">           no checks are made to enforce this.</span>
+<span class="sd">        * theCellSize - cell size (in GeoCRS) which the layer should</span>
+<span class="sd">            be resampled to. If not provided for a raster layer (i.e.</span>
+<span class="sd">            theCellSize=None), the native raster cell size will be used.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the output clipped layer (placed in the</span>
+<span class="sd">        system temp dir).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       Exception if input layer is a density layer in projected coordinates -</span>
+<span class="sd">       see issue #123</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theLayer</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">theExtent</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Layer or Extent passed to clip is None.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">!=</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">RasterLayer</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Expected a raster layer but received a </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span>
+               <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="n">myWorkingLayer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+
+    <span class="c"># Check for existence of keywords file</span>
+    <span class="n">myKeywordsPath</span> <span class="o">=</span> <span class="n">myWorkingLayer</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span>
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Input file to be clipped &quot;</span><span class="si">%s</span><span class="s">&quot; does not have the &#39;</span>
+           <span class="s">&#39;expected keywords file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myWorkingLayer</span><span class="p">,</span>
+                                          <span class="n">myKeywordsPath</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">myKeywordsPath</span><span class="p">),</span> <span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># Raise exception if layer is projected and refers to density (issue #123)</span>
+    <span class="c"># FIXME (Ole): Need to deal with it - e.g. by automatically reprojecting</span>
+    <span class="c"># the layer at this point and setting the native resolution accordingly</span>
+    <span class="c"># in its keywords.</span>
+    <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">myKeywordsPath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s">&#39;datatype&#39;</span> <span class="ow">in</span> <span class="n">myKeywords</span> <span class="ow">and</span> <span class="n">myKeywords</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;density&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">srs</span><span class="p">()</span><span class="o">.</span><span class="n">epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">4326</span><span class="p">:</span>
+
+            <span class="c"># This layer is not WGS84 geographic</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Layer </span><span class="si">%s</span><span class="s"> represents density but has spatial &#39;</span>
+                         <span class="s">&#39;reference &quot;</span><span class="si">%s</span><span class="s">&quot;. Density layers must be given in &#39;</span>
+                         <span class="s">&#39;WGS84 geographic coordinates, so please reproject &#39;</span>
+                         <span class="s">&#39;and try again. For more information, see issue &#39;</span>
+                         <span class="s">&#39;https://github.com/AIFDR/inasafe/issues/123&#39;</span>
+                         <span class="o">%</span> <span class="p">(</span><span class="n">myWorkingLayer</span><span class="p">,</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">srs</span><span class="p">()</span><span class="o">.</span><span class="n">toProj4</span><span class="p">()))</span>
+            <span class="k">raise</span> <span class="n">InvalidProjectionException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># We need to provide gdalwarp with a dataset for the clip</span>
+    <span class="c"># because unline gdal_translate, it does not take projwin.</span>
+    <span class="n">myClipKml</span> <span class="o">=</span> <span class="n">extentToKml</span><span class="p">(</span><span class="n">theExtent</span><span class="p">)</span>
+
+    <span class="c"># Create a filename for the clipped, resampled and reprojected layer</span>
+    <span class="n">myHandle</span><span class="p">,</span> <span class="n">myFilename</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s">&#39;.tif&#39;</span><span class="p">,</span> <span class="s">&#39;clip_&#39;</span><span class="p">,</span>
+                                            <span class="n">getTempDir</span><span class="p">())</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">myHandle</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+
+    <span class="c"># If no cell size is specified, we need to run gdalwarp without</span>
+    <span class="c"># specifying the output pixel size to ensure the raster dims</span>
+    <span class="c"># remain consistent.</span>
+    <span class="k">if</span> <span class="n">theCellSize</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myCommand</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;gdalwarp -q -t_srs EPSG:4326 -r near &#39;</span>
+                     <span class="s">&#39;-cutline </span><span class="si">%s</span><span class="s"> -crop_to_cutline -of GTiff &#39;</span>
+                     <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myClipKml</span><span class="p">,</span>
+                                    <span class="n">myWorkingLayer</span><span class="p">,</span>
+                                    <span class="n">myFilename</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">myCommand</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;gdalwarp -q -t_srs EPSG:4326 -r near -tr </span><span class="si">%f</span><span class="s"> </span><span class="si">%f</span><span class="s"> &#39;</span>
+                     <span class="s">&#39;-cutline </span><span class="si">%s</span><span class="s"> -crop_to_cutline -of GTiff &#39;</span>
+                     <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">theCellSize</span><span class="p">,</span>
+                                    <span class="n">theCellSize</span><span class="p">,</span>
+                                    <span class="n">myClipKml</span><span class="p">,</span>
+                                    <span class="n">myWorkingLayer</span><span class="p">,</span>
+                                    <span class="n">myFilename</span><span class="p">))</span>
+    <span class="n">myExecutablePrefix</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&#39;darwin&#39;</span><span class="p">:</span>  <span class="c"># Mac OS X</span>
+        <span class="c"># .. todo:: FIXME - softcode gdal version in this path</span>
+        <span class="n">myExecutablePrefix</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;/Library/Frameworks/GDAL.framework/&#39;</span>
+                              <span class="s">&#39;Versions/1.9/Programs/&#39;</span><span class="p">)</span>
+    <span class="n">myCommand</span> <span class="o">=</span> <span class="n">myExecutablePrefix</span> <span class="o">+</span> <span class="n">myCommand</span>
+
+    <span class="c"># For debugging only</span>
+    <span class="c"># myCommand = myExecutablePrefix + myCommand</span>
+    <span class="c"># myFile = file(&#39;C:/temp/command.txt&#39;, &#39;wt&#39;)</span>
+    <span class="c"># myFile.write(myCommand)</span>
+    <span class="c"># myFile.close()</span>
+    <span class="c"># Now run GDAL warp scottie...</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span><span class="n">myCommand</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myResult</span>
+    <span class="k">except</span> <span class="n">CalledProcessError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;&lt;p&gt;Error while executing the following shell command:&#39;</span>
+                     <span class="s">&#39;&lt;/p&gt;&lt;pre&gt;</span><span class="si">%s</span><span class="s">&lt;/pre&gt;&lt;p&gt;Error message: </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">myCommand</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="c"># shameless hack - see https://github.com/AIFDR/inasafe/issues/141</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&#39;darwin&#39;</span><span class="p">:</span>  <span class="c"># Mac OS X</span>
+            <span class="k">if</span> <span class="s">&#39;Errno 4&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="c"># continue as the error seems to be non critical</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="c"># .. todo:: Check the result of the shell call is ok</span>
+    <span class="n">myKeywordIO</span> <span class="o">=</span> <span class="n">KeywordIO</span><span class="p">()</span>
+    <span class="n">myKeywordIO</span><span class="o">.</span><span class="n">copyKeywords</span><span class="p">(</span><span class="n">theLayer</span><span class="p">,</span> <span class="n">myFilename</span><span class="p">,</span>
+                             <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">theExtraKeywords</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myFilename</span>  <span class="c"># Filename of created file</span>
+
+
+<div class="viewcode-block" id="extentToKml"><a class="viewcode-back" href="../../api-docs/safe_qgis/clipper.html#safe_qgis.clipper.extentToKml">[docs]</a><span class="k">def</span> <span class="nf">extentToKml</span><span class="p">(</span><span class="n">theExtent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A helper to get a little kml doc for an extent so that</span>
+<span class="sd">    we can use it with gdal warp for clipping.&quot;&quot;&quot;</span>
+
+    <span class="n">myBottomLeftCorner</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">theExtent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">myTopLeftCorner</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">theExtent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">myTopRightCorner</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">theExtent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">myBottomRightCorner</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">theExtent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">theExtent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">myKml</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;</span>
+<span class="s">&lt;kml xmlns=&quot;http://www.opengis.net/kml/2.2&quot;&gt;</span>
+<span class="s">  &lt;Document&gt;</span>
+<span class="s">    &lt;Folder&gt;</span>
+<span class="s">      &lt;Placemark&gt;</span>
+<span class="s">        &lt;Polygon&gt;</span>
+<span class="s">          &lt;outerBoundaryIs&gt;</span>
+<span class="s">            &lt;LinearRing&gt;</span>
+<span class="s">              &lt;coordinates&gt;</span>
+<span class="s">                </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"></span>
+<span class="s">              &lt;/coordinates&gt;</span>
+<span class="s">            &lt;/LinearRing&gt;</span>
+<span class="s">          &lt;/outerBoundaryIs&gt;</span>
+<span class="s">        &lt;/Polygon&gt;</span>
+<span class="s">      &lt;/Placemark&gt;</span>
+<span class="s">    &lt;/Folder&gt;</span>
+<span class="s">  &lt;/Document&gt;</span>
+<span class="s">&lt;/kml&gt;&quot;&quot;&quot;</span> <span class="o">%</span>
+    <span class="p">(</span><span class="n">myBottomLeftCorner</span><span class="p">,</span>
+     <span class="n">myTopLeftCorner</span><span class="p">,</span>
+     <span class="n">myTopRightCorner</span><span class="p">,</span>
+     <span class="n">myBottomRightCorner</span><span class="p">,</span>
+     <span class="n">myBottomLeftCorner</span><span class="p">))</span>
+
+    <span class="n">myFilename</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s">&#39;.kml&#39;</span><span class="p">,</span> <span class="s">&#39;extent_&#39;</span><span class="p">,</span>
+                                      <span class="n">getTempDir</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">myFile</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">myFilename</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span>
+    <span class="n">myFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">myKml</span><span class="p">)</span>
+    <span class="n">myFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">myFilename</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

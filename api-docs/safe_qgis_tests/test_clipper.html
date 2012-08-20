@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.test_clipper &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis (Unit Tests)" href="../safe_qgis_tests.html" />
+    <link rel="next" title="Module: safe_qgis.test_dock" href="test_dock.html" />
+    <link rel="prev" title="Package::safe_qgis (Unit Tests)" href="../safe_qgis_tests.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_dock.html" title="Module: safe_qgis.test_dock"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis_tests.html" title="Package::safe_qgis (Unit Tests)"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis_tests.html" accesskey="U">Package::safe_qgis (Unit Tests)</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-test-clipper">
+<h1>Module: safe_qgis.test_clipper<a class="headerlink" href="#module-safe-qgis-test-clipper" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>test_clipper</strong>
+unit tests.</p>
+<span class="target" id="module-safe_qgis.test_clipper"></span><dl class="docutils">
+<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
+<dd><strong>ISClipper test suite.</strong></dd>
+</dl>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.test_clipper.ClipperTest">
+<em class="property">class </em><tt class="descclassname">safe_qgis.test_clipper.</tt><tt class="descname">ClipperTest</tt><big>(</big><em>methodName='runTest'</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test the InaSAFE clipper</p>
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.testRasterScaling">
+<tt class="descname">testRasterScaling</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.testRasterScaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.testRasterScaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raster layers can be scaled when resampled</p>
+<p>This is a test for ticket #52</p>
+<p>Native test .asc data has</p>
+<p>Population_Jakarta_geographic.asc
+ncols         638
+nrows         649
+cellsize      0.00045228819716044</p>
+<p>Population_2010.asc
+ncols         5525
+nrows         2050
+cellsize      0.0083333333333333</p>
+<p>Scaling is necessary for raster data that represents density
+such as population per km^2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.testRasterScaling_projected">
+<tt class="descname">testRasterScaling_projected</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.testRasterScaling_projected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.testRasterScaling_projected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to scale projected density raster layers raise exception</p>
+<p>Automatic scaling when resampling density data
+does not currently work for projected layers. See issue #123.</p>
+<p>For the time being this test checks that an exception is raised
+when scaling is attempted on projected layers.
+When we resolve issue #123, this test should be rewritten.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_clipBoth">
+<tt class="descname">test_clipBoth</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_clipBoth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_clipBoth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raster and Vector layers can be clipped</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_clipRaster">
+<tt class="descname">test_clipRaster</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_clipRaster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_clipRaster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raster layers can be clipped</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_clipVector">
+<tt class="descname">test_clipVector</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_clipVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_clipVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vector layers can be clipped</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_explodeMultiLineGeometry">
+<tt class="descname">test_explodeMultiLineGeometry</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_explodeMultiLineGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_explodeMultiLineGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test exploding LINES multipart to single part geometries works</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_explodeMultiPointGeometry">
+<tt class="descname">test_explodeMultiPointGeometry</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_explodeMultiPointGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_explodeMultiPointGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test exploding POINT multipart to single part geometries works</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_explodeMultiPolygonGeometry">
+<tt class="descname">test_explodeMultiPolygonGeometry</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_explodeMultiPolygonGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_explodeMultiPolygonGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test exploding POLY multipart to single part geometries works</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_extentToKml">
+<tt class="descname">test_extentToKml</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_extentToKml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_extentToKml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if extent to KML is working.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_invalidFilenamesCaught">
+<tt class="descname">test_invalidFilenamesCaught</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_invalidFilenamesCaught"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_invalidFilenamesCaught" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalid filenames raise appropriate exceptions</p>
+<p>Wrote this test because test_clipBoth raised the wrong error
+when file was missing. Instead of reporting that, it gave
+Western boundary must be less than eastern. I got [0.0, 0.0, 0.0, 0.0]</p>
+<p>See issue #170</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_clipper.ClipperTest.test_vectorProjections">
+<tt class="descname">test_vectorProjections</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_clipper.html#ClipperTest.test_vectorProjections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_clipper.ClipperTest.test_vectorProjections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that vector input data is reprojected properly during clip</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../safe_qgis_tests.html"
+                        title="previous chapter">Package::safe_qgis (Unit Tests)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_dock.html"
+                        title="next chapter">Module: safe_qgis.test_dock</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis_tests/test_clipper.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_dock.html" title="Module: safe_qgis.test_dock"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis_tests.html" title="Package::safe_qgis (Unit Tests)"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis_tests.html" >Package::safe_qgis (Unit Tests)</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

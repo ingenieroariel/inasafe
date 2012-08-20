@@ -1,0 +1,694 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.map &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.plugin" href="plugin.html" />
+    <link rel="prev" title="Module: safe_qgis.keywords_dialog" href="keywords_dialog.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="plugin.html" title="Module: safe_qgis.plugin"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keywords_dialog.html" title="Module: safe_qgis.keywords_dialog"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-map">
+<h1>Module:  safe_qgis.map<a class="headerlink" href="#module-safe-qgis-map" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.map</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.map"></span><dl class="docutils">
+<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
+<dd><strong>InaSAFE map making module.</strong></dd>
+</dl>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.map.Map">
+<em class="property">class </em><tt class="descclassname">safe_qgis.map.</tt><tt class="descname">Map</tt><big>(</big><em>theIface</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for creating a map.</p>
+<dl class="method">
+<dt id="safe_qgis.map.Map.addClassToLegend">
+<tt class="descname">addClassToLegend</tt><big>(</big><em>theColour</em>, <em>theMin=None</em>, <em>theMax=None</em>, <em>theCategory=None</em>, <em>theLabel=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.addClassToLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.addClassToLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a class to the current legend. If the legend is not defined,
+a new one will be created. A legend is just an image file with nicely
+rendered classes in it.</p>
+<p>Args:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">theColour - <strong>Required</strong> colour for the class as a QColor</p>
+</li>
+<li><p class="first">theMin - Optional minimum value for the class</p>
+</li>
+<li><dl class="first docutils">
+<dt>theMax - Optional maximum value for the class            * theCategory - Optional category name (will be used in lieu of</dt>
+<dd><p class="first last">min/max)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">theLabel - Optional text label for the class</p>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Throws an exception if the class could not be added for
+some reason..</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.addSymbolToLegend">
+<tt class="descname">addSymbolToLegend</tt><big>(</big><em>theSymbol</em>, <em>theMin=None</em>, <em>theMax=None</em>, <em>theCategory=None</em>, <em>theLabel=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.addSymbolToLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.addSymbolToLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a class to the current legend. If the legend is not defined,
+a new one will be created. A legend is just an image file with nicely
+rendered classes in it.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This method just extracts the colour from the symbol and then
+delegates to the addClassToLegend function.</p>
+</div>
+<p>Args:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">theSymbol - <strong>Required</strong> symbol for the class as a QgsSymbol</p>
+</li>
+<li><p class="first">theMin - Optional minimum value for the class</p>
+</li>
+<li><dl class="first docutils">
+<dt>theMax - Optional maximum value for the class            * theCategory - Optional category name (will be used in lieu of</dt>
+<dd><p class="first last">min/max)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">theLabel - Optional text label for the class</p>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Throws an exception if the class could not be added for
+some reason..</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawDisclaimer">
+<tt class="descname">drawDisclaimer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawDisclaimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawDisclaimer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a disclaimer to the composition.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawGraticuleMask">
+<tt class="descname">drawGraticuleMask</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawGraticuleMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawGraticuleMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper funtion to mask out graticule labels on the right side
+by overpainting a white rectangle with white border on them.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which the map should be drawn</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawImpactTable">
+<tt class="descname">drawImpactTable</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawImpactTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawImpactTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render the impact table.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which to begin drawing</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawImpactTitle">
+<tt class="descname">drawImpactTitle</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawImpactTitle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawImpactTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the map subtitle - obtained from the impact layer keywords.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which to begin drawing</dd>
+<dt>Returns:</dt>
+<dd>float - the height of the label as rendered</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawLegend">
+<tt class="descname">drawLegend</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a legend to the map using our custom legend renderer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">getLegend generates a pixmap in 150dpi so if you set
+the map to a higher dpi it will appear undersized.</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which to begin drawing</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawLogo">
+<tt class="descname">drawLogo</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawLogo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawLogo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a picture containing the logo to the map top left corner</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which the logo shoudl be drawn</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawMap">
+<tt class="descname">drawMap</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a map to the composition and return the compsermap instance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which the map should be drawn</dd>
+<dt>Returns:</dt>
+<dd>A QgsComposerMap instance is returned</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawNativeScaleBar">
+<tt class="descname">drawNativeScaleBar</tt><big>(</big><em>theComposerMap</em>, <em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawNativeScaleBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawNativeScaleBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a scale bar using QGIS&#8217; native drawing - in the case of
+geographic maps, scale will be in degrees, not km.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawPixmap">
+<tt class="descname">drawPixmap</tt><big>(</big><em>thePixmap</em>, <em>theWidthMM</em>, <em>theLeftOffset</em>, <em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawPixmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawPixmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to draw a pixmap directly onto the QGraphicsScene.
+This is an alternative to using QgsComposerPicture which in
+some cases leaves artifacts under windows.</p>
+<p>The Pixmap will have a transform applied to it so that
+it is rendered with the same resolution as the composition.</p>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>thePixmap</li>
+<li>theWidthMM - desired width in mm of output on page</li>
+<li>theLeftOffset</li>
+<li>theTopOffset</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>QGraphicsSceneItem is returned</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawScaleBar">
+<tt class="descname">drawScaleBar</tt><big>(</big><em>theComposerMap</em>, <em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawScaleBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawScaleBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a numeric scale to the bottom left of the map</p>
+<p>We draw the scale bar manually because QGIS does not yet support
+rendering a scalebar for a geographic map in km.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#safe_qgis.map.Map.drawNativeScaleBar" title="safe_qgis.map.Map.drawNativeScaleBar"><tt class="xref py py-meth docutils literal"><span class="pre">drawNativeScaleBar()</span></tt></a></p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theComposerMap - QgsComposerMap instance used as the basis
+scale calculations.</li>
+<li>theTopOffset - vertical offset at which the map should be drawn</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.drawTitle">
+<tt class="descname">drawTitle</tt><big>(</big><em>theTopOffset</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.drawTitle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.drawTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a title to the composition.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTopOffset - vertical offset at which the map should be drawn</dd>
+<dt>Returns:</dt>
+<dd>float - the height of the label as rendered</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.extendLegend">
+<tt class="descname">extendLegend</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.extendLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.extendLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow the legend pixmap enough to accommodate one more legend entry.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.getLegend">
+<tt class="descname">getLegend</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.getLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.getLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Examine the classes of the impact layer associated with this print
+job.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>An InvalidLegendLayer will be raised if a legend cannot be
+created from the layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.getMapTitle">
+<tt class="descname">getMapTitle</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.getMapTitle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.getMapTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the map title from the layer keywords if possible.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None on error, otherwise the title</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.getRasterLegend">
+<tt class="descname">getRasterLegend</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.getRasterLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.getRasterLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the legend for a raster layer as an image.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>An image representing the layer&#8217;s legend.
+self.legend is also populated</dd>
+<dt>Raises:</dt>
+<dd>An InvalidLegendLayer will be raised if a legend cannot be
+created from the layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.getVectorLegend">
+<tt class="descname">getVectorLegend</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.getVectorLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.getVectorLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the legend for this layer as a graphic.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>A QImage object.
+self.legend is also populated with the image.</dd>
+<dt>Raises:</dt>
+<dd>An InvalidLegendLayer will be raised if a legend cannot be
+created from the layer.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.htmlFooter">
+<tt class="descname">htmlFooter</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.htmlFooter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.htmlFooter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html footer for wrapping content in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.htmlHeader">
+<tt class="descname">htmlHeader</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.htmlHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.htmlHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html header for wrapping content in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.makePdf">
+<tt class="descname">makePdf</tt><big>(</big><em>theFilename</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.makePdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.makePdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to createa  nice little pdf map.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFilename - a string containing a filename path with .pdf
+extension</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.mmToPoints">
+<tt class="descname">mmToPoints</tt><big>(</big><em>theMM</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.mmToPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.mmToPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert measurement in points to one in mm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theMM - distance in milimeters</dd>
+<dt>Returns:</dt>
+<dd>mm converted value</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.pointsToMM">
+<tt class="descname">pointsToMM</tt><big>(</big><em>thePoints</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.pointsToMM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.pointsToMM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert measurement in points to one in mm.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>thePoints - distance in pixels</dd>
+<dt>Returns:</dt>
+<dd>mm converted value</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.renderHtml">
+<tt class="descname">renderHtml</tt><big>(</big><em>theHtml</em>, <em>theWidthMM</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.renderHtml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.renderHtml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render some HTML to a pixmap.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theHtml - HTML to be rendered. It is assumed that the html
+is a snippet only, containing no body element - a standard
+header and footer will be appended.</li>
+<li>theWidthMM- width of the table in mm - will be converted to
+points based on the resolution of our page.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A QPixmap</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.renderImpactTable">
+<tt class="descname">renderImpactTable</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.renderImpactTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.renderImpactTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render the table in the keywords if present. The table is an
+html table with statistics for the impact layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.renderPrintout">
+<tt class="descname">renderPrintout</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.renderPrintout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.renderPrintout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the printout for our final map composition.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.renderTemplate">
+<tt class="descname">renderTemplate</tt><big>(</big><em>theTemplateFilePath</em>, <em>theOutputFilePath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.renderTemplate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.renderTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a QgsComposer map from a template and render it</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">THIS METHOD IS EXPERIMENTAL AND CURRENTLY NON FUNCTIONAL</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theTemplateFilePath - path to the template that should be loaded.
+theOutputFilePath - path for the output pdf</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.setImpactLayer">
+<tt class="descname">setImpactLayer</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.setImpactLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.setImpactLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutator for the impact layer that will be used for stats,
+legend and reporting.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theLayer - a valid QgsMapLayer</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.setupComposition">
+<tt class="descname">setupComposition</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.setupComposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.setupComposition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up the composition ready for drawing elements onto it.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.setupPrinter">
+<tt class="descname">setupPrinter</tt><big>(</big><em>theFilename</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.setupPrinter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.setupPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a QPrinter instance set up to print to an A4 portrait pdf</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFilename - filename for pdf generated using this printer</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.showComposer">
+<tt class="descname">showComposer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.showComposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.showComposer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the composition in a composer view so the user can tweak it
+if they want to.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.tr">
+<tt class="descname">tr</tt><big>(</big><em>theString</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.tr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.tr" title="Permalink to this definition">¶</a></dt>
+<dd><p>We implement this ourself since we do not inherit QObject.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theString - string for translation.</dd>
+<dt>Returns:</dt>
+<dd>Translated version of theString.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.map.Map.writeTemplate">
+<tt class="descname">writeTemplate</tt><big>(</big><em>theTemplateFilePath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/map.html#Map.writeTemplate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.map.Map.writeTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the current composition as a template that can be
+re-used in QGIS.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="keywords_dialog.html"
+                        title="previous chapter">Module:  safe_qgis.keywords_dialog</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plugin.html"
+                        title="next chapter">Module:  safe_qgis.plugin</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/map.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="plugin.html" title="Module: safe_qgis.plugin"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keywords_dialog.html" title="Module: safe_qgis.keywords_dialog"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

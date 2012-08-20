@@ -1,0 +1,261 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.exceptions &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.help" href="help.html" />
+    <link rel="prev" title="Module: safe_qgis.dock" href="dock.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="help.html" title="Module: safe_qgis.help"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dock.html" title="Module: safe_qgis.dock"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-exceptions">
+<h1>Module:  safe_qgis.exceptions<a class="headerlink" href="#module-safe-qgis-exceptions" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.exceptions</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.exceptions"></span><p>InaSAFE Disaster risk assessment tool developed by AusAid -
+<strong>Exception Classes.</strong></p>
+<p>Custom exception classes for the IS application.</p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="exception">
+<dt id="safe_qgis.exceptions.HashNotFoundException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">HashNotFoundException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#HashNotFoundException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.HashNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when a no keyword hash can be found.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InsufficientOverlapException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InsufficientOverlapException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InsufficientOverlapException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InsufficientOverlapException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception raised if an error occurs during extent calculation
+because the bounding boxes do not overlap.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InsufficientParametersException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InsufficientParametersException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InsufficientParametersException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InsufficientParametersException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when insufficient parameters have been set.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InvalidBoundingBoxException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InvalidBoundingBoxException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InvalidBoundingBoxException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InvalidBoundingBoxException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception raised if an error occurs during extent calculation
+because one of the extents is invalid.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InvalidKVPException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InvalidKVPException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InvalidKVPException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InvalidKVPException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception raised when a key value pair is invalid -
+for example if the key of value is None or an empty string.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InvalidParameterException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InvalidParameterException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InvalidParameterException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InvalidParameterException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when an invalid parameter is
+passed to a function.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.InvalidProjectionException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">InvalidProjectionException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#InvalidProjectionException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.InvalidProjectionException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception raised if a layer needs to be reprojected.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.KeywordNotFoundException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">KeywordNotFoundException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#KeywordNotFoundException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.KeywordNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when a no keyword can be found.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.LegendLayerException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">LegendLayerException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#LegendLayerException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.LegendLayerException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception raised when trying to create a legend from
+a QgsMapLayer that does not have suitable characteristics to
+allow a legend to be created from it.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.NoFeaturesInExtentException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">NoFeaturesInExtentException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#NoFeaturesInExtentException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.NoFeaturesInExtentException" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception that gets thrown when no features are within
+the extent being clipped.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.NoFunctionsFoundException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">NoFunctionsFoundException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#NoFunctionsFoundException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.NoFunctionsFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when a no impact calculation
+functions can be found.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.QgisPathException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">QgisPathException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#QgisPathException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.QgisPathException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when qgispath.txt could not be read.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.StyleError">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">StyleError</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#StyleError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.StyleError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception relating to reading / generating GIS styles</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.StyleInfoNotFoundException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">StyleInfoNotFoundException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#StyleInfoNotFoundException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.StyleInfoNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when a no styleInfo can be found.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.TestNotImplementedException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">TestNotImplementedException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#TestNotImplementedException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.TestNotImplementedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for when a test exists only as a stub.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="safe_qgis.exceptions.TranslationLoadException">
+<em class="property">exception </em><tt class="descclassname">safe_qgis.exceptions.</tt><tt class="descname">TranslationLoadException</tt><a class="reference internal" href="../../_modules/safe_qgis/exceptions.html#TranslationLoadException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.exceptions.TranslationLoadException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception handler for whe translation file fails
+to load.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dock.html"
+                        title="previous chapter">Module:  safe_qgis.dock</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="help.html"
+                        title="next chapter">Module:  safe_qgis.help</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/exceptions.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="help.html" title="Module: safe_qgis.help"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dock.html" title="Module: safe_qgis.dock"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

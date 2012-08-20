@@ -1,0 +1,243 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.clipper &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.dock" href="dock.html" />
+    <link rel="prev" title="Package::safe_qgis" href="../safe_qgis.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dock.html" title="Module: safe_qgis.dock"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis.html" title="Package::safe_qgis"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-clipper">
+<h1>Module:  safe_qgis.clipper<a class="headerlink" href="#module-safe-qgis-clipper" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.clipper</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.clipper"></span><dl class="docutils">
+<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
+<dd><strong>ISClipper implementation.</strong></dd>
+</dl>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="function">
+<dt id="safe_qgis.clipper.clipLayer">
+<tt class="descclassname">safe_qgis.clipper.</tt><tt class="descname">clipLayer</tt><big>(</big><em>theLayer</em>, <em>theExtent</em>, <em>theCellSize=None</em>, <em>theExtraKeywords=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/clipper.html#clipLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.clipper.clipLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip a Hazard or Exposure layer to the extents provided.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Will delegate to clipVectorLayer or clipRasterLayer as needed.</p>
+</div>
+<p>Args:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">theLayer - a valid QGIS vector or raster layer</p>
+</li>
+<li><dl class="first docutils">
+<dt>theExtent - an array representing the exposure layer</dt>
+<dd><p class="first last">extents in the form [xmin, ymin, xmax, ymax]. It is assumed
+that the coordinates are in EPSG:4326 although currently
+no checks are made to enforce this.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>theCellSize - cell size which the layer should be resampled to.</dt>
+<dd><p class="first last">This argument will be ignored for vector layers and if not provided
+for a raster layer, the native raster cell size will be used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>theExtraKeywords - Optional keywords dictionary to be added to</dt>
+<dd><p class="first last">output layer</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Path to the output clipped layer (placed in the
+system temp dir). The output layer will be reprojected to EPSG:4326
+if needed.</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.clipper.explodeMultiPartGeometry">
+<tt class="descclassname">safe_qgis.clipper.</tt><tt class="descname">explodeMultiPartGeometry</tt><big>(</big><em>theGeom</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/clipper.html#explodeMultiPartGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.clipper.explodeMultiPartGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a multipart geometry to a list of single parts. This method was
+adapted from Carson Farmer&#8217;s fTools doGeometry implementation in QGIS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theGeom - A geometry - if it is multipart it will be exploded.</dd>
+<dt>Returns:</dt>
+<dd>A list of single part geometries</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.clipper.extentToKml">
+<tt class="descclassname">safe_qgis.clipper.</tt><tt class="descname">extentToKml</tt><big>(</big><em>theExtent</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/clipper.html#extentToKml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.clipper.extentToKml" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper to get a little kml doc for an extent so that
+we can use it with gdal warp for clipping.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.clipper.tr">
+<tt class="descclassname">safe_qgis.clipper.</tt><tt class="descname">tr</tt><big>(</big><em>theText</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/clipper.html#tr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.clipper.tr" title="Permalink to this definition">¶</a></dt>
+<dd><p>We define a tr() alias here since the ClipperTest implementation below
+is not a class and does not inherit from QObject.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference external" href="http://tinyurl.com/pyqt-differences">http://tinyurl.com/pyqt-differences</a></p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theText - string to be translated</dd>
+<dt>Returns:</dt>
+<dd>Translated version of the given string if available, otherwise
+the original string.</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../safe_qgis.html"
+                        title="previous chapter">Package::safe_qgis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dock.html"
+                        title="next chapter">Module:  safe_qgis.dock</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/clipper.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dock.html" title="Module: safe_qgis.dock"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis.html" title="Package::safe_qgis"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

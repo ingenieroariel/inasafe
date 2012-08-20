@@ -1,0 +1,184 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_help &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_help</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid and World Bank</span>
+<span class="sd">- **GUI Test Cases.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;21/02/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="c"># Needed though not used below</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtGui</span> <span class="kn">import</span> <span class="n">QApplication</span>  <span class="c"># pylint: disable=W0611</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="n">getQgisTestApp</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.help</span> <span class="kn">import</span> <span class="n">Help</span>
+
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="HelpTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_help.html#safe_qgis.test_help.HelpTest">[docs]</a><span class="k">class</span> <span class="nc">HelpTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE help GUI</span>
+<span class="sd">    .. note:: Currently these tests will all fail unless you comment out the</span>
+<span class="sd">    APP.exec_() lines because the web view does not load content without</span>
+<span class="sd">    the main application event loop running.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="HelpTest.XtestDialogLoads"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_help.html#safe_qgis.test_help.HelpTest.XtestDialogLoads">[docs]</a>    <span class="k">def</span> <span class="nf">XtestDialogLoads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Basic test to ensure the keyword dialog has loaded&quot;&quot;&quot;</span>
+
+        <span class="n">myHelp</span> <span class="o">=</span> <span class="n">Help</span><span class="p">(</span><span class="n">PARENT</span><span class="p">)</span>
+        <span class="c">#myHelp.show()</span>
+        <span class="c">#QGISAPP.exec_()</span>
+
+        <span class="n">myText</span> <span class="o">=</span> <span class="n">myHelp</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">webView</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="n">myHelp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">myExpectedText</span> <span class="o">=</span> <span class="s">&#39;This is the project: InaSAFE - QGIS&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Expected to find &quot;</span><span class="si">%s</span><span class="s">&quot; in </span><span class="se">\n\n</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">myExpectedText</span><span class="p">,</span> <span class="n">myText</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myText</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">myExpectedText</span><span class="p">),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="HelpTest.XtestDockHelp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_help.html#safe_qgis.test_help.HelpTest.XtestDockHelp">[docs]</a>    <span class="k">def</span> <span class="nf">XtestDockHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test help dialog works with context set to &#39;dock&#39;&quot;&quot;&quot;</span>
+        <span class="n">myHelp</span> <span class="o">=</span> <span class="n">Help</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">theContext</span><span class="o">=</span><span class="s">&#39;dock&#39;</span><span class="p">)</span>
+        <span class="n">myText</span> <span class="o">=</span> <span class="n">myHelp</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">webView</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="n">myExpectedText</span> <span class="o">=</span> <span class="s">&#39;Using the InaSAFE Plugin&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Expected to find &quot;</span><span class="si">%s</span><span class="s">&quot; in </span><span class="se">\n\n</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">myExpectedText</span><span class="p">,</span> <span class="n">myText</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myText</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">myExpectedText</span><span class="p">),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="HelpTest.XtestKeywordsHelp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_help.html#safe_qgis.test_help.HelpTest.XtestKeywordsHelp">[docs]</a>    <span class="k">def</span> <span class="nf">XtestKeywordsHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test help dialog works with context set to &#39;keywords&#39;&quot;&quot;&quot;</span>
+        <span class="n">myHelp</span> <span class="o">=</span> <span class="n">Help</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">theContext</span><span class="o">=</span><span class="s">&#39;keywords&#39;</span><span class="p">)</span>
+        <span class="n">myText</span> <span class="o">=</span> <span class="n">myHelp</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">webView</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="n">myExpectedText</span> <span class="o">=</span> <span class="s">&#39;avoid using spaces&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Expected to find &quot;</span><span class="si">%s</span><span class="s">&quot; in </span><span class="se">\n\n</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">myExpectedText</span><span class="p">,</span> <span class="n">myText</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myText</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">myExpectedText</span><span class="p">),</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">HelpTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

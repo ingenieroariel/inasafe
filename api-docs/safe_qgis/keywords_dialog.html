@@ -1,0 +1,477 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.keywords_dialog &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.map" href="map.html" />
+    <link rel="prev" title="Module: safe_qgis.keyword_io" href="keyword_io.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-keywords-dialog">
+<h1>Module:  safe_qgis.keywords_dialog<a class="headerlink" href="#module-safe-qgis-keywords-dialog" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.keywords_dialog</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.keywords_dialog"></span><p>InaSAFE Disaster risk assessment tool developed by AusAid -
+<strong>GUI Keywords Dialog.</strong></p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Check raster is single band</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog">
+<em class="property">class </em><tt class="descclassname">safe_qgis.keywords_dialog.</tt><tt class="descname">KeywordsDialog</tt><big>(</big><em>parent</em>, <em>iface</em>, <em>theDock=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dialog implementation class for the Risk In A Box keywords editor.</p>
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.accept">
+<tt class="descname">accept</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the ok button is pressed.</p>
+<p>It will write out the keywords for the layer that is active.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.addListEntry">
+<tt class="descname">addListEntry</tt><big>(</big><em>theKey</em>, <em>theValue</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.addListEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.addListEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to the keywords list given its key/value.</p>
+<p>The key and value must both be valid, non empty strings
+or an InvalidKVPException will be raised.</p>
+<p>If an entry with the same key exists, it&#8217;s value will be
+replaced with theValue.</p>
+<p>It will add the current key/value pair to the list if it is not
+already present. The kvp will also be stored in the data of the
+listwidgetitem as a simple string delimited with a bar (&#8216;|&#8217;).</p>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>theKey - string representing the key part of the key
+value pair (kvp)</li>
+<li>theValue - string representing the value part of the key
+value pair (kvp)</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.getKeywords">
+<tt class="descname">getKeywords</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.getKeywords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.getKeywords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain the state of the dialog as a keywords dict</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>dict - a dictionary of keyword reflecting the state of the dialog.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.getValueForKey">
+<tt class="descname">getValueForKey</tt><big>(</big><em>theKey</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.getValueForKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.getValueForKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if our key list contains a specific key,
+and return its value if present.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theKey- String representing the key to search for</dd>
+<dt>Returns:</dt>
+<dd>Value of key if matched otherwise none</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.loadStateFromKeywords">
+<tt class="descname">loadStateFromKeywords</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.loadStateFromKeywords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.loadStateFromKeywords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the ui state to match the keywords of the
+currently active layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_cboSubcategory_currentIndexChanged">
+<tt class="descname">on_cboSubcategory_currentIndexChanged</tt><big>(</big><em>theIndex=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_cboSubcategory_currentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_cboSubcategory_currentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the subcategory is changed.</p>
+<p>When the user changes the subcategory, we will extract the
+subcategory and dataype or unit (depending on if it is a hazard
+or exposure subcategory) from the [] after the name.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_leTitle_textEdited">
+<tt class="descname">on_leTitle_textEdited</tt><big>(</big><em>theText</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_leTitle_textEdited"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_leTitle_textEdited" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the keywords list whenver the user changes the title.
+This slot is not called is the title is changed programmatically.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>dict - a dictionary of keyword reflecting the state of the dialog.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAddToList1_clicked">
+<tt class="descname">on_pbnAddToList1_clicked</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_pbnAddToList1_clicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAddToList1_clicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the pbnAddToList1 button is pressed.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAddToList2_clicked">
+<tt class="descname">on_pbnAddToList2_clicked</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_pbnAddToList2_clicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAddToList2_clicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the pbnAddToList2 button is pressed.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAdvanced_toggled">
+<tt class="descname">on_pbnAdvanced_toggled</tt><big>(</big><em>theFlag</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_pbnAdvanced_toggled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_pbnAdvanced_toggled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the advanced button is toggled.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">some of the behaviour for hiding widgets is done using
+the signal/slot editor in designer, so if you are trying to figure
+out how the interactions work, look there too!</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFlag - boolean indicating the new checked state of the button</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_pbnRemove_clicked">
+<tt class="descname">on_pbnRemove_clicked</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_pbnRemove_clicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_pbnRemove_clicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the pbnRemove button is pressed.</p>
+<p>It will remove any selected items in the keywords list.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_radExposure_toggled">
+<tt class="descname">on_radExposure_toggled</tt><big>(</big><em>theFlag</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_radExposure_toggled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_radExposure_toggled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the hazard radio is toggled on.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFlag - boolean indicating the new checked state of the button</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.on_radHazard_toggled">
+<tt class="descname">on_radHazard_toggled</tt><big>(</big><em>theFlag</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.on_radHazard_toggled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.on_radHazard_toggled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the hazard radio is toggled.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFlag - boolean indicating the new checked state of the button</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.removeItemByKey">
+<tt class="descname">removeItemByKey</tt><big>(</big><em>theKey</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.removeItemByKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.removeItemByKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an item from the kvp list given its key.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theKey - key of item to be removed.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.removeItemByValue">
+<tt class="descname">removeItemByValue</tt><big>(</big><em>theValue</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.removeItemByValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.removeItemByValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an item from the kvp list given its key.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theValue - value of item to be removed.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.reset">
+<tt class="descname">reset</tt><big>(</big><em>thePrimaryKeywordsOnlyFlag=True</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all controls to a blank state.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>thePrimaryKeywordsOnlyFlag - if True (the default), only
+reset Subcategory, datatype and units.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.setCategory">
+<tt class="descname">setCategory</tt><big>(</big><em>theCategory</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.setCategory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.setCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the category radio button based on theCategory.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theCategory - a string which must be either &#8216;hazard&#8217; or &#8216;exposure&#8217;.</dd>
+<dt>Returns:</dt>
+<dd>False if the radio button could not be updated</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.setSubcategoryList">
+<tt class="descname">setSubcategoryList</tt><big>(</big><em>theEntries</em>, <em>theSelectedItem=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.setSubcategoryList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.setSubcategoryList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to populate the subcategory list based on category context.</p>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>theEntries - an OrderedDict of subcategories. The dict entries
+should be (&#8216;earthquake&#8217;, self.tr(&#8216;earthquake&#8217;)). See
+<a class="reference external" href="http://www.voidspace.org.uk/python/odict.html">http://www.voidspace.org.uk/python/odict.html</a> for info on
+OrderedDict.</li>
+<li>theSelectedItem - optional parameter indicating which item
+should be selected in the combo. If the selected item is not
+in theList, it will be appended to it.</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.showHelp">
+<tt class="descname">showHelp</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.showHelp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.showHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the help text for the keywords safe_qgis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.keywords_dialog.KeywordsDialog.updateControlsFromList">
+<tt class="descname">updateControlsFromList</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keywords_dialog.html#KeywordsDialog.updateControlsFromList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keywords_dialog.KeywordsDialog.updateControlsFromList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the ui state to match the keywords of the
+currently active layer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="keyword_io.html"
+                        title="previous chapter">Module:  safe_qgis.keyword_io</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="map.html"
+                        title="next chapter">Module:  safe_qgis.map</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/keywords_dialog.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

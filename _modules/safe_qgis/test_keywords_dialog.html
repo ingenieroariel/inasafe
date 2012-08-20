@@ -1,0 +1,488 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_keywords_dialog &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_keywords_dialog</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid and World Bank</span>
+<span class="sd">- **GUI Test Cases.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;21/02/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add PARENT directory to path to make test aware of other modules</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtTest</span> <span class="kn">import</span> <span class="n">QTest</span>
+
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsRasterLayer</span><span class="p">,</span>
+                       <span class="n">QgsMapLayerRegistry</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.odict</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getQgisTestApp</span><span class="p">,</span> <span class="n">unitTestDataPath</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="n">readKeywordsFromFile</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.keywords_dialog</span> <span class="kn">import</span> <span class="n">KeywordsDialog</span>
+
+
+<span class="c"># For testing and demoing</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">HAZDATA</span>
+
+<span class="c"># Get QGis app handle</span>
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="makePadangLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.makePadangLayer">[docs]</a><span class="k">def</span> <span class="nf">makePadangLayer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Helper function that returns a single predefined layer&quot;&quot;&quot;</span>
+    <span class="n">myFile</span> <span class="o">=</span> <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span>
+    <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="n">myFile</span><span class="p">)</span>
+    <span class="n">myTitle</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;title&#39;</span><span class="p">)</span>
+    <span class="c"># myTitle = &#39;An earthquake in Padang like in 2009&#39;</span>
+    <span class="n">myLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myTitle</span><span class="p">)</span>
+    <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">addMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myLayer</span>
+
+</div>
+<div class="viewcode-block" id="makeKeywordlessLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.makeKeywordlessLayer">[docs]</a><span class="k">def</span> <span class="nf">makeKeywordlessLayer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Helper function that returns a single predefined keywordless layer&quot;&quot;&quot;</span>
+    <span class="n">myFile</span> <span class="o">=</span> <span class="s">&#39;keywordless_layer.tif&#39;</span>
+    <span class="n">myBasePath</span> <span class="o">=</span> <span class="n">unitTestDataPath</span><span class="p">(</span><span class="s">&#39;hazard&#39;</span><span class="p">)</span>
+    <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myBasePath</span><span class="p">,</span> <span class="n">myFile</span><span class="p">))</span>
+    <span class="n">myTitle</span> <span class="o">=</span> <span class="s">&#39;Keywordless Layer&#39;</span>
+    <span class="n">myLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myTitle</span><span class="p">)</span>
+    <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">addMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myLayer</span>
+
+</div>
+<div class="viewcode-block" id="clearLayers"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.clearLayers">[docs]</a><span class="k">def</span> <span class="nf">clearLayers</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Clear all the loaded layers&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">myLayer</span> <span class="ow">in</span> <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">mapLayers</span><span class="p">():</span>
+        <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">removeMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest">[docs]</a><span class="k">class</span> <span class="nc">KeywordsDialogTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE keywords GUI&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="KeywordsDialogTest.setUp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create fresh dialog for each test&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.tearDown"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Destroy the dialog after each test&quot;&quot;&quot;</span>
+        <span class="n">clearLayers</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_showHelp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_showHelp">[docs]</a>    <span class="k">def</span> <span class="nf">test_showHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that help button works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">buttonBox</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Help</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Help dialog was not created when help button pressed&#39;</span>
+        <span class="k">assert</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">helpDialog</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_pbnAdvanced_toggled"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_pbnAdvanced_toggled">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_pbnAdvanced_toggled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test advanced button toggle behaviour works&quot;&quot;&quot;</span>
+        <span class="n">makePadangLayer</span><span class="p">()</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">pbnAdvanced</span>
+        <span class="n">myButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myState</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">grpAdvanced</span><span class="o">.</span><span class="n">isHidden</span><span class="p">()</span>
+        <span class="n">myExpectedState</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Advanced options did not become visible when&#39;</span>
+                     <span class="s">&#39; the advanced button was clicked</span><span class="se">\n</span><span class="s">Got&#39;</span>
+                     <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected\</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myState</span><span class="p">,</span> <span class="n">myExpectedState</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myState</span> <span class="o">==</span> <span class="n">myExpectedState</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Now hide advanced again and test...</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myState</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">grpAdvanced</span><span class="o">.</span><span class="n">isHidden</span><span class="p">()</span>
+        <span class="n">myExpectedState</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Advanced options did not become hidden when&#39;</span>
+                     <span class="s">&#39; the advanced button was clicked again</span><span class="se">\n</span><span class="s">Got&#39;</span>
+                     <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected\</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myState</span><span class="p">,</span> <span class="n">myExpectedState</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">grpAdvanced</span><span class="o">.</span><span class="n">isVisible</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_radHazard_toggled"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_radHazard_toggled">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_radHazard_toggled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test hazard radio button toggle behaviour works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">radHazard</span>
+        <span class="n">myButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Toggling the hazard radio did not add a category &#39;</span>
+                     <span class="s">&#39;to the keywords list.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;category&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.Xtest_on_radExposure_toggled"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.Xtest_on_radExposure_toggled">[docs]</a>    <span class="k">def</span> <span class="nf">Xtest_on_radExposure_toggled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test exposure radio button toggle behaviour works&quot;&quot;&quot;</span>
+
+        <span class="c"># Cannot get this test to work, but it works fine in the safe_qgis</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">radExposure</span>
+        <span class="n">myButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Toggling the exposure radio did not add a category &#39;</span>
+                     <span class="s">&#39;to the keywords list.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;category&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_cboSubcategory_currentIndexChanged"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_cboSubcategory_currentIndexChanged">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_cboSubcategory_currentIndexChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test subcategory combo change event works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">radHazard</span>
+        <span class="n">myButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">radExposure</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myCombo</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">cboSubcategory</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myCombo</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">myCombo</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">myCombo</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Changing the subcategory did not add &#39;</span>
+                     <span class="s">&#39;to the keywords list for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="n">myCombo</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">myKey</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;subcategory&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myKey</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">assert</span> <span class="n">myKey</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">myCombo</span><span class="o">.</span><span class="n">currentText</span><span class="p">()),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_setSubcategoryList"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_setSubcategoryList">[docs]</a>    <span class="k">def</span> <span class="nf">test_setSubcategoryList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test set subcategory list works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myList</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s">&#39;population [density]&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;population [density]&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;population [count]&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;population [count]&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;building&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;building&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;building [osm]&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;building [osm]&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;building [sigab]&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;building [sigab]&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;roads&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;roads&#39;</span><span class="p">)])</span>
+        <span class="n">mySelectedItem</span> <span class="o">=</span> <span class="s">&#39;building&#39;</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">setSubcategoryList</span><span class="p">(</span><span class="n">myList</span><span class="p">,</span> <span class="n">mySelectedItem</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myDialog</span><span class="o">.</span><span class="n">cboSubcategory</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">mySelectedItem</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">mySelectedItem</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_pbnAddToList1_clicked"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_pbnAddToList1_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_pbnAddToList1_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test adding an item to the list using predefined form works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">radPredefined</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">cboKeyword</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;foo&#39;</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">lePredefinedValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myExpectedResult</span><span class="p">)</span>
+        <span class="c"># Work around for commented out line below</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">on_pbnAddToList1_clicked</span><span class="p">()</span>
+        <span class="c">#QTest.mouseClick(myDialog.pbnAddToList1, QtCore.Qt.LeftButton)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;datatype&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_pbnAddToList2_clicked"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_pbnAddToList2_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_pbnAddToList2_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test adding an item to the list using user defened form works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">radUserDefined</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">leKey</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">leValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;bar&#39;</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">lePredefinedValue</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myExpectedResult</span><span class="p">)</span>
+        <span class="c"># Work around for commented out line below</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">on_pbnAddToList2_clicked</span><span class="p">()</span>
+        <span class="c">#QTest.mouseClick(myDialog.pbnAddToList2, QtCore.Qt.LeftButton)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="k">print</span> <span class="s">&#39;Dict&#39;</span><span class="p">,</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getKeywords</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_on_pbnRemove_clicked"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_on_pbnRemove_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">test_on_pbnRemove_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test pressing remove works on key list&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">lstKeywords</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">addListEntry</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">lstKeywords</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_addListEntry"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_addListEntry">[docs]</a>    <span class="k">def</span> <span class="nf">test_addListEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test add entry to list works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">addListEntry</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;foo&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_addWarningsForColons"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_addWarningsForColons">[docs]</a>    <span class="k">def</span> <span class="nf">test_addWarningsForColons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test add entry to list works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">addListEntry</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="s">&#39;fo:o&#39;</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;fo.o&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="c">#</span>
+        <span class="c"># Check the user gets a message if they put colons in the value</span>
+        <span class="c">#</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;Colons are not allowed, replaced with &quot;.&quot;&#39;</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myDialog</span><span class="o">.</span><span class="n">lblMessage</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;lblMessage error </span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="c">#</span>
+        <span class="c"># Check the user gets a message if they put colons in the key</span>
+        <span class="c">#</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">addListEntry</span><span class="p">(</span><span class="s">&#39;ba:r&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;Colons are not allowed, replaced with &quot;.&quot;&#39;</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myDialog</span><span class="o">.</span><span class="n">lblMessage</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;lblMessage error </span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_setCategory"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_setCategory">[docs]</a>    <span class="k">def</span> <span class="nf">test_setCategory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test set category works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">setCategory</span><span class="p">(</span><span class="s">&#39;hazard&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;hazard&#39;</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;category&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_reset"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_reset">[docs]</a>    <span class="k">def</span> <span class="nf">test_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test form reset works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">leTitle</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&#39;Foo&#39;</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">leTitle</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_removeItemByKey"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_removeItemByKey">[docs]</a>    <span class="k">def</span> <span class="nf">test_removeItemByKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test remove item by its key works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">addListEntry</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">removeItemByKey</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">lstKeywords</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">myExpectedResult</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myExpectedResult</span><span class="p">))</span>
+        <span class="c">#print &#39;Dict&#39;, myDialog.getKeywords()</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myExpectedResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_removeItemByValue"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_removeItemByValue">[docs]</a>    <span class="k">def</span> <span class="nf">test_removeItemByValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test remove item by its value works&quot;&quot;&quot;</span>
+        <span class="n">makePadangLayer</span><span class="p">()</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">removeItemByValue</span><span class="p">(</span><span class="s">&#39;hazard&#39;</span><span class="p">)</span>
+
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getKeywords</span><span class="p">()</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;An earthquake in Padang like in 2009&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_getValueForKey"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_getValueForKey">[docs]</a>    <span class="k">def</span> <span class="nf">test_getValueForKey</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test get value for key works&quot;&quot;&quot;</span>
+        <span class="n">makePadangLayer</span><span class="p">()</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myExpectedValue</span> <span class="o">=</span> <span class="s">&#39;hazard&#39;</span>
+        <span class="n">myValue</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getValueForKey</span><span class="p">(</span><span class="s">&#39;category&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Expected key value of </span><span class="si">%s</span><span class="se">\n</span><span class="s">Got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myExpectedValue</span><span class="p">,</span> <span class="n">myValue</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myValue</span> <span class="o">==</span> <span class="n">myExpectedValue</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_loadStateFromKeywords"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_loadStateFromKeywords">[docs]</a>    <span class="k">def</span> <span class="nf">test_loadStateFromKeywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test load state from keywords works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myLayer</span> <span class="o">=</span> <span class="n">makePadangLayer</span><span class="p">()</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">myLayer</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">loadStateFromKeywords</span><span class="p">()</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getKeywords</span><span class="p">()</span>
+
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;An earthquake in Padang like in 2009&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="KeywordsDialogTest.test_checkStateWhenKeywordsAbsent"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_keywords_dialog.html#safe_qgis.test_keywords_dialog.KeywordsDialogTest.test_checkStateWhenKeywordsAbsent">[docs]</a>    <span class="k">def</span> <span class="nf">test_checkStateWhenKeywordsAbsent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test load state from keywords works&quot;&quot;&quot;</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="n">PARENT</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myLayer</span> <span class="o">=</span> <span class="n">makeKeywordlessLayer</span><span class="p">()</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">myLayer</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">loadStateFromKeywords</span><span class="p">()</span>
+        <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">myDialog</span><span class="o">.</span><span class="n">getKeywords</span><span class="p">()</span>
+        <span class="c">#check that a default title is given (see</span>
+        <span class="c">#https://github.com/AIFDR/inasafe/issues/111)</span>
+        <span class="n">myExpectedKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;Keywordless Layer&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">myKeywords</span><span class="p">,</span> <span class="n">myExpectedKeywords</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myKeywords</span> <span class="o">==</span> <span class="n">myExpectedKeywords</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">KeywordsDialogTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

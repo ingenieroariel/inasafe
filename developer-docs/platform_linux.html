@@ -1,0 +1,377 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development under Gnu/Linux &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Development under MS Windows" href="platform_windows.html" />
+    <link rel="prev" title="InaSAFE developer documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_windows.html" title="Development under MS Windows"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="InaSAFE developer documentation"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="development-under-gnu-linux">
+<h1>Development under Gnu/Linux<a class="headerlink" href="#development-under-gnu-linux" title="Permalink to this headline">¶</a></h1>
+<p>Risk-in-a-box is built in python and runs as a plugin in <a class="reference external" href="http://qgis.org">QGIS</a>.</p>
+<div class="section" id="quick-installation-guide-linux-debian-based">
+<h2>Quick Installation Guide - Linux (Debian based)<a class="headerlink" href="#quick-installation-guide-linux-debian-based" title="Permalink to this headline">¶</a></h2>
+<p>These instructions are for setting up a development version on a Debian based
+linux system such as Ubuntu or Mint.</p>
+<ol class="arabic simple">
+<li>Goto the area where you do development, e.g cd ~/sandbox</li>
+<li>wget bit.ly/inasafe-install</li>
+<li>source ./inasafe-install</li>
+</ol>
+<p>To verify that the installation works you can run the test suite from the
+command line:</p>
+<div class="highlight-python"><pre>cd inasafe-dev
+make test</pre>
+</div>
+<p>This will run all the regression tests and also highlight any code issues.
+Note that first time the tests are run they will pull 250MB of test data from
+our subversion repository (If asked for a password just hit Enter). See further
+notes on running tests below.</p>
+<p>To run the plugin start QGIS and enable it from the
+<em class="menuselection">Plugins ‣ Manage Plugins</em> menu.</p>
+<p>If this doesn&#8217;t work see section towards the end of this document about
+dependencies and try to do a manual install.</p>
+</div>
+<div class="section" id="manual-installation-guide-linux-debian-based">
+<h2>Manual Installation Guide - Linux (Debian based)<a class="headerlink" href="#manual-installation-guide-linux-debian-based" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<p>The Graphical User Interface components are built using
+<a class="reference external" href="http://www.riverbankcomputing.co.uk/software/pyqt/intro">PyQt4</a> and the QGIS
+plugin API (useful resources: <a class="reference external" href="http://qgis.org/pyqgis-cookbook/">the QGIS Python Cookbook</a> and <a class="reference external" href="http://qgis.org/api/">the QGIS C++ API documentation</a>).  As such it is helpful if you are familiar with these
+technologies (python, Qt4, PyQt4, QGIS). In addition, the following are needed
+on your machine in order to work effectively with the code base:</p>
+<ul class="simple">
+<li>git</li>
+<li>subversion</li>
+<li>pep8</li>
+<li>nosetests (with coverage plugin)</li>
+<li>python-numpy (for numerical computations)</li>
+<li>python-gdal (python bindings to underlying gis functionality)</li>
+<li>python-sphinx (compilation of documents)</li>
+<li>cloud-sptheme (sphinx theme)</li>
+<li>pyqt4-dev-tools (compiling ui and resources)</li>
+<li>qt4-doc (qt4 API documentation)</li>
+<li>pyflakes (test for bad coding style like unused imports / vars)</li>
+<li>python-nosexcover and python-coverage (code coverage reporting)</li>
+</ul>
+<p>On an ubuntu system you can install these requirements using apt:</p>
+<div class="highlight-python"><pre>sudo apt-get install git subversion pep8 python-nose python-coverage \
+python-gdal python-numpy python-sphinx pyqt4-dev-tools pyflakes \
+sudo pip install cloud-sptheme python-nosexcover</pre>
+</div>
+<p>In some cases these dependencies may already be on your system via installation
+process you followed for QGIS.</p>
+</div>
+<div class="section" id="cloning-the-source-code-from-git">
+<h3>Cloning the source code from git<a class="headerlink" href="#cloning-the-source-code-from-git" title="Permalink to this headline">¶</a></h3>
+<p>To develop on the plugin, you first need to copy it to your local system. If
+you are a developer, the simplest way to do that is go to
+<cite>~/.qgis/python/plugins</cite> and clone inasafe from our GitHub repository
+page like this:</p>
+<div class="highlight-python"><pre>git clone git://github.com/AIFDR/inasafe.git  (for read only)
+git clone git@github.com:AIFDR/inasafe.git    (to commit changes)</pre>
+</div>
+</div>
+<div class="section" id="qgis-installed-in-a-non-standard-location">
+<h3>QGIS installed in a non-standard location<a class="headerlink" href="#qgis-installed-in-a-non-standard-location" title="Permalink to this headline">¶</a></h3>
+<p>For running unit tests that need QGIS, you may need to adjust <em>PYTHONPATH</em> and
+<em>QGISPATH</em> if QGIS is running in a non standard location. For example with
+QGIS built from source into /usr/local (and python bindings global install
+option disabled), you could run these commands (or add them to your ~/.bashrc):</p>
+<div class="highlight-python"><pre>export QGISPATH=/usr/local
+export PYTHONPATH=$PYTHONPATH:/usr/local/share/qgis/python/</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The above can be set within Eclipse&#8217;s project properties if you are
+running your tests using the PyDev IDE environment.</p>
+</div>
+</div>
+<div class="section" id="adding-inasafe-to-your-python-path">
+<h3>Adding inasafe to your python path:<a class="headerlink" href="#adding-inasafe-to-your-python-path" title="Permalink to this headline">¶</a></h3>
+<p>Lastly, you should add the inasafe plugin folder to your PYTHONPATH so that
+package and module paths can be resolved correctly. E.g:</p>
+<div class="highlight-python"><pre>export PYTHONPATH=$PYTHONPATH:${HOME}/.qgis/python/plugins/inasafe</pre>
+</div>
+<p>Once again you could add this to your .bashrc or set it in Eclipse for
+convenience if needed.</p>
+</div>
+<div class="section" id="running-tests">
+<span id="running-tests-label"></span><h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h3>
+<p>You can run all tests (which includes code coverage reports and other
+diagnostics) by doing this within the inasafe plugin folder:</p>
+<div class="highlight-python"><pre>make test</pre>
+</div>
+<p>You can also run individual tests using nose. For example to run the
+riabclipper test you would do:</p>
+<div class="highlight-python"><pre>nosetests -v gui.test_riabclipper</pre>
+</div>
+</div>
+<div class="section" id="achievements">
+<h3>Achievements<a class="headerlink" href="#achievements" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is optional and thus not hard coded into the
+makefile.</p>
+</div>
+<p>Optionally you can enable nose achievments which is a motivational
+tool that gives you little achievement awards based on your test
+results:</p>
+<p>sudo pip install git+git://github.com/exogen/nose-achievements.git</p>
+<p>Now create this file in the root of your inasafe git checkout
+<tt class="file docutils literal"><span class="pre">setup.cfg</span></tt>:</p>
+<div class="highlight-python"><pre>[nosetests]
+with-achievements=1</pre>
+</div>
+<p>When you run tests occasionally achievements will be displayed
+to you at the end of the test run. See the achievements home page
+at <a class="reference external" href="http://exogen.github.com/nose-achievements/">http://exogen.github.com/nose-achievements/</a>.</p>
+</div>
+</div>
+<div class="section" id="developing-using-eclipse-linux">
+<h2>Developing using Eclipse (Linux)<a class="headerlink" href="#developing-using-eclipse-linux" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is optional - you can use any environment you like for editing
+python, or even a simple text editor.</p>
+</div>
+<p>If you wish to use an IDE for development, please refer to
+<a class="reference external" href="http://linfiniti.com/2011/12/remote-debugging-qgis-python-plugins-with-pydev/">this article</a>
+for detailed information on how to get the basic Eclipse with PyDev setup.</p>
+<div class="section" id="creating-a-project">
+<h3>Creating a project<a class="headerlink" href="#creating-a-project" title="Permalink to this headline">¶</a></h3>
+<p>The procedure for doing this is to do:
+<em class="menuselection">File ‣ New ‣ Project...</em> and
+then from the resulting dialog do <em class="menuselection">PyDev ‣ PyDev Project</em>.</p>
+<p>In the resulting project dialog, set the following details:</p>
+<ul class="simple">
+<li><em class="guilabel">Project name:</em> : <tt class="kbd docutils literal"><span class="pre">inasafe</span></tt></li>
+<li><em class="guilabel">Use default</em> : <tt class="kbd docutils literal"><span class="pre">uncheck</span></tt></li>
+<li>:guilabel (linux):<cite>Directory</cite> : <tt class="kbd docutils literal"><span class="pre">/home/&lt;your</span> <span class="pre">user</span> <span class="pre">name/.qgis/python/plugins/inasafe/</span></tt></li>
+<li>:guilabel (windows):<cite>Directory</cite> : <tt class="kbd docutils literal"><span class="pre">/home/&lt;your</span> <span class="pre">user</span> <span class="pre">name/.qgis/python/plugins/inasafe/</span></tt></li>
+<li><em class="guilabel">Choose project type</em> : <tt class="kbd docutils literal"><span class="pre">Python</span></tt></li>
+<li><em class="guilabel">Grammar Version</em> : <tt class="kbd docutils literal"><span class="pre">2.7</span></tt></li>
+<li><em class="guilabel">Add project directory to PYTHONPATH?</em> : <tt class="kbd docutils literal"><span class="pre">check</span></tt></li>
+</ul>
+<p>At this point you should should click the link entitled &#8216;Please configure an interpreter
+in related preferences before continuing.&#8217; And on the resulting dialog do:</p>
+<ul class="simple">
+<li><em class="guilabel">Python Interpreters: New...</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>In the dialog that appears do:</p>
+<ul class="simple">
+<li><em class="guilabel">Interpreter Name</em> : <tt class="kbd docutils literal"><span class="pre">System</span> <span class="pre">Python</span> <span class="pre">2.7</span></tt></li>
+<li><em class="guilabel">Interpreter Executable</em> : <tt class="kbd docutils literal"><span class="pre">/usr/bin/python</span></tt></li>
+<li><em class="guilabel">OK Button</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>Another dialog will appear. Tick the first entry in the list that points to
+your:</p>
+<div class="highlight-python"><pre>~/.eclipse/org.eclipse.platform_3.7.0_155965261/plugins/org.python.pydev_2.3.0.2011121518/</pre>
+</div>
+<p>(or simply click the &#8216;Select All&#8217; button)</p>
+<ul class="simple">
+<li><em class="guilabel">OK Button</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+<p>You will be returned to the Python Interpreters list and should see an entry for
+System Python 2.7 listed there. Now do in the <em>Libraries</em> tab:</p>
+<ul class="simple">
+<li><em class="guilabel">Finish</em> : <tt class="kbd docutils literal"><span class="pre">click</span> <span class="pre">this</span> <span class="pre">button</span></tt></li>
+</ul>
+</div>
+<div class="section" id="remote-debugging-with-eclipse">
+<h3>Remote Debugging with Eclipse<a class="headerlink" href="#remote-debugging-with-eclipse" title="Permalink to this headline">¶</a></h3>
+<p>For remote debugging, you should add pydevd to your PYTHONPATH before starting <em>QGIS</em>
+for example (you will need to adjust these paths to match your system):</p>
+<div class="highlight-python"><pre>export PYTHONPATH=$PYTHONPATH:/home/timlinux/.eclipse/org.eclipse.platform_3.7.0_155965261/plugins/org.python.pydev.debug_2.3.0.2011121518/pysrc/</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you are running with remote debugging enabled, be sure to start the
+PyDev debug server first before launching the Risk-in-a-box QGIS plugin
+otherwise QGIS will likely crash when it can&#8217;t find the debug server.</p>
+</div>
+<p>You will need to ensure that the PYTHONPATH containing your pydev package folder
+is set before you launch QGIS - for example by adding the above line to your ~/.bashrc
+or by making a small batch file containing the above export and then sourcing the file
+before launching QGIS e.g.:</p>
+<div class="highlight-python"><pre>source riab_paths.sh
+/usr/local/bin/qgis</pre>
+</div>
+</div>
+<div class="section" id="running-unit-tests-from-the-ide">
+<h3>Running Unit tests from the IDE<a class="headerlink" href="#running-unit-tests-from-the-ide" title="Permalink to this headline">¶</a></h3>
+<p>Python has very good integrated support for unit testing. The first thing
+you should do after setting up the IDE project is to run the tests. You can run tests
+in the following ways:</p>
+<ul class="simple">
+<li>For the entire inasafe package</li>
+<li>For individual sub packages (e.g. engine, gui, storage, impact_functions)</li>
+<li>for an individual test module within a package</li>
+<li>for an class within a test module</li>
+<li>for an individual method within a test class</li>
+</ul>
+<p>You can view these individual entities by browsing and expanding nodes in the project
+panel in the left of the IDE.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you run the test suite for the entire inasafe package, it
+will mistakenly treat the sphinx documentation conf.py (docs.source.conf)
+as a test and fail for that test. This is &#8216;normal&#8217; and can be ignored.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development under Gnu/Linux</a><ul>
+<li><a class="reference internal" href="#quick-installation-guide-linux-debian-based">Quick Installation Guide - Linux (Debian based)</a></li>
+<li><a class="reference internal" href="#manual-installation-guide-linux-debian-based">Manual Installation Guide - Linux (Debian based)</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#cloning-the-source-code-from-git">Cloning the source code from git</a></li>
+<li><a class="reference internal" href="#qgis-installed-in-a-non-standard-location">QGIS installed in a non-standard location</a></li>
+<li><a class="reference internal" href="#adding-inasafe-to-your-python-path">Adding inasafe to your python path:</a></li>
+<li><a class="reference internal" href="#running-tests">Running tests</a></li>
+<li><a class="reference internal" href="#achievements">Achievements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#developing-using-eclipse-linux">Developing using Eclipse (Linux)</a><ul>
+<li><a class="reference internal" href="#creating-a-project">Creating a project</a></li>
+<li><a class="reference internal" href="#remote-debugging-with-eclipse">Remote Debugging with Eclipse</a></li>
+<li><a class="reference internal" href="#running-unit-tests-from-the-ide">Running Unit tests from the IDE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">InaSAFE developer documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="platform_windows.html"
+                        title="next chapter">Development under MS Windows</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/platform_linux.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="platform_windows.html" title="Development under MS Windows"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="InaSAFE developer documentation"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

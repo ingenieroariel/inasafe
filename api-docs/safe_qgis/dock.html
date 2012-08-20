@@ -1,0 +1,675 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.dock &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.exceptions" href="exceptions.html" />
+    <link rel="prev" title="Module: safe_qgis.clipper" href="clipper.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Module: safe_qgis.exceptions"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="clipper.html" title="Module: safe_qgis.clipper"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-dock">
+<h1>Module:  safe_qgis.dock<a class="headerlink" href="#module-safe-qgis-dock" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.dock</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.dock"></span><p>InaSAFE Disaster risk assessment tool developed by AusAid - <strong>GUI Dialog.</strong></p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Check raster is single band</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.dock.Dock">
+<em class="property">class </em><tt class="descclassname">safe_qgis.dock.</tt><tt class="descname">Dock</tt><big>(</big><em>iface</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dock implementation class for the Risk In A Box plugin.</p>
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.accept">
+<tt class="descname">accept</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute analysis when ok button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.addComboItemInOrder">
+<tt class="descname">addComboItemInOrder</tt><big>(</big><em>theCombo</em>, <em>theItemText</em>, <em>theItemData=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.addComboItemInOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.addComboItemInOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Although QComboBox allows you to set an InsertAlphabetically enum
+this only has effect when a user interactively adds combo items to
+an editable combo. This we have this little function to ensure that
+combos are always sorted alphabetically.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theCombo - combo box receiving the new item</li>
+<li>theItemText - display text for the combo</li>
+<li>theItemData - optional UserRole data to be associated with
+the item</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+</dl>
+<p>Raises:</p>
+<p>..todo:: Move this to utilities</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.canvasLayersetChanged">
+<tt class="descname">canvasLayersetChanged</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.canvasLayersetChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.canvasLayersetChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper slot to update the dock combos if the canvas layerset
+has been changed (e.g. one or more layer visibilities changed).
+If self.showOnlyVisibleLayersFlag is set to False this method will
+simply return, doing nothing.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the RIAB library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.completed">
+<tt class="descname">completed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.completed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.completed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot activated when the process is done.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.connectLayerListener">
+<tt class="descname">connectLayerListener</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.connectLayerListener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.connectLayerListener" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a signal/slot to listen for changes in the layers loaded
+in QGIS.</p>
+<p>..seealso:: disconnectLayerListener</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.disableBusyCursor">
+<tt class="descname">disableBusyCursor</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.disableBusyCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.disableBusyCursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable the hourglass cursor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.disconnectLayerListener">
+<tt class="descname">disconnectLayerListener</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.disconnectLayerListener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.disconnectLayerListener" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroy the signal/slot to listen for changes in the layers loaded
+in QGIS.</p>
+<p>..seealso:: connectLayerListener</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.displayHtml">
+<tt class="descname">displayHtml</tt><big>(</big><em>theMessage</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.displayHtml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.displayHtml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an html snippet, wrap it in a page header and footer
+and display it in the wvResults widget.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.enableBusyCursor">
+<tt class="descname">enableBusyCursor</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.enableBusyCursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.enableBusyCursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the hourglass enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.extentToGeoArray">
+<tt class="descname">extentToGeoArray</tt><big>(</big><em>theExtent</em>, <em>theSourceCrs</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.extentToGeoArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.extentToGeoArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the supplied extent to geographic and return as as array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.getExposureLayer">
+<tt class="descname">getExposureLayer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.getExposureLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.getExposureLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain the name of the path to the exposure file from the
+userrole of the QtCombo for exposure.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.getFunctionID">
+<tt class="descname">getFunctionID</tt><big>(</big><em>theIndex=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.getFunctionID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.getFunctionID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the canonical impact function ID for the currently selected
+function (or the specified combo entry if theIndex is supplied.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>theIndex int - Optional index position in the combo that you</dt>
+<dd>want the function id for. Defaults to None. If not set / None
+the currently selected combo item&#8217;s function id will be
+returned.</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>myFunctionID str - String that identifies the function</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.getFunctions">
+<tt class="descname">getFunctions</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.getFunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.getFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to obtain a list of impact functions from
+the impact calculator.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>no</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.getHazardLayer">
+<tt class="descname">getHazardLayer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.getHazardLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.getHazardLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain qgsmaplayer id from the userrole of the QtCombo for exposure
+and return it as a QgsMapLayer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.getLayers">
+<tt class="descname">getLayers</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.getLayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.getLayers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to obtain a list of layers currently loaded in QGIS.</p>
+<p>On invocation, this method will populate cboHazard and
+cboExposure on the dialog with a list of available layers. Only
+<strong>singleband raster</strong> layers will be added to the hazard layer list,
+and only <strong>point vector</strong> layers will be added to the exposure layer
+list.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>no</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.hideBusy">
+<tt class="descname">hideBusy</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.hideBusy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.hideBusy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper function to indicate processing is done.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.htmlFooter">
+<tt class="descname">htmlFooter</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.htmlFooter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.htmlFooter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html footer for wrapping content in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.htmlHeader">
+<tt class="descname">htmlHeader</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.htmlHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.htmlHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html header for wrapping content in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.layerChanged">
+<tt class="descname">layerChanged</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.layerChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.layerChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handler for when the QGIS active layer is changed.
+If the active layer is changed and it has keywords and a report,
+show the report..</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theLayer - the QgsMapLayer instance that is now active..</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.layerWasAdded">
+<tt class="descname">layerWasAdded</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.layerWasAdded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.layerWasAdded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot for the old (pre QGIS 1.8 api) to notify us when
+a layer is added. This is suboptimal since if many layers are
+added this slot gets called multiple times. This slot simply
+delegates to getLayers and is only implemented here to make the
+connections between the different signals and slots clearer and
+better documented.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.layerWillBeRemoved">
+<tt class="descname">layerWillBeRemoved</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.layerWillBeRemoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.layerWillBeRemoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot for the old (pre QGIS 1.8 api) to notify us when
+a layer is removed. This is suboptimal since if many layers are
+removed this slot gets called multiple times. This slot simply
+delegates to getLayers and is only implemented here to make the
+connections between the different signals and slots clearer and
+better documented.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.layersAdded">
+<tt class="descname">layersAdded</tt><big>(</big><em>theLayers=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.layersAdded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.layersAdded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot for the new (QGIS 1.8 and beyond api) to notify us when
+a group of layers is are added. This is optimal since if many layers
+are added this slot gets called only once. This slot simply
+delegates to getLayers and is only implemented here to make the
+connections between the different signals and slots clearer and
+better documented.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.layersWillBeRemoved">
+<tt class="descname">layersWillBeRemoved</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.layersWillBeRemoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.layersWillBeRemoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot for the new (QGIS 1.8 and beyond api) to notify us when
+a group of layers is are removed. This is optimal since if many layers
+are removed this slot gets called only once. This slot simply
+delegates to getLayers and is only implemented here to make the
+connections between the different signals and slots clearer and
+better documented.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.on_cboExposure_currentIndexChanged">
+<tt class="descname">on_cboExposure_currentIndexChanged</tt><big>(</big><em>theIndex</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.on_cboExposure_currentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.on_cboExposure_currentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the Exposure combo is changed
+so that we can see if the ok button should be enabled.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Don&#8217;t use the &#64;pyqtSlot() decorator for autoslots!</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>No exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.on_cboFunction_currentIndexChanged">
+<tt class="descname">on_cboFunction_currentIndexChanged</tt><big>(</big><em>theIndex</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.on_cboFunction_currentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.on_cboFunction_currentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the Function combo is changed
+so that we can see if the ok button should be enabled.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Don&#8217;t use the &#64;pyqtSlot() decorator for autoslots!</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.on_cboHazard_currentIndexChanged">
+<tt class="descname">on_cboHazard_currentIndexChanged</tt><big>(</big><em>theIndex</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.on_cboHazard_currentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.on_cboHazard_currentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic slot executed when the Hazard combo is changed
+so that we can see if the ok button should be enabled.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Don&#8217;t use the &#64;pyqtSlot() decorator for autoslots!</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>No exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.optimalClip">
+<tt class="descname">optimalClip</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.optimalClip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.optimalClip" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper function to perform an optimal clip of the input data.
+Optimal extent should be considered as the intersection between
+the three inputs. The inasafe library will perform various checks
+to ensure that the extent is tenable, includes data from both
+etc.</p>
+<p>The result of this function will be two layers which are
+clipped and resampled if needed, and in the EPSG:4326 geographic
+coordinate reference system.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>A two-tuple containing the paths to the clipped hazard and
+exposure layers.</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.printMap">
+<tt class="descname">printMap</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.printMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.printMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot to print map when print map button pressed.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.readImpactLayer">
+<tt class="descname">readImpactLayer</tt><big>(</big><em>myEngineImpactLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.readImpactLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.readImpactLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to read and validate layer.</p>
+<dl class="docutils">
+<dt>Args</dt>
+<dd>myEngineImpactLayer: Layer object as provided by the inasafe engine</dd>
+<dt>Returns</dt>
+<dd>validated qgis layer or None</dd>
+<dt>Raises</dt>
+<dd>Exception if layer is not valid</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.readSettings">
+<tt class="descname">readSettings</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.readSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.readSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the dock state from QSettings. Do this on init and after
+changing options in the options dialog.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.restoreFunctionState">
+<tt class="descname">restoreFunctionState</tt><big>(</big><em>theOriginalFunction</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.restoreFunctionState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.restoreFunctionState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the function combo to a known state.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theOriginalFunction - name of function that should be selected</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the RIAB library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.restoreState">
+<tt class="descname">restoreState</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.restoreState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.restoreState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the state of the dock to the last known state.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.saveState">
+<tt class="descname">saveState</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.saveState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.saveState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the current state of the ui to an internal class member
+so that it can be restored again easily.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.setOkButtonStatus">
+<tt class="descname">setOkButtonStatus</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.setOkButtonStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.setOkButtonStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to set the ok button status if the
+form is valid and disable it if it is not.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.setupCalculator">
+<tt class="descname">setupCalculator</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.setupCalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.setupCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise the ImpactCalculator based on the current
+state of the ui.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.showBusy">
+<tt class="descname">showBusy</tt><big>(</big><em>theTitle=None</em>, <em>theMessage=None</em>, <em>theProgress=0</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.showBusy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.showBusy" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper function to indicate the plugin is processing.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theTitle - an optional title for the status update. Should be
+plain text only</li>
+<li>theMessage - an optional message to pass to the busy indicator.
+Can be an html snippet.</li>
+<li>theProgress - a number between 0 and 100 indicating % complete</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the RIAB library will be propagated.</dd>
+</dl>
+<p>..note:: Uses bootstrap css for progress bar.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.showHelp">
+<tt class="descname">showHelp</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.showHelp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.showHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the help text into the wvResults widget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.validate">
+<tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method to evaluate the current state of the dialog and
+determine if it is appropriate for the OK button to be enabled
+or not.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The enabled state of the OK button on the dialog will
+NOT be updated (set True or False) depending on the outcome of
+the UI readiness tests performed - <strong>only</strong> True or False
+will be returned by the function.</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd><p class="first">A two-tuple consisting of:</p>
+<ul class="simple">
+<li>Boolean reflecting the results of the valudation tests.</li>
+<li>A message indicating any reason why the validation may
+have failed.</li>
+</ul>
+<p>Example:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">flag</span><span class="p">,</span><span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.dock.Dock.viewportGeoArray">
+<tt class="descname">viewportGeoArray</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/dock.html#Dock.viewportGeoArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.dock.Dock.viewportGeoArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain the map canvas current extent in EPSG:4326</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="clipper.html"
+                        title="previous chapter">Module:  safe_qgis.clipper</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="exceptions.html"
+                        title="next chapter">Module:  safe_qgis.exceptions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/dock.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Module: safe_qgis.exceptions"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="clipper.html" title="Module: safe_qgis.clipper"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

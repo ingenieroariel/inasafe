@@ -1,0 +1,450 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_map &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_map</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid and World Bank</span>
+<span class="sd">- **GUI Test Cases.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add PARENT directory to path to make test aware of other modules</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsSymbol</span><span class="p">,</span>
+                       <span class="n">QgsMapLayerRegistry</span><span class="p">,</span>
+                       <span class="n">QgsRectangle</span><span class="p">,</span>
+                       <span class="n">QgsComposerPicture</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qgis.gui</span> <span class="kn">import</span> <span class="n">QgsMapCanvasLayer</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getQgisTestApp</span><span class="p">,</span>
+                                <span class="n">assertHashForFile</span><span class="p">,</span>
+                                <span class="n">hashForFile</span><span class="p">,</span>
+                                <span class="n">assertHashesForFile</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.map</span> <span class="kn">import</span> <span class="n">Map</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">loadLayer</span><span class="p">,</span> <span class="n">setJakartaGeoExtent</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="n">getTempDir</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydevd</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pylint: disable=F0401</span>
+    <span class="k">print</span> <span class="s">&#39;Remote debugging is enabled.&#39;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Debugging was disabled&#39;</span>
+
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="MapTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest">[docs]</a><span class="k">class</span> <span class="nc">MapTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE Map generator&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MapTest.setUp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setup fixture run before each tests&quot;&quot;&quot;</span>
+        <span class="n">myRegistry</span> <span class="o">=</span> <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">myLayer</span> <span class="ow">in</span> <span class="n">myRegistry</span><span class="o">.</span><span class="n">mapLayers</span><span class="p">():</span>
+            <span class="n">myRegistry</span><span class="o">.</span><span class="n">removeMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_inasafeMap"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_inasafeMap">[docs]</a>    <span class="k">def</span> <span class="nf">test_inasafeMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test making a pdf using the Map class.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_shakeimpact.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myCanvasLayer</span> <span class="o">=</span> <span class="n">QgsMapCanvasLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">setLayerSet</span><span class="p">([</span><span class="n">myCanvasLayer</span><span class="p">])</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">106.7894</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.2308</span><span class="p">,</span> <span class="mf">106.8004</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.2264</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;outCustom.pdf&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">makePdf</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+        <span class="c"># ,, note:: Template writing is experimental</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">writeTemplate</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;template.qpt&#39;</span><span class="p">))</span>
+        <span class="c">#os.remove(myPath)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_getLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_getLegend">[docs]</a>    <span class="k">def</span> <span class="nf">test_getLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Getting a legend for a generic layer works.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_shakeimpact.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myMap</span><span class="o">.</span><span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="n">myLegend</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">getLegend</span><span class="p">()</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;getLegend.png&#39;</span><span class="p">)</span>
+        <span class="n">myLegend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="c"># As we have discovered, different versions of Qt and</span>
+        <span class="c"># OS platforms cause different output, so hashes are a list</span>
+        <span class="c"># of &#39;known good&#39; renders.</span>
+        <span class="n">myExpectedHashes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># win</span>
+                            <span class="s">&#39;d0c3071c4babe7db4f9762b311d61184&#39;</span><span class="p">,</span>  <span class="c"># ub12.04xiner</span>
+                            <span class="s">&#39;b94cfd8a10d709ff28466ada425f24c8&#39;</span><span class="p">,</span>  <span class="c"># ub11.04-64</span>
+                            <span class="s">&#39;00dc58aa50867de9b617ccfab0d13f21&#39;</span><span class="p">,</span>  <span class="c"># ub12.04</span>
+                            <span class="s">&#39;e65853e217a4c9b0c2f303dd2aadb373&#39;</span><span class="p">,</span>  <span class="c"># ub12.04 xvfb</span>
+                            <span class="s">&#39;e4273364b33a943e1108f519dbe8e06c&#39;</span><span class="p">,</span>  <span class="c"># ub12.04-64</span>
+                            <span class="s">&#39;91177a81bee4400be4e85789e3be1e91&#39;</span><span class="p">,</span>  <span class="c"># binary read</span>
+                            <span class="s">&#39;57da6f81b4a55507e1bed0b73423244b&#39;</span><span class="p">,</span>  <span class="c"># wVistaSP2-32</span>
+                            <span class="s">&#39;&#39;</span>
+                            <span class="p">]</span>
+        <span class="n">assertHashesForFile</span><span class="p">(</span><span class="n">myExpectedHashes</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_getVectorLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_getVectorLegend">[docs]</a>    <span class="k">def</span> <span class="nf">test_getVectorLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Getting a legend for a vector layer works.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_shakeimpact.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">getVectorLegend</span><span class="p">()</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;getVectorLegend.png&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="c"># As we have discovered, different versions of Qt and</span>
+        <span class="c"># OS platforms cause different output, so hashes are a list</span>
+        <span class="c"># of &#39;known good&#39; renders.</span>
+        <span class="c"># Results currently identical to getLegend as image is same</span>
+        <span class="n">myExpectedHashes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># win</span>
+                            <span class="s">&#39;d0c3071c4babe7db4f9762b311d61184&#39;</span><span class="p">,</span>  <span class="c"># ub12.04 xinr</span>
+                            <span class="s">&#39;b94cfd8a10d709ff28466ada425f24c8&#39;</span><span class="p">,</span>  <span class="c"># ub11.04-64</span>
+                            <span class="s">&#39;00dc58aa50867de9b617ccfab0d13f21&#39;</span><span class="p">,</span>  <span class="c"># ub12.04</span>
+                            <span class="s">&#39;e65853e217a4c9b0c2f303dd2aadb373&#39;</span><span class="p">,</span>  <span class="c"># ub12.04 xvfb</span>
+                            <span class="s">&#39;e4273364b33a943e1108f519dbe8e06c&#39;</span><span class="p">,</span>  <span class="c"># ub12.04-64</span>
+                            <span class="c"># ub11.04-64 laptop</span>
+                            <span class="s">&#39;91177a81bee4400be4e85789e3be1e91&#39;</span><span class="p">,</span>  <span class="c"># Binary Read</span>
+                            <span class="s">&#39;57da6f81b4a55507e1bed0b73423244b&#39;</span><span class="p">,</span>  <span class="c"># wVistaSP2-32</span>
+                            <span class="s">&#39;&#39;</span>
+                            <span class="p">]</span>
+        <span class="n">assertHashesForFile</span><span class="p">(</span><span class="n">myExpectedHashes</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_getRasterLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_getRasterLegend">[docs]</a>    <span class="k">def</span> <span class="nf">test_getRasterLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Getting a legend for a raster layer works.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_floodimpact.tif&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">getRasterLegend</span><span class="p">()</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;getRasterLegend.png&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="c"># As we have discovered, different versions of Qt and</span>
+        <span class="c"># OS platforms cause different output, so hashes are a list</span>
+        <span class="c"># of &#39;known good&#39; renders.</span>
+        <span class="n">myExpectedHashes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># win</span>
+                            <span class="s">&#39;9ead6ce0ac789adc65a6f00bd2d1f709&#39;</span><span class="p">,</span>  <span class="c"># ub12.04xiner</span>
+                            <span class="s">&#39;84bc3d518e3a0504f8dc36dfd620394e&#39;</span><span class="p">,</span>  <span class="c"># ub11.04-64</span>
+                            <span class="s">&#39;b68ccc328de852f0c66b8abe43eab3da&#39;</span><span class="p">,</span>  <span class="c"># ub12.04</span>
+                            <span class="s">&#39;cd5fb96f6c5926085d251400dd3b4928&#39;</span><span class="p">,</span>  <span class="c"># ub12.04 xvfb</span>
+                            <span class="s">&#39;a654d0dcb6b6d14b0a7a62cd979c16b9&#39;</span><span class="p">,</span>  <span class="c"># ub12.04-64</span>
+                            <span class="c"># ub11.04-64 laptop</span>
+                            <span class="s">&#39;9692ba8dbf909b8fe3ed27a8f4924b78&#39;</span><span class="p">,</span>  <span class="c"># binary read</span>
+                            <span class="s">&#39;5f4ef033bb1d6f36af4c08db55ca63be&#39;</span><span class="p">,</span>  <span class="c"># wVistaSP2-32</span>
+                            <span class="s">&#39;&#39;</span><span class="p">,</span>
+                            <span class="p">]</span>
+        <span class="n">assertHashesForFile</span><span class="p">(</span><span class="n">myExpectedHashes</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.addSymbolToLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.addSymbolToLegend">[docs]</a>    <span class="k">def</span> <span class="nf">addSymbolToLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test we can add a symbol to the legend.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_floodimpact.tif&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">QgsSymbol</span><span class="p">()</span>
+        <span class="n">mySymbol</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">56</span><span class="p">))</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">addSymbolToLegend</span><span class="p">(</span><span class="n">mySymbol</span><span class="p">,</span>
+                                <span class="n">theMin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">theMax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                <span class="n">theCategory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                <span class="n">theLabel</span><span class="o">=</span><span class="s">&#39;Foo&#39;</span><span class="p">)</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;addSymbolToLegend.png&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedHash</span> <span class="o">=</span> <span class="s">&#39;1234&#39;</span>
+        <span class="n">assertHashForFile</span><span class="p">(</span><span class="n">myExpectedHash</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_addClassToLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_addClassToLegend">[docs]</a>    <span class="k">def</span> <span class="nf">test_addClassToLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test we can add a class to the map legend.&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_shakeimpact.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">myColour</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">126</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">addClassToLegend</span><span class="p">(</span><span class="n">myColour</span><span class="p">,</span>
+                               <span class="n">theMin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theMax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theCategory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theLabel</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">addClassToLegend</span><span class="p">(</span><span class="n">myColour</span><span class="p">,</span>
+                               <span class="n">theMin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theMax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theCategory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">theLabel</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;addClassToLegend.png&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="c"># As we have discovered, different versions of Qt and</span>
+        <span class="c"># OS platforms cause different output, so hashes are a list</span>
+        <span class="c"># of &#39;known good&#39; renders.</span>
+        <span class="n">myExpectedHashes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># win</span>
+                            <span class="s">&#39;67c0f45792318298664dd02cc0ac94c3&#39;</span><span class="p">,</span>  <span class="c"># ub12.04xiner</span>
+                            <span class="s">&#39;ea0702782c2ed5d950c427fbe1743858&#39;</span><span class="p">,</span>  <span class="c"># ub11.04-64</span>
+                            <span class="s">&#39;53e0ba1144e071ad41756595d29bf444&#39;</span><span class="p">,</span>  <span class="c"># ub12.04</span>
+                            <span class="s">&#39;0681c3587305074bc9272f456fb4dd09&#39;</span><span class="p">,</span>  <span class="c"># ub12.04 xvfb</span>
+                            <span class="s">&#39;a37443d70604bdc8c279576b424a158c&#39;</span><span class="p">,</span>  <span class="c"># ub12.04-64</span>
+                            <span class="c"># ub11.04-64 laptop</span>
+                            <span class="s">&#39;944cee3eb9d916816b60ef41e8069683&#39;</span><span class="p">,</span>  <span class="c"># binary read</span>
+                            <span class="s">&#39;de3ceb6547ffc6c557d031c0b7ee9e75&#39;</span><span class="p">,</span>  <span class="c"># wVistaSP2-32</span>
+                            <span class="s">&#39;&#39;</span><span class="p">,</span>
+                            <span class="p">]</span>
+        <span class="n">assertHashesForFile</span><span class="p">(</span><span class="n">myExpectedHashes</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_getMapTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_getMapTitle">[docs]</a>    <span class="k">def</span> <span class="nf">test_getMapTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Getting the map title from the keywords&quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_floodimpact.tif&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myTitle</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">getMapTitle</span><span class="p">()</span>
+        <span class="n">myExpectedTitle</span> <span class="o">=</span> <span class="s">&#39;Penduduk yang Mungkin dievakuasi&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Got:</span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myExpectedTitle</span><span class="p">,</span> <span class="n">myTitle</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myTitle</span> <span class="o">==</span> <span class="n">myExpectedTitle</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_handleMissingMapTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_handleMissingMapTitle">[docs]</a>    <span class="k">def</span> <span class="nf">test_handleMissingMapTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Missing map title from the keywords fails gracefully&quot;&quot;&quot;</span>
+        <span class="c"># TODO running OSM Buildngs with Pendudk Jakarta</span>
+        <span class="c"># wasthrowing an error when requesting map title</span>
+        <span class="c"># that this test wasnt replicating well</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;population_padang_1.asc&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myTitle</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">getMapTitle</span><span class="p">()</span>
+        <span class="n">myExpectedTitle</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Got:</span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myExpectedTitle</span><span class="p">,</span> <span class="n">myTitle</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myTitle</span> <span class="o">==</span> <span class="n">myExpectedTitle</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="MapTest.Xtest_renderTable"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.Xtest_renderTable">[docs]</a>    <span class="k">def</span> <span class="nf">Xtest_renderTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that html renders nicely. Commented out for now until we work</span>
+<span class="sd">        out how to get webkit to do offscreen rendering nicely.&quot;&quot;&quot;</span>
+        <span class="n">myFilename</span> <span class="o">=</span> <span class="s">&#39;test_floodimpact.tif&#39;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Layer is not valid: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myFilename</span>
+        <span class="k">assert</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myPixmap</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">renderImpactTable</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">myPixmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="n">myExpectedWidth</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">myExpectedHeight</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Invalid width - got </span><span class="si">%s</span><span class="s"> expected </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">myPixmap</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span>
+                                    <span class="n">myExpectedWidth</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myPixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">==</span> <span class="n">myExpectedWidth</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Invalid height - got </span><span class="si">%s</span><span class="s"> expected </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">myPixmap</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span>
+                                    <span class="n">myExpectedHeight</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myPixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">==</span> <span class="n">myExpectedHeight</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;renderImpactTable.png&#39;</span><span class="p">)</span>
+        <span class="n">myPixmap</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="n">myExpectedHash</span> <span class="o">=</span> <span class="s">&#39;c9164d5c2bb85c6081905456ab827f3e&#39;</span>
+        <span class="n">assertHashForFile</span><span class="p">(</span><span class="n">myExpectedHash</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_renderTemplate"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_renderTemplate">[docs]</a>    <span class="k">def</span> <span class="nf">test_renderTemplate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that load template works&quot;&quot;&quot;</span>
+        <span class="c">#Use the template from our resources bundle</span>
+        <span class="n">myInPath</span> <span class="o">=</span> <span class="s">&#39;:/plugins/inasafe/basic.qpt&#39;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;test_shakeimpact.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+
+        <span class="n">myCanvasLayer</span> <span class="o">=</span> <span class="n">QgsMapCanvasLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">setLayerSet</span><span class="p">([</span><span class="n">myCanvasLayer</span><span class="p">])</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setImpactLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">myOutPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;outTemplate.pdf&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myOutPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myOutPath</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">renderTemplate</span><span class="p">(</span><span class="n">myInPath</span><span class="p">,</span> <span class="n">myOutPath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myOutPath</span><span class="p">)</span>
+        <span class="c">#os.remove(myPath)</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_mmPointConversion"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_mmPointConversion">[docs]</a>    <span class="k">def</span> <span class="nf">test_mmPointConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that conversions between pixel and page dimensions work.&quot;&quot;&quot;</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myDpi</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">=</span> <span class="n">myDpi</span>
+        <span class="n">myPixels</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="n">myMM</span> <span class="o">=</span> <span class="mf">25.4</span>  <span class="c"># 1 inch</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">pointsToMM</span><span class="p">(</span><span class="n">myPixels</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&quot;Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myMM</span><span class="p">,</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myMM</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">mmToPoints</span><span class="p">(</span><span class="n">myMM</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&quot;Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myPixels</span><span class="p">,</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span> <span class="o">==</span> <span class="n">myPixels</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="MapTest.test_windowsDrawingArtifacts"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_map.html#safe_qgis.test_map.MapTest.test_windowsDrawingArtifacts">[docs]</a>    <span class="k">def</span> <span class="nf">test_windowsDrawingArtifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that windows rendering does not make artifacts&quot;&quot;&quot;</span>
+        <span class="c"># sometimes spurious lines are drawn on the layout</span>
+        <span class="n">myMap</span> <span class="o">=</span> <span class="n">Map</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setupComposition</span><span class="p">()</span>
+        <span class="n">myPdfPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;outArtifactsTest.pdf&#39;</span><span class="p">)</span>
+        <span class="n">myMap</span><span class="o">.</span><span class="n">setupPrinter</span><span class="p">(</span><span class="n">myPdfPath</span><span class="p">)</span>
+
+        <span class="n">myPixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">myPixmap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">))</span>
+        <span class="n">myFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;greyBox&#39;</span><span class="p">)</span>
+        <span class="n">myPixmap</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myFilename</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">190</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+            <span class="n">myPicture</span> <span class="o">=</span> <span class="n">QgsComposerPicture</span><span class="p">(</span><span class="n">myMap</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+            <span class="n">myPicture</span><span class="o">.</span><span class="n">setPictureFile</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+            <span class="n">myPicture</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">myPicture</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>  <span class="c"># x</span>
+                                      <span class="n">i</span><span class="p">,</span>  <span class="c"># y</span>
+                                      <span class="mi">10</span><span class="p">,</span>  <span class="c"># width</span>
+                                      <span class="mi">10</span><span class="p">)</span>  <span class="c"># height</span>
+            <span class="n">myMap</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myPicture</span><span class="p">)</span>
+            <span class="c"># Same drawing drawn directly as a pixmap</span>
+            <span class="n">myPixmapItem</span> <span class="o">=</span> <span class="n">myMap</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">myPixmap</span><span class="p">)</span>
+            <span class="n">myPixmapItem</span><span class="o">.</span><span class="n">setOffset</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="c"># Same drawing using our drawPixmap Helper</span>
+            <span class="n">myWidthMM</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">myMap</span><span class="o">.</span><span class="n">drawPixmap</span><span class="p">(</span><span class="n">myPixmap</span><span class="p">,</span> <span class="n">myWidthMM</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">40</span><span class="p">)</span>
+
+        <span class="n">myMap</span><span class="o">.</span><span class="n">renderPrintout</span><span class="p">()</span>
+        <span class="n">myUnwantedHash</span> <span class="o">=</span> <span class="s">&#39;d05e9223d50baf8bb147475aa96d6ba3&#39;</span>
+        <span class="n">myHash</span> <span class="o">=</span> <span class="n">hashForFile</span><span class="p">(</span><span class="n">myPdfPath</span><span class="p">)</span>
+        <span class="c"># when this test no longer matches our broken render hash</span>
+        <span class="c"># we know the issue is fixed</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Windows map render still draws with artifacts.&#39;</span>
+        <span class="k">assert</span> <span class="n">myHash</span> <span class="o">!=</span> <span class="n">myUnwantedHash</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">MapTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

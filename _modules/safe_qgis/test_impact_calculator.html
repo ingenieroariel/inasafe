@@ -1,0 +1,326 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_impact_calculator &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_impact_calculator</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">**Impact calculator test suite.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add PARENT directory to path to make test aware of other modules</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.impact_calculator</span> <span class="kn">import</span> <span class="n">ImpactCalculator</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">InsufficientParametersException</span><span class="p">,</span>
+                           <span class="n">KeywordNotFoundException</span><span class="p">,</span>
+                           <span class="n">StyleInfoNotFoundException</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="p">(</span><span class="n">readKeywordsFromLayer</span><span class="p">,</span> <span class="n">getStyleInfo</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span>  <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">EXPDATA</span><span class="p">,</span> <span class="n">TESTDATA</span>
+
+<span class="c"># Retired impact function for characterisation</span>
+<span class="c"># (need import here if test is run independently)</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">BNPB_earthquake_guidelines</span>
+
+
+<div class="viewcode-block" id="ImpactCalculatorTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest">[docs]</a><span class="k">class</span> <span class="nc">ImpactCalculatorTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE plugin stub&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ImpactCalculatorTest.setUp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create shared resources that all tests can use&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span> <span class="o">=</span> <span class="n">ImpactCalculator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Padang_WGS84.shp&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                                            <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span><span class="p">)</span>
+        <span class="c"># UTM projected layer</span>
+
+        <span class="n">fn</span> <span class="o">=</span> <span class="s">&#39;tsunami_max_inundation_depth_BB_utm.asc&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterTsunamiBBPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterExposureBBPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                                                <span class="s">&#39;tsunami_building_&#39;</span>
+                                                 <span class="s">&#39;exposure.shp&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rasterPopulationPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">EXPDATA</span><span class="p">,</span> <span class="s">&#39;glp10ag.asc&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setHazardLayer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setExposureLayer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setFunction</span><span class="p">(</span><span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.tearDown"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tear down - destroy the QGIS app&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_properties"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_properties">[docs]</a>    <span class="k">def</span> <span class="nf">test_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test if the properties work as expected.&quot;&quot;&quot;</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Vector property incorrect.&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">exposureLayer</span><span class="p">()</span> <span class="o">==</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span><span class="p">),</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Raster property incorrect.&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">hazardLayer</span><span class="p">()</span> <span class="o">==</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rasterShakePath</span><span class="p">),</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Function property incorrect.&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">function</span><span class="p">()</span> <span class="o">==</span>
+                <span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_run"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_run">[docs]</a>    <span class="k">def</span> <span class="nf">test_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that run works as expected in non threading mode&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+            <span class="c"># run non threaded</span>
+            <span class="n">myRunner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="n">myImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+            <span class="n">myFilename</span> <span class="o">=</span> <span class="n">myImpactLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myFilename</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myFilename</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myMessage</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myMessage</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Calculator run failed. </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_thread"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_thread">[docs]</a>    <span class="k">def</span> <span class="nf">test_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that starting it in a thread works as expected.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+            <span class="n">myRunner</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="c"># wait until the thread is done</span>
+            <span class="n">myRunner</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="n">myImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+            <span class="n">myFilename</span> <span class="o">=</span> <span class="n">myImpactLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myFilename</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myFilename</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myMessage</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myMessage</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Calculator run failed:</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_startWithNoParameters"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_startWithNoParameters">[docs]</a>    <span class="k">def</span> <span class="nf">test_startWithNoParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that run raises an error properly when no parameters defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setExposureLayer</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setHazardLayer</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="c">#next line should raise an error</span>
+            <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+            <span class="n">myRunner</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Runtime error encountered: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+        <span class="k">except</span> <span class="n">InsufficientParametersException</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="c"># expected outcome</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Missing parameters not raised as error.&#39;</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected an error, none encountered.&#39;</span>
+        <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_getKeywordFromImpactLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_getKeywordFromImpactLayer">[docs]</a>    <span class="k">def</span> <span class="nf">test_getKeywordFromImpactLayer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check that we can get keywords from a created impact layer.&quot;&quot;&quot;</span>
+        <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+        <span class="n">myRunner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="n">myImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+        <span class="n">myKeyword</span> <span class="o">=</span> <span class="n">readKeywordsFromLayer</span><span class="p">(</span><span class="n">myImpactLayer</span><span class="p">,</span>
+                                          <span class="s">&#39;impact_summary&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Keyword request returned an empty string&#39;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">myKeyword</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="c"># Test we get an exception if keyword is not found</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myKeyword</span> <span class="o">=</span> <span class="n">readKeywordsFromLayer</span><span class="p">(</span>
+                            <span class="n">myImpactLayer</span><span class="p">,</span> <span class="s">&#39;boguskeyword&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">KeywordNotFoundException</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c"># this is good</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Request for bogus keyword raised incorrect &#39;</span>
+                         <span class="s">&#39;exception type: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_issue100"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_issue100">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue100</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test for issue 100: unhashable type dict&quot;&quot;&quot;</span>
+        <span class="n">exposure_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                            <span class="s">&#39;OSM_building_polygons_20110905.shp&#39;</span><span class="p">)</span>
+        <span class="n">hazard_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                            <span class="s">&#39;Flood_Current_Depth_Jakarta_geographic.asc&#39;</span><span class="p">)</span>
+        <span class="c"># Verify relevant metada is ok</span>
+        <span class="c">#H = readSafeLayer(hazard_path)</span>
+        <span class="c">#E = readSafeLayer(exposure_path)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setHazardLayer</span><span class="p">(</span><span class="n">hazard_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setExposureLayer</span><span class="p">(</span><span class="n">exposure_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">setFunction</span><span class="p">(</span><span class="s">&#39;Flood Building Impact Function&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+            <span class="c"># run non threaded</span>
+            <span class="n">myRunner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="n">myImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+            <span class="n">myFilename</span> <span class="o">=</span> <span class="n">myImpactLayer</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myFilename</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myFilename</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">myMessage</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">myMessage</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Calculator run failed. </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ImpactCalculatorTest.test_getStyleInfo"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_impact_calculator.html#safe_qgis.test_impact_calculator.ImpactCalculatorTest.test_getStyleInfo">[docs]</a>    <span class="k">def</span> <span class="nf">test_getStyleInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that we can get styleInfo data from a vector&#39;s keyword file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">myRunner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+        <span class="n">myRunner</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">myRunner</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">myImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect type returned from &#39;</span>
+               <span class="s">&#39;myRunner.impactlayer(). Expected an impactlayer&#39;</span>
+               <span class="s">&#39;but received a </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">myImpactLayer</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">myImpactLayer</span><span class="p">,</span> <span class="s">&#39;get_style_info&#39;</span><span class="p">),</span> <span class="n">myMessage</span>
+
+        <span class="n">myStyleInfo</span> <span class="o">=</span> <span class="n">getStyleInfo</span><span class="p">(</span><span class="n">myImpactLayer</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Style info request returned an empty string&#39;</span>
+        <span class="k">assert</span> <span class="n">myStyleInfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="c">#print myStyleInfo</span>
+
+        <span class="c"># Test we get an exception if style info is not found</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myStyleInfo</span> <span class="o">=</span> <span class="n">getStyleInfo</span><span class="p">(</span><span class="s">&#39;boguspath&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StyleInfoNotFoundException</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c"># This is good</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;StyleInfo request for bogus file raised incorrect&#39;</span> <span class="o">+</span>
+                   <span class="s">&#39; exception type: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StyleInfoNotFoundException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">ImpactCalculatorTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

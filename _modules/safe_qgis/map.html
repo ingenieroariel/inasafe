@@ -1,0 +1,1244 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.map &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.map</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">  **InaSAFE map making module.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsComposition</span><span class="p">,</span>
+                       <span class="n">QgsComposerMap</span><span class="p">,</span>
+                       <span class="n">QgsComposerLabel</span><span class="p">,</span>
+                       <span class="n">QgsComposerPicture</span><span class="p">,</span>
+                       <span class="n">QgsComposerScaleBar</span><span class="p">,</span>
+                       <span class="n">QgsComposerShape</span><span class="p">,</span>
+                       <span class="n">QgsMapLayer</span><span class="p">,</span>
+                       <span class="n">QgsDistanceArea</span><span class="p">,</span>
+                       <span class="n">QgsPoint</span><span class="p">,</span>
+                       <span class="n">QgsRectangle</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qgis.gui</span> <span class="kn">import</span> <span class="n">QgsComposerView</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWebKit</span><span class="p">,</span> <span class="n">QtXml</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">LegendLayerException</span><span class="p">,</span>
+                           <span class="n">KeywordNotFoundException</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.keyword_io</span> <span class="kn">import</span> <span class="n">KeywordIO</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="n">getTempDir</span><span class="p">,</span> <span class="n">htmlHeader</span><span class="p">,</span> <span class="n">htmlFooter</span>
+<span class="c"># Don&#39;t remove this even if it is flagged as unused by your ide</span>
+<span class="c"># it is needed for qrc:/ url resolution. See Qt Resources docs.</span>
+<span class="kn">import</span> <span class="nn">safe_qgis.resources</span>     <span class="c"># pylint: disable=W0611</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydevd</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pylint: disable=F0401</span>
+    <span class="k">print</span> <span class="s">&#39;Remote debugging is enabled.&#39;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Debugging was disabled&#39;</span>
+
+
+<div class="viewcode-block" id="Map"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map">[docs]</a><span class="k">class</span> <span class="nc">Map</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;A class for creating a map.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theIface</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for the Map class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theIface - reference to the QGIS iface object</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span> <span class="o">=</span> <span class="n">theIface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">theIface</span><span class="o">.</span><span class="n">activeLayer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span> <span class="o">=</span> <span class="n">KeywordIO</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">footer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># how high each row of the legend should be</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legendIncrement</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">=</span> <span class="mi">210</span>  <span class="c"># width in mm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span> <span class="o">=</span> <span class="mi">297</span>  <span class="c"># height in mm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">=</span> <span class="mf">300.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c"># margin in mm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalSpacing</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c"># vertical spacing between elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c"># intended for debugging use only</span>
+        <span class="c"># make a square map where width = height = page width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disclaimer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE has been jointly developed by&#39;</span>
+                                  <span class="s">&#39; BNPB, AusAid &amp; the World Bank&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Map.tr"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.tr">[docs]</a>    <span class="k">def</span> <span class="nf">tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theString</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;We implement this ourself since we do not inherit QObject.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           theString - string for translation.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           Translated version of theString.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&#39;Map&#39;</span><span class="p">,</span> <span class="n">theString</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.setImpactLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.setImpactLayer">[docs]</a>    <span class="k">def</span> <span class="nf">setImpactLayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theLayer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mutator for the impact layer that will be used for stats,</span>
+<span class="sd">        legend and reporting.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theLayer - a valid QgsMapLayer</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">theLayer</span>
+</div>
+<div class="viewcode-block" id="Map.writeTemplate"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.writeTemplate">[docs]</a>    <span class="k">def</span> <span class="nf">writeTemplate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTemplateFilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the current composition as a template that can be</span>
+<span class="sd">        re-used in QGIS.&quot;&quot;&quot;</span>
+        <span class="n">myDocument</span> <span class="o">=</span> <span class="n">QtXml</span><span class="o">.</span><span class="n">QDomDocument</span><span class="p">()</span>
+        <span class="n">myElement</span> <span class="o">=</span> <span class="n">myDocument</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s">&#39;Composer&#39;</span><span class="p">)</span>
+        <span class="n">myDocument</span><span class="o">.</span><span class="n">appendChild</span><span class="p">(</span><span class="n">myElement</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">writeXML</span><span class="p">(</span><span class="n">myElement</span><span class="p">,</span> <span class="n">myDocument</span><span class="p">)</span>
+        <span class="n">myXml</span> <span class="o">=</span> <span class="n">myDocument</span><span class="o">.</span><span class="n">toByteArray</span><span class="p">()</span>
+        <span class="n">myFile</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">theTemplateFilePath</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+        <span class="n">myFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">myXml</span><span class="p">)</span>
+        <span class="n">myFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Map.renderTemplate"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.renderTemplate">[docs]</a>    <span class="k">def</span> <span class="nf">renderTemplate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTemplateFilePath</span><span class="p">,</span> <span class="n">theOutputFilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load a QgsComposer map from a template and render it</span>
+
+<span class="sd">        .. note:: THIS METHOD IS EXPERIMENTAL AND CURRENTLY NON FUNCTIONAL</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTemplateFilePath - path to the template that should be loaded.</span>
+<span class="sd">            theOutputFilePath - path for the output pdf</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupComposition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupPrinter</span><span class="p">(</span><span class="n">theOutputFilePath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">:</span>
+            <span class="n">myFile</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFile</span><span class="p">(</span><span class="n">theTemplateFilePath</span><span class="p">)</span>
+            <span class="n">myDocument</span> <span class="o">=</span> <span class="n">QtXml</span><span class="o">.</span><span class="n">QDomDocument</span><span class="p">()</span>
+            <span class="n">myDocument</span><span class="o">.</span><span class="n">setContent</span><span class="p">(</span><span class="n">myFile</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>  <span class="c"># .. todo:: fix magic param</span>
+            <span class="n">myNodeList</span> <span class="o">=</span> <span class="n">myDocument</span><span class="o">.</span><span class="n">elementsByTagName</span><span class="p">(</span><span class="s">&#39;Composer&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">myNodeList</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">myElement</span> <span class="o">=</span> <span class="n">myNodeList</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">toElement</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">readXML</span><span class="p">(</span><span class="n">myElement</span><span class="p">,</span> <span class="n">myDocument</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderPrintout</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Map.getLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.getLegend">[docs]</a>    <span class="k">def</span> <span class="nf">getLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Examine the classes of the impact layer associated with this print</span>
+<span class="sd">        job.</span>
+
+<span class="sd">        .. note: This is a wrapper for the rasterLegend and vectorLegend</span>
+<span class="sd">           methods.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            An InvalidLegendLayer will be raised if a legend cannot be</span>
+<span class="sd">            created from the layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Unable to make a legend when map generator &#39;</span>
+                                <span class="s">&#39;has no layer set.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LegendLayerException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="s">&#39;impact_summary&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">KeywordNotFoundException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;This layer does not appear to be an impact &#39;</span>
+                                <span class="s">&#39;layer. Try selecting an impact layer in the &#39;</span>
+                                <span class="s">&#39;QGIS layers list or creating a new impact &#39;</span>
+                                <span class="s">&#39;scenario before using the print tool.&#39;</span>
+                                <span class="s">&#39;</span><span class="se">\n</span><span class="s">Message: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">VectorLayer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getVectorLegend</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRasterLegend</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span>
+</div>
+<div class="viewcode-block" id="Map.getVectorLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.getVectorLegend">[docs]</a>    <span class="k">def</span> <span class="nf">getVectorLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the legend for this layer as a graphic.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A QImage object.</span>
+<span class="sd">            self.legend is also populated with the image.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            An InvalidLegendLayer will be raised if a legend cannot be</span>
+<span class="sd">            created from the layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">isUsingRendererV2</span><span class="p">():</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;A legend can only be generated for &#39;</span>
+                                <span class="s">&#39;vector layers that use the &quot;new symbology&quot; &#39;</span>
+                                <span class="s">&#39;implementation in QGIS.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LegendLayerException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="c"># new symbology - subclass of QgsFeatureRendererV2 class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">myRenderer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">rendererV2</span><span class="p">()</span>
+        <span class="n">myType</span> <span class="o">=</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&quot;singleSymbol&quot;</span><span class="p">:</span>
+            <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addSymbolToLegend</span><span class="p">(</span><span class="n">theLabel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span>
+                                   <span class="n">theSymbol</span><span class="o">=</span><span class="n">mySymbol</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&quot;categorizedSymbol&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">myCategory</span> <span class="ow">in</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">categories</span><span class="p">():</span>
+                <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">myCategory</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addSymbolToLegend</span><span class="p">(</span>
+                                <span class="n">theCategory</span><span class="o">=</span><span class="n">myCategory</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="o">.</span><span class="n">toString</span><span class="p">(),</span>
+                                <span class="n">theLabel</span><span class="o">=</span><span class="n">myCategory</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span>
+                                <span class="n">theSymbol</span><span class="o">=</span><span class="n">mySymbol</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&quot;graduatedSymbol&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">myRange</span> <span class="ow">in</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">ranges</span><span class="p">():</span>
+                <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">myRange</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addSymbolToLegend</span><span class="p">(</span><span class="n">theMin</span><span class="o">=</span><span class="n">myRange</span><span class="o">.</span><span class="n">lowerValue</span><span class="p">(),</span>
+                                       <span class="n">theMax</span><span class="o">=</span><span class="n">myRange</span><span class="o">.</span><span class="n">upperValue</span><span class="p">(),</span>
+                                       <span class="n">theLabel</span><span class="o">=</span><span class="n">myRange</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span>
+                                       <span class="n">theSymbol</span><span class="o">=</span><span class="n">mySymbol</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#type unknown</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Unrecognised renderer type found for the &#39;</span>
+                                <span class="s">&#39;impact layer. Please use one of these: &#39;</span>
+                                <span class="s">&#39;single symbol, categorised symbol or &#39;</span>
+                                <span class="s">&#39;graduated symbol and then try again.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LegendLayerException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span>
+</div>
+<div class="viewcode-block" id="Map.getRasterLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.getRasterLegend">[docs]</a>    <span class="k">def</span> <span class="nf">getRasterLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the legend for a raster layer as an image.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            An image representing the layer&#39;s legend.</span>
+<span class="sd">            self.legend is also populated</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            An InvalidLegendLayer will be raised if a legend cannot be</span>
+<span class="sd">            created from the layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myShader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">rasterShader</span><span class="p">()</span><span class="o">.</span><span class="n">rasterShaderFunction</span><span class="p">()</span>
+        <span class="n">myRampItems</span> <span class="o">=</span> <span class="n">myShader</span><span class="o">.</span><span class="n">colorRampItemList</span><span class="p">()</span>
+        <span class="n">myLastValue</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c"># Making an assumption here...</span>
+        <span class="k">print</span> <span class="s">&#39;Source: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">myItem</span> <span class="ow">in</span> <span class="n">myRampItems</span><span class="p">:</span>
+            <span class="n">myValue</span> <span class="o">=</span> <span class="n">myItem</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">myLabel</span> <span class="o">=</span> <span class="n">myItem</span><span class="o">.</span><span class="n">label</span>
+            <span class="n">myColor</span> <span class="o">=</span> <span class="n">myItem</span><span class="o">.</span><span class="n">color</span>
+            <span class="k">print</span> <span class="s">&#39;Value: </span><span class="si">%s</span><span class="s"> Label </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myValue</span><span class="p">,</span> <span class="n">myLabel</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addClassToLegend</span><span class="p">(</span><span class="n">myColor</span><span class="p">,</span>
+                      <span class="n">theMin</span><span class="o">=</span><span class="n">myLastValue</span><span class="p">,</span>
+                      <span class="n">theMax</span><span class="o">=</span><span class="n">myValue</span><span class="p">,</span>
+                      <span class="n">theLabel</span><span class="o">=</span><span class="n">myLabel</span><span class="p">)</span>
+            <span class="n">myLastValue</span> <span class="o">=</span> <span class="n">myValue</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span>
+</div>
+<div class="viewcode-block" id="Map.addSymbolToLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.addSymbolToLegend">[docs]</a>    <span class="k">def</span> <span class="nf">addSymbolToLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                         <span class="n">theSymbol</span><span class="p">,</span>
+                         <span class="n">theMin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theMax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theCategory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theLabel</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a class to the current legend. If the legend is not defined,</span>
+<span class="sd">        a new one will be created. A legend is just an image file with nicely</span>
+<span class="sd">        rendered classes in it.</span>
+
+<span class="sd">        .. note:: This method just extracts the colour from the symbol and then</span>
+<span class="sd">           delegates to the addClassToLegend function.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            * theSymbol - **Required** symbol for the class as a QgsSymbol</span>
+<span class="sd">            * theMin - Optional minimum value for the class</span>
+<span class="sd">            * theMax - Optional maximum value for the class\</span>
+<span class="sd">            * theCategory - Optional category name (will be used in lieu of</span>
+<span class="sd">                       min/max)</span>
+<span class="sd">            * theLabel - Optional text label for the class</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Throws an exception if the class could not be added for</span>
+<span class="sd">            some reason..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myColour</span> <span class="o">=</span> <span class="n">theSymbol</span><span class="o">.</span><span class="n">color</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addClassToLegend</span><span class="p">(</span><span class="n">myColour</span><span class="p">,</span>
+                              <span class="n">theMin</span><span class="o">=</span><span class="n">theMin</span><span class="p">,</span>
+                              <span class="n">theMax</span><span class="o">=</span><span class="n">theMax</span><span class="p">,</span>
+                              <span class="n">theCategory</span><span class="o">=</span><span class="n">theCategory</span><span class="p">,</span>
+                              <span class="n">theLabel</span><span class="o">=</span><span class="n">theLabel</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.addClassToLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.addClassToLegend">[docs]</a>    <span class="k">def</span> <span class="nf">addClassToLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                         <span class="n">theColour</span><span class="p">,</span>
+                         <span class="n">theMin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theMax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theCategory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">theLabel</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a class to the current legend. If the legend is not defined,</span>
+<span class="sd">        a new one will be created. A legend is just an image file with nicely</span>
+<span class="sd">        rendered classes in it.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            * theColour - **Required** colour for the class as a QColor</span>
+<span class="sd">            * theMin - Optional minimum value for the class</span>
+<span class="sd">            * theMax - Optional maximum value for the class\</span>
+<span class="sd">            * theCategory - Optional category name (will be used in lieu of</span>
+<span class="sd">                       min/max)</span>
+<span class="sd">            * theLabel - Optional text label for the class</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Throws an exception if the class could not be added for</span>
+<span class="sd">            some reason..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extendLegend</span><span class="p">()</span>
+        <span class="n">myOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">legendIncrement</span>
+        <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
+        <span class="n">myBrush</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">theColour</span><span class="p">)</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">myBrush</span><span class="p">)</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">theColour</span><span class="p">)</span>
+        <span class="n">myWhitespace</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c"># white space above and below each class itcon</span>
+        <span class="n">mySquareSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legendIncrement</span> <span class="o">-</span> <span class="p">(</span><span class="n">myWhitespace</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">myLeftIndent</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">myLeftIndent</span><span class="p">,</span>
+                                         <span class="n">myOffset</span> <span class="o">+</span> <span class="n">myWhitespace</span><span class="p">,</span>
+                                         <span class="n">mySquareSize</span><span class="p">,</span> <span class="n">mySquareSize</span><span class="p">))</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c"># outline colour</span>
+        <span class="n">myLabelX</span> <span class="o">=</span> <span class="n">myLeftIndent</span> <span class="o">+</span> <span class="n">mySquareSize</span> <span class="o">+</span> <span class="mi">10</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                         <span class="n">myFontSize</span><span class="p">,</span>
+                         <span class="n">myFontWeight</span><span class="p">,</span>
+                         <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">theLabel</span><span class="p">:</span>
+            <span class="n">myLabel</span> <span class="o">=</span> <span class="n">theLabel</span>
+        <span class="k">if</span> <span class="n">theMin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">theMax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myLabel</span> <span class="o">+=</span> <span class="s">&#39; [&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">theMin</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">theMax</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span>
+        <span class="k">if</span> <span class="n">theCategory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myLabel</span> <span class="o">=</span> <span class="s">&#39; (&#39;</span> <span class="o">+</span> <span class="n">theCategory</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">myLabelX</span><span class="p">,</span> <span class="n">myOffset</span> <span class="o">+</span> <span class="mi">25</span><span class="p">,</span> <span class="n">myLabel</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.extendLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.extendLegend">[docs]</a>    <span class="k">def</span> <span class="nf">extendLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Grow the legend pixmap enough to accommodate one more legend entry.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
+            <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">12</span>
+            <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Bold</span>
+            <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                             <span class="n">myFontSize</span><span class="p">,</span>
+                             <span class="n">myFontWeight</span><span class="p">,</span>
+                             <span class="n">myItalicsFlag</span><span class="p">)</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Legend&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># extend the existing legend down for the next class</span>
+            <span class="n">myPixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">+</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">legendIncrement</span><span class="p">)</span>
+            <span class="n">myPixmap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">myPixmap</span><span class="p">)</span>
+
+            <span class="n">myRect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">drawPixmap</span><span class="p">(</span><span class="n">myRect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">,</span> <span class="n">myRect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="n">myPixmap</span>
+</div>
+<div class="viewcode-block" id="Map.setupComposition"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.setupComposition">[docs]</a>    <span class="k">def</span> <span class="nf">setupComposition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the composition ready for drawing elements onto it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myCanvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mapCanvas</span><span class="p">()</span>
+        <span class="n">myRenderer</span> <span class="o">=</span> <span class="n">myCanvas</span><span class="o">.</span><span class="n">mapRenderer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span> <span class="o">=</span> <span class="n">QgsComposition</span><span class="p">(</span><span class="n">myRenderer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">setPlotStyle</span><span class="p">(</span><span class="n">QgsComposition</span><span class="o">.</span><span class="n">Print</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">setPaperSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">setPrintResolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">setPrintAsRaster</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.setupPrinter"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.setupPrinter">[docs]</a>    <span class="k">def</span> <span class="nf">setupPrinter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a QPrinter instance set up to print to an A4 portrait pdf</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theFilename - filename for pdf generated using this printer</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#</span>
+        <span class="c"># Create a printer device (we are &#39;printing&#39; to a pdf</span>
+        <span class="c">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setOutputFormat</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">PdfFormat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setOutputFileName</span><span class="p">(</span><span class="n">theFilename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setPaperSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSizeF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span><span class="p">),</span>
+                                             <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">Millimeter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setFullPage</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setColorMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">Color</span><span class="p">)</span>
+        <span class="n">myResolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">printResolution</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">setResolution</span><span class="p">(</span><span class="n">myResolution</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.renderPrintout"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.renderPrintout">[docs]</a>    <span class="k">def</span> <span class="nf">renderPrintout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate the printout for our final map composition.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">setPlotStyle</span><span class="p">(</span><span class="n">QgsComposition</span><span class="o">.</span><span class="n">Print</span><span class="p">)</span>  <span class="c"># or preview</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">printAsRaster</span><span class="p">():</span>
+            <span class="n">myWidth</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">/</span> <span class="mf">25.4</span><span class="p">)</span>
+            <span class="n">myHeight</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span> <span class="o">/</span> <span class="mf">25.4</span><span class="p">)</span>
+            <span class="n">myImage</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">myWidth</span><span class="p">,</span> <span class="n">myHeight</span><span class="p">),</span>
+                                   <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_ARGB32</span><span class="p">)</span>
+            <span class="n">myImage</span><span class="o">.</span><span class="n">setDotsPerMeterX</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">/</span> <span class="mf">25.4</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">myImage</span><span class="o">.</span><span class="n">setDotsPerMeterY</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span> <span class="o">/</span> <span class="mf">25.4</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">myImage</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">myImagePainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">myImage</span><span class="p">)</span>
+            <span class="n">mySourceArea</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span><span class="p">)</span>
+            <span class="n">myTargetArea</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myWidth</span><span class="p">,</span> <span class="n">myHeight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">myImagePainter</span><span class="p">,</span> <span class="n">myTargetArea</span><span class="p">,</span> <span class="n">mySourceArea</span><span class="p">)</span>
+            <span class="n">myImagePainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">myTargetArea</span><span class="p">,</span> <span class="n">myImage</span><span class="p">,</span> <span class="n">myTargetArea</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#Each composer element will be rendered as its own layer in the pdf</span>
+            <span class="n">myPaperRectMM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">pageRect</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">Millimeter</span><span class="p">)</span>
+            <span class="n">myPaperRectPx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">printer</span><span class="o">.</span><span class="n">pageRect</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">DevicePixel</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">myPainter</span><span class="p">,</span> <span class="n">myPaperRectPx</span><span class="p">,</span> <span class="n">myPaperRectMM</span><span class="p">)</span>
+        <span class="n">myPainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Map.drawLogo"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawLogo">[docs]</a>    <span class="k">def</span> <span class="nf">drawLogo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a picture containing the logo to the map top left corner</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which the logo shoudl be drawn</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myLogo</span> <span class="o">=</span> <span class="n">QgsComposerPicture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myLogo</span><span class="o">.</span><span class="n">setPictureFile</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/bnpb_logo.png&#39;</span><span class="p">)</span>
+        <span class="n">myLogo</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span><span class="p">,</span>
+                                   <span class="n">theTopOffset</span><span class="p">,</span>
+                                   <span class="mi">10</span><span class="p">,</span>
+                                   <span class="mi">10</span><span class="p">)</span>
+        <span class="n">myLogo</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+        <span class="n">myLogo</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c"># To ensure it overlays graticule markers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myLogo</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.drawTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawTitle">[docs]</a>    <span class="k">def</span> <span class="nf">drawTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a title to the composition.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which the map should be drawn</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float - the height of the label as rendered</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">14</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Bold</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                             <span class="n">myFontSize</span><span class="p">,</span>
+                             <span class="n">myFontWeight</span><span class="p">,</span>
+                             <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QgsComposerLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+        <span class="n">myHeading</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE - Indonesian Scenario Assessment&#39;</span>
+                            <span class="s">&#39; for Emergencies&#39;</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myHeading</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">adjustSizeToText</span><span class="p">()</span>
+        <span class="n">myLabelHeight</span> <span class="o">=</span> <span class="mf">10.0</span>  <span class="c"># determined using qgis map composer</span>
+        <span class="n">myLabelWidth</span> <span class="o">=</span> <span class="mf">170.0</span>   <span class="c"># item - position and size...option</span>
+        <span class="n">myLeftOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">-</span> <span class="n">myLabelWidth</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="n">myLeftOffset</span><span class="p">,</span>
+                                <span class="n">theTopOffset</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>  <span class="c"># -2 to push it up a little</span>
+                                <span class="n">myLabelWidth</span><span class="p">,</span>
+                                <span class="n">myLabelHeight</span><span class="p">,</span>
+                                <span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myLabel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myLabelHeight</span>
+</div>
+<div class="viewcode-block" id="Map.drawMap"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawMap">[docs]</a>    <span class="k">def</span> <span class="nf">drawMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a map to the composition and return the compsermap instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which the map should be drawn</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A QgsComposerMap instance is returned</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myMapWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapWidth</span>
+        <span class="n">myComposerMap</span> <span class="o">=</span> <span class="n">QgsComposerMap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span><span class="p">,</span>
+                                       <span class="n">theTopOffset</span><span class="p">,</span>
+                                       <span class="n">myMapWidth</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span><span class="p">)</span>
+        <span class="c">#myExtent = self.iface.mapCanvas().extent()</span>
+        <span class="c"># The dimensions of the map canvas and the print compser map may</span>
+        <span class="c"># differ. So we set the map composer extent using the canvas and</span>
+        <span class="c"># then defer to the map canvas&#39;s map extents thereafter</span>
+        <span class="c"># Update: disabled as it results in a rectangular rather than</span>
+        <span class="c"># square map</span>
+        <span class="c">#myComposerMap.setNewExtent(myExtent)</span>
+        <span class="n">myComposerExtent</span> <span class="o">=</span> <span class="n">myComposerMap</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span>
+        <span class="c"># Recenter the composer map on the center of the canvas</span>
+        <span class="c"># Note that since the composer map is square and the canvas may be</span>
+        <span class="c"># arbitrarily shaped, we center based on the longest edge</span>
+        <span class="n">myCanvasExtent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mapCanvas</span><span class="p">()</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span>
+        <span class="n">myWidth</span> <span class="o">=</span> <span class="n">myCanvasExtent</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">myHeight</span> <span class="o">=</span> <span class="n">myCanvasExtent</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">myLongestLength</span> <span class="o">=</span> <span class="n">myWidth</span>
+        <span class="k">if</span> <span class="n">myWidth</span> <span class="o">&lt;</span> <span class="n">myHeight</span><span class="p">:</span>
+            <span class="n">myLongestLength</span> <span class="o">=</span> <span class="n">myHeight</span>
+        <span class="n">myHalfLength</span> <span class="o">=</span> <span class="n">myLongestLength</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">myCenter</span> <span class="o">=</span> <span class="n">myCanvasExtent</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+        <span class="n">myMinX</span> <span class="o">=</span> <span class="n">myCenter</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">myHalfLength</span>
+        <span class="n">myMaxX</span> <span class="o">=</span> <span class="n">myCenter</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="n">myHalfLength</span>
+        <span class="n">myMinY</span> <span class="o">=</span> <span class="n">myCenter</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="n">myHalfLength</span>
+        <span class="n">myMaxY</span> <span class="o">=</span> <span class="n">myCenter</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="n">myHalfLength</span>
+        <span class="n">mySquareExtent</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="n">myMinX</span><span class="p">,</span> <span class="n">myMinY</span><span class="p">,</span> <span class="n">myMaxX</span><span class="p">,</span> <span class="n">myMaxY</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setNewExtent</span><span class="p">(</span><span class="n">mySquareExtent</span><span class="p">)</span>
+
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">myNumberOfSplits</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="c"># .. todo:: Write logic to adjust preciosn so that adjacent tick marks</span>
+        <span class="c">#    always have different displayed values</span>
+        <span class="n">myPrecision</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">myXInterval</span> <span class="o">=</span> <span class="n">myComposerExtent</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">/</span> <span class="n">myNumberOfSplits</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridIntervalX</span><span class="p">(</span><span class="n">myXInterval</span><span class="p">)</span>
+        <span class="n">myYInterval</span> <span class="o">=</span> <span class="n">myComposerExtent</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="n">myNumberOfSplits</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridIntervalY</span><span class="p">(</span><span class="n">myYInterval</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridStyle</span><span class="p">(</span><span class="n">QgsComposerMap</span><span class="o">.</span><span class="n">Cross</span><span class="p">)</span>
+        <span class="n">myCrossLengthMM</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setCrossLength</span><span class="p">(</span><span class="n">myCrossLengthMM</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># To ensure it does not overlay logo</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                             <span class="n">myFontSize</span><span class="p">,</span>
+                             <span class="n">myFontWeight</span><span class="p">,</span>
+                             <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridAnnotationFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridAnnotationPrecision</span><span class="p">(</span><span class="n">myPrecision</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setShowGridAnnotation</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">myComposerMap</span><span class="o">.</span><span class="n">setGridAnnotationDirection</span><span class="p">(</span>
+                                        <span class="n">QgsComposerMap</span><span class="o">.</span><span class="n">BoundaryDirection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myComposerMap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawGraticuleMask</span><span class="p">(</span><span class="n">theTopOffset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myComposerMap</span>
+</div>
+<div class="viewcode-block" id="Map.drawGraticuleMask"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawGraticuleMask">[docs]</a>    <span class="k">def</span> <span class="nf">drawGraticuleMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A helper funtion to mask out graticule labels on the right side</span>
+<span class="sd">           by overpainting a white rectangle with white border on them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which the map should be drawn</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myLeftOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapWidth</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsComposerShape</span><span class="p">(</span><span class="n">myLeftOffset</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span>
+                                  <span class="n">theTopOffset</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">-</span> <span class="n">myLeftOffset</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setShapeType</span><span class="p">(</span><span class="n">QgsComposerShape</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setLineWidth</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setOutlineColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setFillColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setOpacity</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+        <span class="c"># These two lines seem superfluous but are needed</span>
+        <span class="n">myBrush</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">myBrush</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.drawNativeScaleBar"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawNativeScaleBar">[docs]</a>    <span class="k">def</span> <span class="nf">drawNativeScaleBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theComposerMap</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw a scale bar using QGIS&#39; native drawing - in the case of</span>
+<span class="sd">        geographic maps, scale will be in degrees, not km.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myScaleBar</span> <span class="o">=</span> <span class="n">QgsComposerScaleBar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myScaleBar</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="s">&#39;Numeric&#39;</span><span class="p">)</span>  <span class="c"># optionally modify the style</span>
+        <span class="n">myScaleBar</span><span class="o">.</span><span class="n">setComposerMap</span><span class="p">(</span><span class="n">theComposerMap</span><span class="p">)</span>
+        <span class="n">myScaleBar</span><span class="o">.</span><span class="n">applyDefaultSize</span><span class="p">()</span>
+        <span class="n">myScaleBarHeight</span> <span class="o">=</span> <span class="n">myScaleBar</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">myScaleBarWidth</span> <span class="o">=</span> <span class="n">myScaleBar</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="c"># -1 to avoid overlapping the map border</span>
+        <span class="n">myScaleBar</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">theTopOffset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">-</span>
+                                     <span class="p">(</span><span class="n">myScaleBarHeight</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+                                   <span class="n">myScaleBarWidth</span><span class="p">,</span>
+                                   <span class="n">myScaleBarHeight</span><span class="p">)</span>
+        <span class="n">myScaleBar</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+        <span class="c"># Disabled for now</span>
+        <span class="c">#self.composition.addItem(myScaleBar)</span>
+</div>
+<div class="viewcode-block" id="Map.drawScaleBar"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawScaleBar">[docs]</a>    <span class="k">def</span> <span class="nf">drawScaleBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theComposerMap</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a numeric scale to the bottom left of the map</span>
+
+<span class="sd">        We draw the scale bar manually because QGIS does not yet support</span>
+<span class="sd">        rendering a scalebar for a geographic map in km.</span>
+
+<span class="sd">        .. seealso:: :meth:`drawNativeScaleBar`</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theComposerMap - QgsComposerMap instance used as the basis</span>
+<span class="sd">              scale calculations.</span>
+<span class="sd">            * theTopOffset - vertical offset at which the map should be drawn</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myCanvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mapCanvas</span><span class="p">()</span>
+        <span class="n">myRenderer</span> <span class="o">=</span> <span class="n">myCanvas</span><span class="o">.</span><span class="n">mapRenderer</span><span class="p">()</span>
+        <span class="c">#</span>
+        <span class="c"># Add a linear map scale</span>
+        <span class="c">#</span>
+        <span class="n">myDistanceArea</span> <span class="o">=</span> <span class="n">QgsDistanceArea</span><span class="p">()</span>
+        <span class="n">myDistanceArea</span><span class="o">.</span><span class="n">setSourceCrs</span><span class="p">(</span><span class="n">myRenderer</span><span class="o">.</span><span class="n">destinationCrs</span><span class="p">()</span><span class="o">.</span><span class="n">srsid</span><span class="p">())</span>
+        <span class="n">myDistanceArea</span><span class="o">.</span><span class="n">setProjectionsEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># Determine how wide our map is in km/m</span>
+        <span class="c"># Starting point at BL corner</span>
+        <span class="n">myComposerExtent</span> <span class="o">=</span> <span class="n">theComposerMap</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span>
+        <span class="n">myStartPoint</span> <span class="o">=</span> <span class="n">QgsPoint</span><span class="p">(</span><span class="n">myComposerExtent</span><span class="o">.</span><span class="n">xMinimum</span><span class="p">(),</span>
+                                <span class="n">myComposerExtent</span><span class="o">.</span><span class="n">yMinimum</span><span class="p">())</span>
+        <span class="c"># Ending point at BR corner</span>
+        <span class="n">myEndPoint</span> <span class="o">=</span> <span class="n">QgsPoint</span><span class="p">(</span><span class="n">myComposerExtent</span><span class="o">.</span><span class="n">xMaximum</span><span class="p">(),</span>
+                              <span class="n">myComposerExtent</span><span class="o">.</span><span class="n">yMinimum</span><span class="p">())</span>
+        <span class="n">myGroundDistance</span> <span class="o">=</span> <span class="n">myDistanceArea</span><span class="o">.</span><span class="n">measureLine</span><span class="p">(</span><span class="n">myStartPoint</span><span class="p">,</span> <span class="n">myEndPoint</span><span class="p">)</span>
+        <span class="c"># Get the equivalent map distance per page mm</span>
+        <span class="n">myMapWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapWidth</span>
+        <span class="c"># How far is 1mm on map on the ground in meters?</span>
+        <span class="n">myMMToGroundDistance</span> <span class="o">=</span> <span class="n">myGroundDistance</span> <span class="o">/</span> <span class="n">myMapWidth</span>
+        <span class="c">#print &#39;MM:&#39;, myMMDistance</span>
+        <span class="c"># How long we want the scale bar to be in relation to the map</span>
+        <span class="n">myScaleBarToMapRatio</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="c"># How many divisions the scale bar should have</span>
+        <span class="n">myTickCount</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">myScaleBarWidthMM</span> <span class="o">=</span> <span class="n">myMapWidth</span> <span class="o">*</span> <span class="n">myScaleBarToMapRatio</span>
+        <span class="n">myPrintSegmentWidthMM</span> <span class="o">=</span> <span class="n">myScaleBarWidthMM</span> <span class="o">/</span> <span class="n">myTickCount</span>
+        <span class="c"># Segment width in real world (m)</span>
+        <span class="c"># We apply some logic here so that segments are displayed in meters</span>
+        <span class="c"># if each segment is less that 1000m otherwise km. Also the segment</span>
+        <span class="c"># lengths are rounded down to human looking numbers e.g. 1km not 1.1km</span>
+        <span class="n">myUnits</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">myGroundSegmentWidth</span> <span class="o">=</span> <span class="n">myPrintSegmentWidthMM</span> <span class="o">*</span> <span class="n">myMMToGroundDistance</span>
+        <span class="k">if</span> <span class="n">myGroundSegmentWidth</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">myUnits</span> <span class="o">=</span> <span class="s">&#39;m&#39;</span>
+            <span class="n">myGroundSegmentWidth</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">myGroundSegmentWidth</span><span class="p">)</span>
+            <span class="c"># adjust the segment width now to account for rounding</span>
+            <span class="n">myPrintSegmentWidthMM</span> <span class="o">=</span> <span class="n">myGroundSegmentWidth</span> <span class="o">/</span> <span class="n">myMMToGroundDistance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myUnits</span> <span class="o">=</span> <span class="s">&#39;km&#39;</span>
+            <span class="c"># Segment with in real world (km)</span>
+            <span class="n">myGroundSegmentWidth</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">myGroundSegmentWidth</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">myPrintSegmentWidthMM</span> <span class="o">=</span> <span class="p">((</span><span class="n">myGroundSegmentWidth</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">/</span>
+                                    <span class="n">myMMToGroundDistance</span><span class="p">)</span>
+        <span class="c"># Now adjust the scalebar width to account for rounding</span>
+        <span class="n">myScaleBarWidthMM</span> <span class="o">=</span> <span class="n">myTickCount</span> <span class="o">*</span> <span class="n">myPrintSegmentWidthMM</span>
+
+        <span class="c">#print &quot;SBWMM:&quot;, myScaleBarWidthMM</span>
+        <span class="c">#print &quot;SWMM:&quot;, myPrintSegmentWidthMM</span>
+        <span class="c">#print &quot;SWM:&quot;, myGroundSegmentWidthM</span>
+        <span class="c">#print &quot;SWKM:&quot;, myGroundSegmentWidthKM</span>
+        <span class="c"># start drawing in line segments</span>
+        <span class="n">myScaleBarHeight</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c"># mm</span>
+        <span class="n">myLineWidth</span> <span class="o">=</span> <span class="mf">0.3</span>  <span class="c"># mm</span>
+        <span class="n">myInsetDistance</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c"># how much to inset the scalebar into the map by</span>
+        <span class="n">myScaleBarX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">+</span> <span class="n">myInsetDistance</span>
+        <span class="n">myScaleBarY</span> <span class="o">=</span> <span class="p">(</span><span class="n">theTopOffset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">-</span>
+                      <span class="n">myInsetDistance</span> <span class="o">-</span> <span class="n">myScaleBarHeight</span><span class="p">)</span>  <span class="c"># mm</span>
+
+        <span class="c"># Draw an outer background box - shamelessly hardcoded buffer</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsComposerShape</span><span class="p">(</span><span class="n">myScaleBarX</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>  <span class="c"># left edge</span>
+                                  <span class="n">myScaleBarY</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span>  <span class="c"># top edge</span>
+                                  <span class="n">myScaleBarWidthMM</span> <span class="o">+</span> <span class="mi">13</span><span class="p">,</span>  <span class="c"># right edge</span>
+                                  <span class="n">myScaleBarHeight</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span>  <span class="c"># bottom edge</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setShapeType</span><span class="p">(</span><span class="n">QgsComposerShape</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setLineWidth</span><span class="p">(</span><span class="n">myLineWidth</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">myBrush</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="c"># workaround for missing setTransparentFill missing from python api</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">myBrush</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+        <span class="c"># Set up the tick label font</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                             <span class="n">myFontSize</span><span class="p">,</span>
+                             <span class="n">myFontWeight</span><span class="p">,</span>
+                             <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="c"># Draw the bottom line</span>
+        <span class="n">myUpshift</span> <span class="o">=</span> <span class="mf">0.3</span>  <span class="c"># shift the bottom line up for better rendering</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsComposerShape</span><span class="p">(</span><span class="n">myScaleBarX</span><span class="p">,</span>
+                                  <span class="n">myScaleBarY</span> <span class="o">+</span> <span class="n">myScaleBarHeight</span> <span class="o">-</span> <span class="n">myUpshift</span><span class="p">,</span>
+                                  <span class="n">myScaleBarWidthMM</span><span class="p">,</span>
+                                  <span class="mf">0.1</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setShapeType</span><span class="p">(</span><span class="n">QgsComposerShape</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setLineWidth</span><span class="p">(</span><span class="n">myLineWidth</span><span class="p">)</span>
+        <span class="n">myRect</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+        <span class="c"># Now draw the scalebar ticks</span>
+        <span class="k">for</span> <span class="n">myTickCountIterator</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">myTickCount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">myDistanceSuffix</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">myTickCountIterator</span> <span class="o">==</span> <span class="n">myTickCount</span><span class="p">:</span>
+                <span class="n">myDistanceSuffix</span> <span class="o">=</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">myUnits</span>
+            <span class="n">myRealWorldDistance</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%.0f%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                                   <span class="p">(</span><span class="n">myTickCountIterator</span> <span class="o">*</span>
+                                    <span class="n">myGroundSegmentWidth</span><span class="p">,</span>
+                                    <span class="n">myDistanceSuffix</span><span class="p">))</span>
+            <span class="c">#print &#39;RW:&#39;, myRealWorldDistance</span>
+            <span class="n">myMMOffset</span> <span class="o">=</span> <span class="n">myScaleBarX</span> <span class="o">+</span> <span class="p">(</span><span class="n">myTickCountIterator</span> <span class="o">*</span>
+                                        <span class="n">myPrintSegmentWidthMM</span><span class="p">)</span>
+            <span class="c">#print &#39;MM:&#39;, myMMOffset</span>
+            <span class="n">myTickHeight</span> <span class="o">=</span> <span class="n">myScaleBarHeight</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="c"># Lines are not exposed by the api yet so we</span>
+            <span class="c"># bodge drawing lines using rectangles with 1px height or width</span>
+            <span class="n">myTickWidth</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c"># width or rectangle to be drawn</span>
+            <span class="n">myUpTickLine</span> <span class="o">=</span> <span class="n">QgsComposerShape</span><span class="p">(</span><span class="n">myMMOffset</span><span class="p">,</span>
+                                <span class="n">myScaleBarY</span> <span class="o">+</span> <span class="n">myScaleBarHeight</span> <span class="o">-</span> <span class="n">myTickHeight</span><span class="p">,</span>
+                                <span class="n">myTickWidth</span><span class="p">,</span>
+                                <span class="n">myTickHeight</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+
+            <span class="n">myUpTickLine</span><span class="o">.</span><span class="n">setShapeType</span><span class="p">(</span><span class="n">QgsComposerShape</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">)</span>
+            <span class="n">myUpTickLine</span><span class="o">.</span><span class="n">setLineWidth</span><span class="p">(</span><span class="n">myLineWidth</span><span class="p">)</span>
+            <span class="n">myUpTickLine</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myUpTickLine</span><span class="p">)</span>
+            <span class="c">#</span>
+            <span class="c"># Add a tick label</span>
+            <span class="c">#</span>
+            <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QgsComposerLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+            <span class="n">myLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+            <span class="n">myLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myRealWorldDistance</span><span class="p">)</span>
+            <span class="n">myLabel</span><span class="o">.</span><span class="n">adjustSizeToText</span><span class="p">()</span>
+            <span class="n">myLabel</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="n">myMMOffset</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span>
+                                <span class="n">myScaleBarY</span> <span class="o">-</span> <span class="n">myTickHeight</span><span class="p">)</span>
+            <span class="n">myLabel</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myLabel</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.drawImpactTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawImpactTitle">[docs]</a>    <span class="k">def</span> <span class="nf">drawImpactTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw the map subtitle - obtained from the impact layer keywords.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which to begin drawing</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float - the height of the label as rendered</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myTitle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMapTitle</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">myTitle</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myTitle</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Bold</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                         <span class="n">myFontSize</span><span class="p">,</span>
+                         <span class="n">myFontWeight</span><span class="p">,</span>
+                         <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QgsComposerLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+        <span class="n">myHeading</span> <span class="o">=</span> <span class="n">myTitle</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myHeading</span><span class="p">)</span>
+        <span class="n">myLabelWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">myLabelHeight</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span><span class="p">,</span>
+                            <span class="n">theTopOffset</span><span class="p">,</span>
+                            <span class="n">myLabelWidth</span><span class="p">,</span>
+                            <span class="n">myLabelHeight</span><span class="p">,</span>
+                            <span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myLabel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myLabelHeight</span>
+</div>
+<div class="viewcode-block" id="Map.drawLegend"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawLegend">[docs]</a>    <span class="k">def</span> <span class="nf">drawLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a legend to the map using our custom legend renderer.</span>
+
+<span class="sd">        .. note:: getLegend generates a pixmap in 150dpi so if you set</span>
+<span class="sd">           the map to a higher dpi it will appear undersized.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which to begin drawing</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getLegend</span><span class="p">()</span>
+        <span class="n">myPicture1</span> <span class="o">=</span> <span class="n">QgsComposerPicture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myLegendFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;legend.png&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myLegendFile</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+        <span class="n">myPicture1</span><span class="o">.</span><span class="n">setPictureFile</span><span class="p">(</span><span class="n">myLegendFile</span><span class="p">)</span>
+        <span class="n">myLegendHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsToMM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">myLegendWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsToMM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="n">myPicture1</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span><span class="p">,</span>
+                                   <span class="n">theTopOffset</span><span class="p">,</span>
+                                   <span class="n">myLegendWidth</span><span class="p">,</span>
+                                   <span class="n">myLegendHeight</span><span class="p">)</span>
+        <span class="n">myPicture1</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myPicture1</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">myLegendFile</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.drawPixmap"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawPixmap">[docs]</a>    <span class="k">def</span> <span class="nf">drawPixmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thePixmap</span><span class="p">,</span> <span class="n">theWidthMM</span><span class="p">,</span> <span class="n">theLeftOffset</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper to draw a pixmap directly onto the QGraphicsScene.</span>
+<span class="sd">        This is an alternative to using QgsComposerPicture which in</span>
+<span class="sd">        some cases leaves artifacts under windows.</span>
+
+<span class="sd">        The Pixmap will have a transform applied to it so that</span>
+<span class="sd">        it is rendered with the same resolution as the composition.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            * thePixmap</span>
+<span class="sd">            * theWidthMM - desired width in mm of output on page</span>
+<span class="sd">            * theLeftOffset</span>
+<span class="sd">            * theTopOffset</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QGraphicsSceneItem is returned</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myDesiredWidthMM</span> <span class="o">=</span> <span class="n">theWidthMM</span>  <span class="c"># mm</span>
+        <span class="n">myDesiredWidthPX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mmToPoints</span><span class="p">(</span><span class="n">myDesiredWidthMM</span><span class="p">)</span>
+        <span class="n">myActualWidthPX</span> <span class="o">=</span> <span class="n">thePixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">myScaleFactor</span> <span class="o">=</span> <span class="n">myDesiredWidthPX</span> <span class="o">/</span> <span class="n">myActualWidthPX</span>
+
+        <span class="k">print</span> <span class="n">myScaleFactor</span><span class="p">,</span> <span class="n">myActualWidthPX</span><span class="p">,</span> <span class="n">myDesiredWidthPX</span>
+        <span class="n">myTransform</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTransform</span><span class="p">()</span>
+        <span class="n">myTransform</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">myScaleFactor</span><span class="p">,</span> <span class="n">myScaleFactor</span><span class="p">)</span>
+        <span class="n">myTransform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">myItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">thePixmap</span><span class="p">)</span>
+        <span class="n">myItem</span><span class="o">.</span><span class="n">setTransform</span><span class="p">(</span><span class="n">myTransform</span><span class="p">)</span>
+        <span class="n">myItem</span><span class="o">.</span><span class="n">setOffset</span><span class="p">(</span><span class="n">theLeftOffset</span> <span class="o">/</span> <span class="n">myScaleFactor</span><span class="p">,</span>
+                         <span class="n">theTopOffset</span> <span class="o">/</span> <span class="n">myScaleFactor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myItem</span>
+</div>
+<div class="viewcode-block" id="Map.drawImpactTable"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawImpactTable">[docs]</a>    <span class="k">def</span> <span class="nf">drawImpactTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theTopOffset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the impact table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theTopOffset - vertical offset at which to begin drawing</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Draw the table</span>
+        <span class="n">myTable</span> <span class="o">=</span> <span class="n">QgsComposerPicture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myImage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">renderImpactTable</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">myImage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myTableFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getTempDir</span><span class="p">(),</span> <span class="s">&#39;table.png&#39;</span><span class="p">)</span>
+            <span class="n">myImage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">myTableFile</span><span class="p">,</span> <span class="s">&#39;PNG&#39;</span><span class="p">)</span>
+            <span class="n">myTable</span><span class="o">.</span><span class="n">setPictureFile</span><span class="p">(</span><span class="n">myTableFile</span><span class="p">)</span>
+            <span class="n">myScaleFactor</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">myTableHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsToMM</span><span class="p">(</span><span class="n">myImage</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">*</span> <span class="n">myScaleFactor</span>
+            <span class="n">myTableWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointsToMM</span><span class="p">(</span><span class="n">myImage</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="o">*</span> <span class="n">myScaleFactor</span>
+            <span class="n">myLeftOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">-</span> <span class="n">myTableWidth</span>
+            <span class="n">myTable</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="n">myLeftOffset</span><span class="p">,</span>
+                                    <span class="n">theTopOffset</span><span class="p">,</span>
+                                    <span class="n">myTableWidth</span><span class="p">,</span>
+                                    <span class="n">myTableHeight</span><span class="p">)</span>
+            <span class="n">myTable</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myTable</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.drawDisclaimer"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.drawDisclaimer">[docs]</a>    <span class="k">def</span> <span class="nf">drawDisclaimer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a disclaimer to the composition.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myFontSize</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">myFontWeight</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span>
+        <span class="n">myItalicsFlag</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">myFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&#39;verdana&#39;</span><span class="p">,</span>
+                             <span class="n">myFontSize</span><span class="p">,</span>
+                             <span class="n">myFontWeight</span><span class="p">,</span>
+                             <span class="n">myItalicsFlag</span><span class="p">)</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QgsComposerLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">myFont</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disclaimer</span><span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">adjustSizeToText</span><span class="p">()</span>
+        <span class="n">myLabelHeight</span> <span class="o">=</span> <span class="mf">7.0</span>  <span class="c"># mm determined using qgis map composer</span>
+        <span class="n">myLabelWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageWidth</span>   <span class="c"># item - position and size...option</span>
+        <span class="n">myLeftOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span>
+        <span class="n">myTopOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageHeight</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setItemPosition</span><span class="p">(</span><span class="n">myLeftOffset</span><span class="p">,</span>
+                                <span class="n">myTopOffset</span><span class="p">,</span>
+                                <span class="n">myLabelWidth</span><span class="p">,</span>
+                                <span class="n">myLabelHeight</span><span class="p">,</span>
+                                <span class="p">)</span>
+        <span class="n">myLabel</span><span class="o">.</span><span class="n">setFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFramesFlag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">myLabel</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Map.makePdf"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.makePdf">[docs]</a>    <span class="k">def</span> <span class="nf">makePdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to createa  nice little pdf map.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theFilename - a string containing a filename path with .pdf</span>
+<span class="sd">            extension</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupComposition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupPrinter</span><span class="p">(</span><span class="n">theFilename</span><span class="p">)</span>
+        <span class="c"># Keep track of our vertical positioning as we work our way down</span>
+        <span class="c"># the page placing elements on it.</span>
+        <span class="n">myTopOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageMargin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawLogo</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="n">myLabelHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawTitle</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="c"># Update the map offset for the next row of content</span>
+        <span class="n">myTopOffset</span> <span class="o">+=</span> <span class="n">myLabelHeight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalSpacing</span>
+        <span class="n">myComposerMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawMap</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawScaleBar</span><span class="p">(</span><span class="n">myComposerMap</span><span class="p">,</span> <span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="c"># Update the top offset for the next horizontal row of items</span>
+        <span class="n">myTopOffset</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapHeight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalSpacing</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">myImpactTitleHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawImpactTitle</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="c"># Update the top offset for the next horizontal row of items</span>
+        <span class="k">if</span> <span class="n">myImpactTitleHeight</span><span class="p">:</span>
+            <span class="n">myTopOffset</span> <span class="o">+=</span> <span class="n">myImpactTitleHeight</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalSpacing</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawLegend</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawImpactTable</span><span class="p">(</span><span class="n">myTopOffset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawDisclaimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">renderPrintout</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Map.getMapTitle"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.getMapTitle">[docs]</a>    <span class="k">def</span> <span class="nf">getMapTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the map title from the layer keywords if possible.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None on error, otherwise the title</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myTitle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="s">&#39;map_title&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">myTitle</span>
+        <span class="k">except</span> <span class="n">KeywordNotFoundException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="Map.renderImpactTable"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.renderImpactTable">[docs]</a>    <span class="k">def</span> <span class="nf">renderImpactTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the table in the keywords if present. The table is an</span>
+<span class="sd">        html table with statistics for the impact layer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myHtml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">readKeywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="s">&#39;impact_table&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">renderHtml</span><span class="p">(</span><span class="n">myHtml</span><span class="p">,</span> <span class="mi">156</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">KeywordNotFoundException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="Map.renderHtml"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.renderHtml">[docs]</a>    <span class="k">def</span> <span class="nf">renderHtml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theHtml</span><span class="p">,</span> <span class="n">theWidthMM</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render some HTML to a pixmap.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            * theHtml - HTML to be rendered. It is assumed that the html</span>
+<span class="sd">              is a snippet only, containing no body element - a standard</span>
+<span class="sd">              header and footer will be appended.</span>
+<span class="sd">            * theWidthMM- width of the table in mm - will be converted to</span>
+<span class="sd">              points based on the resolution of our page.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A QPixmap</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Using 150dpi as the baseline, work out a standard text size</span>
+        <span class="c"># multiplier so that page renders equally well at different print</span>
+        <span class="c"># resolutions.</span>
+        <span class="n">myBaselineDpi</span> <span class="o">=</span> <span class="mi">150</span>
+        <span class="n">myFactor</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span><span class="p">)</span> <span class="o">/</span> <span class="n">myBaselineDpi</span>
+        <span class="n">myWidthPx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mmToPoints</span><span class="p">(</span><span class="n">theWidthMM</span><span class="p">)</span>
+        <span class="n">myPage</span> <span class="o">=</span> <span class="n">QtWebKit</span><span class="o">.</span><span class="n">QWebPage</span><span class="p">()</span>
+        <span class="n">myFrame</span> <span class="o">=</span> <span class="n">myPage</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">()</span>
+        <span class="n">myFrame</span><span class="o">.</span><span class="n">setTextSizeMultiplier</span><span class="p">(</span><span class="n">myFactor</span><span class="p">)</span>
+        <span class="n">myFrame</span><span class="o">.</span><span class="n">setScrollBarPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">,</span>
+                                   <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAlwaysOff</span><span class="p">)</span>
+        <span class="n">myFrame</span><span class="o">.</span><span class="n">setScrollBarPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span>
+                                   <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAlwaysOff</span><span class="p">)</span>
+
+        <span class="n">myHeader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">htmlHeader</span><span class="p">()</span>
+        <span class="n">myFooter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">htmlFooter</span><span class="p">()</span>
+        <span class="n">myHtml</span> <span class="o">=</span> <span class="n">myHeader</span> <span class="o">+</span> <span class="n">theHtml</span> <span class="o">+</span> <span class="n">myFooter</span>
+        <span class="n">myFrame</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="n">myHtml</span><span class="p">)</span>
+        <span class="c">#file(&#39;/tmp/report.html&#39;, &#39;wt&#39;).write(myHtml).close()</span>
+        <span class="c">#print &#39;\n\n\nPage:\n&#39;, myFrame.toHtml()</span>
+        <span class="c">#mySize = QtCore.QSize(600, 200)</span>
+        <span class="n">mySize</span> <span class="o">=</span> <span class="n">myFrame</span><span class="o">.</span><span class="n">contentsSize</span><span class="p">()</span>
+        <span class="n">mySize</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="n">myWidthPx</span><span class="p">)</span>
+        <span class="n">myPage</span><span class="o">.</span><span class="n">setViewportSize</span><span class="p">(</span><span class="n">mySize</span><span class="p">)</span>
+        <span class="c"># Disabled for now but please keep this as we may want to render using</span>
+        <span class="c"># a QImage due to device constraints (eg. headless server)</span>
+        <span class="n">myQImageFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">myQImageFlag</span><span class="p">:</span>
+            <span class="n">myImage</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">mySize</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_ARGB32</span><span class="p">)</span>
+            <span class="n">myImage</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">myImage</span><span class="p">)</span>
+            <span class="n">myFrame</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">myPainter</span><span class="p">)</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">myImage</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># render with qpixmap rather</span>
+            <span class="n">myPixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">mySize</span><span class="p">)</span>
+            <span class="n">myPixmap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">myPainter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">myPixmap</span><span class="p">)</span>
+            <span class="n">myFrame</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">myPainter</span><span class="p">)</span>
+            <span class="n">myPainter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">myPixmap</span>
+</div>
+<div class="viewcode-block" id="Map.pointsToMM"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.pointsToMM">[docs]</a>    <span class="k">def</span> <span class="nf">pointsToMM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thePoints</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert measurement in points to one in mm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            thePoints - distance in pixels</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            mm converted value</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myInchAsMM</span> <span class="o">=</span> <span class="mf">25.4</span>
+        <span class="n">myMM</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">thePoints</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span><span class="p">)</span> <span class="o">*</span> <span class="n">myInchAsMM</span>
+        <span class="k">return</span> <span class="n">myMM</span>
+</div>
+<div class="viewcode-block" id="Map.mmToPoints"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.mmToPoints">[docs]</a>    <span class="k">def</span> <span class="nf">mmToPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theMM</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert measurement in points to one in mm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            theMM - distance in milimeters</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            mm converted value</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Any exceptions raised by the InaSAFE library will be propogated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myInchAsMM</span> <span class="o">=</span> <span class="mf">25.4</span>
+        <span class="n">myPoints</span> <span class="o">=</span> <span class="p">(</span><span class="n">theMM</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pageDpi</span><span class="p">)</span> <span class="o">/</span> <span class="n">myInchAsMM</span>
+        <span class="k">return</span> <span class="n">myPoints</span>
+</div>
+<div class="viewcode-block" id="Map.htmlHeader"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.htmlHeader">[docs]</a>    <span class="k">def</span> <span class="nf">htmlHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a standard html header for wrapping content in.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">htmlHeader</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span>
+</div>
+<div class="viewcode-block" id="Map.htmlFooter"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.htmlFooter">[docs]</a>    <span class="k">def</span> <span class="nf">htmlFooter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a standard html footer for wrapping content in.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">footer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">footer</span> <span class="o">=</span> <span class="n">htmlFooter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">footer</span>
+</div>
+<div class="viewcode-block" id="Map.showComposer"><a class="viewcode-back" href="../../api-docs/safe_qgis/map.html#safe_qgis.map.Map.showComposer">[docs]</a>    <span class="k">def</span> <span class="nf">showComposer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Show the composition in a composer view so the user can tweak it</span>
+<span class="sd">        if they want to.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myView</span> <span class="o">=</span> <span class="n">QgsComposerView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">())</span>
+        <span class="n">myView</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

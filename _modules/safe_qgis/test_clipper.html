@@ -1,0 +1,593 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_clipper &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_clipper</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd"> **ISClipper test suite.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;20/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add PARENT directory to path to make test aware of other modules</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsVectorLayer</span><span class="p">,</span>
+                       <span class="n">QgsRasterLayer</span><span class="p">,</span>
+                       <span class="n">QgsGeometry</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="n">readSafeLayer</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="n">getOptimalExtent</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">InvalidProjectionException</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.clipper</span> <span class="kn">import</span> <span class="n">clipLayer</span><span class="p">,</span> <span class="n">extentToKml</span><span class="p">,</span> <span class="n">explodeMultiPartGeometry</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getQgisTestApp</span><span class="p">,</span>
+                            <span class="n">setCanvasCrs</span><span class="p">,</span>
+                            <span class="n">RedirectStdStreams</span><span class="p">,</span>
+                            <span class="n">DEVNULL</span><span class="p">,</span>
+                            <span class="n">GEOCRS</span><span class="p">,</span>
+                            <span class="n">setJakartaGeoExtent</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">TESTDATA</span>
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">nanallclose</span>
+
+<span class="c"># Setup pathnames for test data sets</span>
+<span class="n">VECTOR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Padang_WGS84.shp&#39;</span><span class="p">)</span>
+<span class="n">VECTOR_PATH2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;OSM_subset_google_mercator.shp&#39;</span><span class="p">)</span>
+
+<span class="n">RASTERPATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span><span class="p">)</span>
+<span class="n">RASTERPATH2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;population_padang_1.asc&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Handle to common QGis test app</span>
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ClipperTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest">[docs]</a><span class="k">class</span> <span class="nc">ClipperTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE clipper&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="ClipperTest.test_clipVector"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_clipVector">[docs]</a>    <span class="k">def</span> <span class="nf">test_clipVector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Vector layers can be clipped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Create a vector layer</span>
+        <span class="n">myName</span> <span class="o">=</span> <span class="s">&#39;padang&#39;</span>
+        <span class="n">myVectorLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">VECTOR_PATH</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="s">&#39;ogr&#39;</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find layer &quot;</span><span class="si">%s</span><span class="s">&quot; in path &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myName</span><span class="p">,</span>
+                                                        <span class="n">VECTOR_PATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myVectorLayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">assert</span> <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span>
+        <span class="c"># Create a bounding box</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="p">[</span><span class="mf">100.03</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.14</span><span class="p">,</span> <span class="mf">100.81</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.73</span><span class="p">]</span>
+
+        <span class="c"># Clip the vector to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myRect</span><span class="p">)</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_clipRaster"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_clipRaster">[docs]</a>    <span class="k">def</span> <span class="nf">test_clipRaster</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raster layers can be clipped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Create a raster layer</span>
+        <span class="n">myName</span> <span class="o">=</span> <span class="s">&#39;shake&#39;</span>
+        <span class="n">myRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">RASTERPATH</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find layer &quot;</span><span class="si">%s</span><span class="s">&quot; in path &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myName</span><span class="p">,</span>
+                                                        <span class="n">RASTERPATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myRasterLayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Create a bounding box</span>
+        <span class="n">myRect</span> <span class="o">=</span> <span class="p">[</span><span class="mi">97</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c"># Clip the vector to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span> <span class="n">myRect</span><span class="p">)</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+
+        <span class="c"># Clip and give a desired resolution for the output</span>
+        <span class="n">mySize</span> <span class="o">=</span> <span class="mf">0.05</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span> <span class="n">myRect</span><span class="p">,</span> <span class="n">mySize</span><span class="p">)</span>
+        <span class="n">myNewRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myNewRasterLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="s">&#39;Resampled raster is not valid&#39;</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resampled raster has incorrect pixel size.&#39;</span>
+               <span class="s">&#39;Expected: </span><span class="si">%f</span><span class="s">, Actual: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span>
+               <span class="p">(</span><span class="n">mySize</span><span class="p">,</span> <span class="n">myNewRasterLayer</span><span class="o">.</span><span class="n">rasterUnitsPerPixel</span><span class="p">()))</span>
+        <span class="k">assert</span> <span class="n">myNewRasterLayer</span><span class="o">.</span><span class="n">rasterUnitsPerPixel</span><span class="p">()</span> <span class="o">==</span> <span class="n">mySize</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_invalidFilenamesCaught"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_invalidFilenamesCaught">[docs]</a>    <span class="k">def</span> <span class="nf">test_invalidFilenamesCaught</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Invalid filenames raise appropriate exceptions</span>
+
+<span class="sd">        Wrote this test because test_clipBoth raised the wrong error</span>
+<span class="sd">        when file was missing. Instead of reporting that, it gave</span>
+<span class="sd">        Western boundary must be less than eastern. I got [0.0, 0.0, 0.0, 0.0]</span>
+
+<span class="sd">        See issue #170</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Try to create a vector layer from non-existing filename</span>
+        <span class="n">myName</span> <span class="o">=</span> <span class="s">&#39;stnhaoeu_78oeukqjkrcgA&#39;</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="s">&#39;OEk_tnshoeu_439_kstnhoe&#39;</span>
+
+        <span class="k">with</span> <span class="n">RedirectStdStreams</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">):</span>
+            <span class="n">myVectorLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="s">&#39;ogr&#39;</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;QgsVectorLayer reported &quot;valid&quot; for non &#39;</span>
+               <span class="s">&#39;existent path &quot;</span><span class="si">%s</span><span class="s">&quot; and name &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myName</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Create a raster layer</span>
+        <span class="k">with</span> <span class="n">RedirectStdStreams</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">):</span>
+            <span class="n">myRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;QgsRasterLayer reported &quot;valid&quot; for non &#39;</span>
+               <span class="s">&#39;existent path &quot;</span><span class="si">%s</span><span class="s">&quot; and name &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myName</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">myRasterLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_clipBoth"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_clipBoth">[docs]</a>    <span class="k">def</span> <span class="nf">test_clipBoth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raster and Vector layers can be clipped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Create a vector layer</span>
+        <span class="n">myName</span> <span class="o">=</span> <span class="s">&#39;padang&#39;</span>
+        <span class="n">myVectorLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">VECTOR_PATH</span><span class="p">,</span> <span class="n">myName</span><span class="p">,</span> <span class="s">&#39;ogr&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find layer &quot;</span><span class="si">%s</span><span class="s">&quot; in path &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myName</span><span class="p">,</span>
+                                                        <span class="n">VECTOR_PATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Create a raster layer</span>
+        <span class="n">myName</span> <span class="o">=</span> <span class="s">&#39;shake&#39;</span>
+        <span class="n">myRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">RASTERPATH</span><span class="p">,</span> <span class="n">myName</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Did not find layer &quot;</span><span class="si">%s</span><span class="s">&quot; in path &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myName</span><span class="p">,</span>
+                                                        <span class="n">RASTERPATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myRasterLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Create a bounding box</span>
+        <span class="n">myViewportGeoExtent</span> <span class="o">=</span> <span class="p">[</span><span class="mf">99.53</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.22</span><span class="p">,</span> <span class="mf">101.20</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.36</span><span class="p">]</span>
+
+        <span class="c"># Get the Hazard extents as an array in EPSG:4326</span>
+        <span class="n">myHazardGeoExtent</span> <span class="o">=</span> <span class="p">[</span><span class="n">myRasterLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">xMinimum</span><span class="p">(),</span>
+                             <span class="n">myRasterLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">yMinimum</span><span class="p">(),</span>
+                             <span class="n">myRasterLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">xMaximum</span><span class="p">(),</span>
+                             <span class="n">myRasterLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">yMaximum</span><span class="p">()]</span>
+
+        <span class="c"># Get the Exposure extents as an array in EPSG:4326</span>
+        <span class="n">myExposureGeoExtent</span> <span class="o">=</span> <span class="p">[</span><span class="n">myVectorLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">xMinimum</span><span class="p">(),</span>
+                               <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">yMinimum</span><span class="p">(),</span>
+                               <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">xMaximum</span><span class="p">(),</span>
+                               <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span><span class="o">.</span><span class="n">yMaximum</span><span class="p">()]</span>
+
+        <span class="c"># Now work out the optimal extent between the two layers and</span>
+        <span class="c"># the current view extent. The optimal extent is the intersection</span>
+        <span class="c"># between the two layers and the viewport.</span>
+        <span class="c"># Extent is returned as an array [xmin,ymin,xmax,ymax]</span>
+        <span class="n">myGeoExtent</span> <span class="o">=</span> <span class="n">getOptimalExtent</span><span class="p">(</span><span class="n">myHazardGeoExtent</span><span class="p">,</span>
+                                       <span class="n">myExposureGeoExtent</span><span class="p">,</span>
+                                       <span class="n">myViewportGeoExtent</span><span class="p">)</span>
+
+        <span class="c"># Clip the vector to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myGeoExtent</span><span class="p">)</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+
+        <span class="c"># Clip the raster to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span> <span class="n">myGeoExtent</span><span class="p">)</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+
+        <span class="c"># -------------------------------</span>
+        <span class="c"># Check the extra keywords option</span>
+        <span class="c"># -------------------------------</span>
+        <span class="c"># Clip the vector to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myGeoExtent</span><span class="p">,</span>
+                             <span class="n">theExtraKeywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;kermit&#39;</span><span class="p">:</span> <span class="s">&#39;piggy&#39;</span><span class="p">})</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Extra keyword was not found in </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">kwds</span><span class="p">[</span><span class="s">&#39;kermit&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;piggy&#39;</span>
+
+        <span class="c"># Clip the raster to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span> <span class="n">myGeoExtent</span><span class="p">,</span>
+                             <span class="n">theExtraKeywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;zoot&#39;</span><span class="p">:</span> <span class="s">&#39;animal&#39;</span><span class="p">})</span>
+
+        <span class="c"># Check the output is valid</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Extra keyword was not found in </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myResult</span><span class="p">,</span> <span class="n">kwds</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">kwds</span><span class="p">[</span><span class="s">&#39;zoot&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;animal&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.testRasterScaling"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.testRasterScaling">[docs]</a>    <span class="k">def</span> <span class="nf">testRasterScaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raster layers can be scaled when resampled</span>
+
+<span class="sd">        This is a test for ticket #52</span>
+
+<span class="sd">        Native test .asc data has</span>
+
+<span class="sd">        Population_Jakarta_geographic.asc</span>
+<span class="sd">        ncols         638</span>
+<span class="sd">        nrows         649</span>
+<span class="sd">        cellsize      0.00045228819716044</span>
+
+<span class="sd">        Population_2010.asc</span>
+<span class="sd">        ncols         5525</span>
+<span class="sd">        nrows         2050</span>
+<span class="sd">        cellsize      0.0083333333333333</span>
+
+<span class="sd">        Scaling is necessary for raster data that represents density</span>
+<span class="sd">        such as population per km^2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">myFilename</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Population_Jakarta_geographic.asc&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;Population_2010.asc&#39;</span><span class="p">]:</span>
+
+            <span class="n">myRasterPath</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="n">myFilename</span><span class="p">))</span>
+
+            <span class="c"># Get reference values</span>
+            <span class="n">mySafeLayer</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myRasterPath</span><span class="p">)</span>
+            <span class="n">myMinimum</span><span class="p">,</span> <span class="n">myMaximum</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_extrema</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">myMaximum</span>
+            <span class="k">del</span> <span class="n">myMinimum</span>
+            <span class="n">myNativeResolution</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">()</span>
+
+            <span class="c"># Get the Hazard extents as an array in EPSG:4326</span>
+            <span class="n">myBoundingBox</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_bounding_box</span><span class="p">()</span>
+
+            <span class="c"># Test for a range of resolutions</span>
+            <span class="k">for</span> <span class="n">myResolution</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span>
+                                 <span class="mf">0.01</span><span class="p">,</span>
+                                 <span class="mf">0.005</span><span class="p">,</span>
+                                 <span class="mf">0.002</span><span class="p">,</span>
+                                 <span class="mf">0.001</span><span class="p">,</span>
+                                 <span class="mf">0.0005</span><span class="p">,</span>   <span class="c"># Coarser</span>
+                                 <span class="mf">0.0002</span><span class="p">]:</span>  <span class="c"># Finer</span>
+
+                <span class="c"># To save time only do two resolutions for the</span>
+                <span class="c"># large population set</span>
+                <span class="k">if</span> <span class="n">myFilename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Population_2010&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">myResolution</span> <span class="o">&gt;</span> <span class="mf">0.01</span> <span class="ow">or</span> <span class="n">myResolution</span> <span class="o">&lt;</span> <span class="mf">0.005</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+                <span class="c"># Clip the raster to the bbox</span>
+                <span class="n">myExtraKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;resolution&#39;</span><span class="p">:</span> <span class="n">myNativeResolution</span><span class="p">}</span>
+                <span class="n">myRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myRasterPath</span><span class="p">,</span> <span class="s">&#39;xxx&#39;</span><span class="p">)</span>
+                <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span>
+                                     <span class="n">myBoundingBox</span><span class="p">,</span>
+                                     <span class="n">myResolution</span><span class="p">,</span>
+                                     <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">myExtraKeywords</span><span class="p">)</span>
+
+                <span class="n">mySafeLayer</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myResult</span><span class="p">)</span>
+                <span class="n">myNativeData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">myScaledData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+                <span class="n">mySigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span>
+                           <span class="n">myNativeResolution</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+
+                <span class="c"># Compare extrema</span>
+                <span class="n">myExpectedScaledMax</span> <span class="o">=</span> <span class="n">mySigma</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">myNativeData</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resampled raster was not rescaled correctly: &#39;</span>
+                       <span class="s">&#39;max(myScaledData) was </span><span class="si">%f</span><span class="s"> but expected </span><span class="si">%f</span><span class="s">&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">myScaledData</span><span class="p">),</span> <span class="n">myExpectedScaledMax</span><span class="p">))</span>
+
+                <span class="c"># FIXME (Ole): The rtol used to be 1.0e-8 -</span>
+                <span class="c">#              now it has to be 1.0e-6, otherwise we get</span>
+                <span class="c">#              max(myScaledData) was 12083021.000000 but</span>
+                <span class="c">#              expected 12083020.414316</span>
+                <span class="c">#              Is something being rounded to the nearest</span>
+                <span class="c">#              integer?</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">myExpectedScaledMax</span><span class="p">,</span>
+                                      <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">myScaledData</span><span class="p">),</span>
+                                      <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="n">myExpectedScaledMin</span> <span class="o">=</span> <span class="n">mySigma</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">myNativeData</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resampled raster was not rescaled correctly: &#39;</span>
+                       <span class="s">&#39;min(myScaledData) was </span><span class="si">%f</span><span class="s"> but expected </span><span class="si">%f</span><span class="s">&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">myScaledData</span><span class="p">),</span> <span class="n">myExpectedScaledMin</span><span class="p">))</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">myExpectedScaledMin</span><span class="p">,</span>
+                                      <span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">myScaledData</span><span class="p">),</span>
+                                      <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="c"># Compare elementwise</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Resampled raster was not rescaled correctly&#39;</span>
+                <span class="k">assert</span> <span class="n">nanallclose</span><span class="p">(</span><span class="n">myNativeData</span> <span class="o">*</span> <span class="n">mySigma</span><span class="p">,</span> <span class="n">myScaledData</span><span class="p">,</span>
+                                   <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="c"># Check that it also works with manual scaling</span>
+                <span class="n">myManualData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="n">mySigma</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Resampled raster was not rescaled correctly&#39;</span>
+                <span class="k">assert</span> <span class="n">nanallclose</span><span class="p">(</span><span class="n">myManualData</span><span class="p">,</span> <span class="n">myScaledData</span><span class="p">,</span>
+                                   <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="c"># Check that an exception is raised for bad arguments</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="s">&#39;bad&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;String argument should have raised exception&#39;</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="s">&#39;(1, 3)&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Tuple argument should have raised exception&#39;</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+                <span class="c"># Check None option without keyword datatype == &#39;density&#39;</span>
+                <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;undefined&#39;</span>
+                <span class="n">myUnscaledData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Data should not have changed&#39;</span>
+                <span class="k">assert</span> <span class="n">nanallclose</span><span class="p">(</span><span class="n">myNativeData</span><span class="p">,</span> <span class="n">myUnscaledData</span><span class="p">,</span>
+                                   <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="c"># Try with None and density keyword</span>
+                <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;density&#39;</span>
+                <span class="n">myUnscaledData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Resampled raster was not rescaled correctly&#39;</span>
+                <span class="k">assert</span> <span class="n">nanallclose</span><span class="p">(</span><span class="n">myScaledData</span><span class="p">,</span> <span class="n">myUnscaledData</span><span class="p">,</span>
+                                   <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">),</span> <span class="n">myMessage</span>
+
+                <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;counts&#39;</span>
+                <span class="n">myUnscaledData</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Data should not have changed&#39;</span>
+                <span class="k">assert</span> <span class="n">nanallclose</span><span class="p">(</span><span class="n">myNativeData</span><span class="p">,</span> <span class="n">myUnscaledData</span><span class="p">,</span>
+                                   <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.testRasterScaling_projected"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.testRasterScaling_projected">[docs]</a>    <span class="k">def</span> <span class="nf">testRasterScaling_projected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attempt to scale projected density raster layers raise exception</span>
+
+<span class="sd">        Automatic scaling when resampling density data</span>
+<span class="sd">        does not currently work for projected layers. See issue #123.</span>
+
+<span class="sd">        For the time being this test checks that an exception is raised</span>
+<span class="sd">        when scaling is attempted on projected layers.</span>
+<span class="sd">        When we resolve issue #123, this test should be rewritten.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">myTestFilename</span> <span class="o">=</span> <span class="s">&#39;Population_Jakarta_UTM48N.tif&#39;</span>
+        <span class="n">myRasterPath</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="n">myTestFilename</span><span class="p">))</span>
+
+        <span class="c"># Get reference values</span>
+        <span class="n">mySafeLayer</span> <span class="o">=</span> <span class="n">readSafeLayer</span><span class="p">(</span><span class="n">myRasterPath</span><span class="p">)</span>
+        <span class="n">myMinimum</span><span class="p">,</span> <span class="n">myMaximum</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_extrema</span><span class="p">()</span>
+        <span class="n">myNativeResolution</span> <span class="o">=</span> <span class="n">mySafeLayer</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">()</span>
+
+        <span class="k">print</span>
+        <span class="k">print</span> <span class="n">myMinimum</span><span class="p">,</span> <span class="n">myMaximum</span>
+        <span class="k">print</span> <span class="n">myNativeResolution</span>
+
+        <span class="c"># Define bounding box in EPSG:4326</span>
+        <span class="n">myBoundingBox</span> <span class="o">=</span> <span class="p">[</span><span class="mf">106.61</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.38</span><span class="p">,</span> <span class="mf">107.05</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.07</span><span class="p">]</span>
+
+        <span class="c"># Test for a range of resolutions</span>
+        <span class="k">for</span> <span class="n">myResolution</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]:</span>
+
+            <span class="c"># Clip the raster to the bbox</span>
+            <span class="n">myExtraKeywords</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;resolution&#39;</span><span class="p">:</span> <span class="n">myNativeResolution</span><span class="p">}</span>
+            <span class="n">myRasterLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myRasterPath</span><span class="p">,</span> <span class="s">&#39;xxx&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myRasterLayer</span><span class="p">,</span>
+                                     <span class="n">myBoundingBox</span><span class="p">,</span>
+                                     <span class="n">myResolution</span><span class="p">,</span>
+                                     <span class="n">theExtraKeywords</span><span class="o">=</span><span class="n">myExtraKeywords</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">myResult</span>
+            <span class="k">except</span> <span class="n">InvalidProjectionException</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Should have raised InvalidProjectionException&#39;</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_extentToKml"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_extentToKml">[docs]</a>    <span class="k">def</span> <span class="nf">test_extentToKml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test if extent to KML is working.&quot;&quot;&quot;</span>
+        <span class="n">myExtent</span> <span class="o">=</span> <span class="p">[</span><span class="mf">100.03</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.14</span><span class="p">,</span> <span class="mf">100.81</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.73</span><span class="p">]</span>
+        <span class="n">myKmlFilename</span> <span class="o">=</span> <span class="n">extentToKml</span><span class="p">(</span><span class="n">myExtent</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myKmlFilename</span><span class="p">)</span>
+        <span class="n">myFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">myKmlFilename</span><span class="p">)</span>
+        <span class="n">myKml</span> <span class="o">=</span> <span class="n">myFile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">myFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Generated KML was not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myKml</span>
+        <span class="k">assert</span> <span class="s">&#39;&lt;?xml version&#39;</span> <span class="ow">in</span> <span class="n">myKml</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">for</span> <span class="n">myValue</span> <span class="ow">in</span> <span class="n">myExtent</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">myValue</span><span class="p">)</span> <span class="ow">in</span> <span class="n">myKml</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_vectorProjections"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_vectorProjections">[docs]</a>    <span class="k">def</span> <span class="nf">test_vectorProjections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that vector input data is reprojected properly during clip&quot;&quot;&quot;</span>
+        <span class="c"># Input data is OSM in GOOGLE CRS</span>
+        <span class="c"># We are reprojecting to GEO and expecting the output shp to be in GEO</span>
+        <span class="c"># see https://github.com/AIFDR/inasafe/issues/119</span>
+        <span class="c"># and https://github.com/AIFDR/inasafe/issues/95</span>
+        <span class="n">myVectorLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">VECTOR_PATH2</span><span class="p">,</span>
+                                       <span class="s">&#39;OSM Buildings&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;ogr&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Failed to load osm buildings&#39;</span>
+        <span class="k">assert</span> <span class="n">myVectorLayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">assert</span> <span class="n">myVectorLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+        <span class="n">myClipRect</span> <span class="o">=</span> <span class="p">[</span><span class="mf">106.52</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.38</span><span class="p">,</span> <span class="mf">107.14</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.07</span><span class="p">]</span>
+        <span class="c"># Clip the vector to the bbox</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">clipLayer</span><span class="p">(</span><span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myClipRect</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myResult</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_explodeMultiPolygonGeometry"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_explodeMultiPolygonGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">test_explodeMultiPolygonGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test exploding POLY multipart to single part geometries works&quot;&quot;&quot;</span>
+        <span class="n">myGeometry</span> <span class="o">=</span> <span class="n">QgsGeometry</span><span class="o">.</span><span class="n">fromWkt</span><span class="p">(</span><span class="s">&#39;MULTIPOLYGON(((-0.966314 0.445890,&#39;</span>
+           <span class="s">&#39;-0.281133 0.555729,-0.092839 0.218369,-0.908780 0.035305,-0.966314&#39;</span>
+           <span class="s">&#39; 0.445890)),((-0.906164 0.003923,-0.077148 0.197447,0.043151&#39;</span>
+           <span class="s">&#39; -0.074533,-0.882628 -0.296824,-0.906164 0.003923)))&#39;</span><span class="p">)</span>
+        <span class="n">myCollection</span> <span class="o">=</span> <span class="n">explodeMultiPartGeometry</span><span class="p">(</span><span class="n">myGeometry</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected 2 parts from multipart polygon geometry&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">myCollection</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_explodeMultiLineGeometry"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_explodeMultiLineGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">test_explodeMultiLineGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test exploding LINES multipart to single part geometries works&quot;&quot;&quot;</span>
+        <span class="n">myGeometry</span> <span class="o">=</span> <span class="n">QgsGeometry</span><span class="o">.</span><span class="n">fromWkt</span><span class="p">(</span><span class="s">&#39;MULTILINESTRING((-0.974159 0.526961,&#39;</span>
+                <span class="s">&#39; -0.291594 0.644645), (-0.411893 0.728331,&#39;</span>
+                <span class="s">&#39; -0.160834 0.568804))&#39;</span><span class="p">)</span>
+        <span class="n">myCollection</span> <span class="o">=</span> <span class="n">explodeMultiPartGeometry</span><span class="p">(</span><span class="n">myGeometry</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected 2 parts from multipart line geometry&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">myCollection</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="ClipperTest.test_explodeMultiPointGeometry"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_clipper.html#safe_qgis.test_clipper.ClipperTest.test_explodeMultiPointGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">test_explodeMultiPointGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test exploding POINT multipart to single part geometries works&quot;&quot;&quot;</span>
+        <span class="n">myGeometry</span> <span class="o">=</span> <span class="n">QgsGeometry</span><span class="o">.</span><span class="n">fromWkt</span><span class="p">(</span><span class="s">&#39;MULTIPOINT((-0.966314 0.445890),&#39;</span>
+           <span class="s">&#39;(-0.281133 0.555729))&#39;</span><span class="p">)</span>
+        <span class="n">myCollection</span> <span class="o">=</span> <span class="n">explodeMultiPartGeometry</span><span class="p">(</span><span class="n">myGeometry</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected 2 parts from multipart point geometry&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">myCollection</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">ClipperTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

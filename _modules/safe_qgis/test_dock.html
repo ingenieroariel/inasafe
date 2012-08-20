@@ -1,0 +1,1284 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_dock &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_dock</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid and World Bank</span>
+<span class="sd">- **GUI Test Cases.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add PARENT directory to path to make test aware of other modules</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtTest</span> <span class="kn">import</span> <span class="n">QTest</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsRasterLayer</span><span class="p">,</span>
+                       <span class="n">QgsMapLayerRegistry</span><span class="p">,</span>
+                       <span class="n">QgsRectangle</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qgis.gui</span> <span class="kn">import</span> <span class="n">QgsMapCanvasLayer</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getQgisTestApp</span><span class="p">,</span>
+                                <span class="n">setCanvasCrs</span><span class="p">,</span>
+                                <span class="n">setPadangGeoExtent</span><span class="p">,</span>
+                                <span class="n">setBatemansBayGeoExtent</span><span class="p">,</span>
+                                <span class="n">setJakartaGeoExtent</span><span class="p">,</span>
+                                <span class="n">setYogyaGeoExtent</span><span class="p">,</span>
+                                <span class="n">setJakartaGoogleExtent</span><span class="p">,</span>
+                                <span class="n">setGeoExtent</span><span class="p">,</span>
+                                <span class="n">GEOCRS</span><span class="p">,</span>
+                                <span class="n">GOOGLECRS</span><span class="p">,</span>
+                                <span class="n">loadLayer</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe_qgis.dock</span> <span class="kn">import</span> <span class="n">Dock</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="p">(</span><span class="n">setRasterStyle</span><span class="p">,</span>
+                          <span class="n">qgisVersion</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span>  <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">EXPDATA</span><span class="p">,</span> <span class="n">TESTDATA</span><span class="p">,</span> <span class="n">UNITDATA</span>
+<span class="c"># Retired impact function for characterisation (Ole)</span>
+<span class="c"># So ignore unused import errors for these? (Tim)</span>
+<span class="c"># pylint: disable=W0611</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">allen_fatality_model</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">HKV_flood_study</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">BNPB_earthquake_guidelines</span>
+<span class="c"># pylint: enable=W0611</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydevd</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pylint: disable=F0401</span>
+    <span class="k">print</span> <span class="s">&#39;Remote debugging is enabled.&#39;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Debugging was disabled&#39;</span>
+
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+<span class="n">DOCK</span> <span class="o">=</span> <span class="n">Dock</span><span class="p">(</span><span class="n">IFACE</span><span class="p">)</span>
+
+<span class="n">YOGYA2006_title</span> <span class="o">=</span> <span class="s">&#39;An earthquake in Yogyakarta like in 2006&#39;</span>
+<span class="n">PADANG2009_title</span> <span class="o">=</span> <span class="s">&#39;An earthquake in Padang like in 2009&#39;</span>
+
+
+<div class="viewcode-block" id="getUiState"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.getUiState">[docs]</a><span class="k">def</span> <span class="nf">getUiState</span><span class="p">(</span><span class="n">ui</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get state of the 3 combos on the DOCK ui. This method is purely for</span>
+<span class="sd">    testing and not to be confused with the saveState and restoreState methods</span>
+<span class="sd">    of inasafedock.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">myHazard</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+    <span class="n">myExposure</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+    <span class="n">myImpactFunctionTitle</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+    <span class="n">myImpactFunctionId</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">getFunctionID</span><span class="p">()</span>
+    <span class="n">myRunButton</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">pbnRunStop</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="n">myHazard</span><span class="p">,</span>
+            <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="n">myExposure</span><span class="p">,</span>
+            <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span> <span class="n">myImpactFunctionTitle</span><span class="p">,</span>
+            <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="n">myImpactFunctionId</span><span class="p">,</span>
+            <span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="n">myRunButton</span><span class="p">}</span>
+
+</div>
+<div class="viewcode-block" id="formattedList"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.formattedList">[docs]</a><span class="k">def</span> <span class="nf">formattedList</span><span class="p">(</span><span class="n">theList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a string representing a list of layers (in correct order)</span>
+<span class="sd">    but formatted with line breaks between each entry.&quot;&quot;&quot;</span>
+    <span class="n">myListString</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">myItem</span> <span class="ow">in</span> <span class="n">theList</span><span class="p">:</span>
+        <span class="n">myListString</span> <span class="o">+=</span> <span class="n">myItem</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="k">return</span> <span class="n">myListString</span>
+
+</div>
+<div class="viewcode-block" id="canvasList"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.canvasList">[docs]</a><span class="k">def</span> <span class="nf">canvasList</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Return a string representing the list of canvas layers (in correct</span>
+<span class="sd">    order) but formatted with line breaks between each entry.&quot;&quot;&quot;</span>
+    <span class="n">myListString</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">myLayer</span> <span class="ow">in</span> <span class="n">CANVAS</span><span class="o">.</span><span class="n">layers</span><span class="p">():</span>
+        <span class="n">myListString</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myLayer</span><span class="o">.</span><span class="n">name</span><span class="p">())</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="k">return</span> <span class="n">myListString</span>
+
+</div>
+<div class="viewcode-block" id="combosToString"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.combosToString">[docs]</a><span class="k">def</span> <span class="nf">combosToString</span><span class="p">(</span><span class="n">ui</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to return a string showing the state of all combos (all their</span>
+<span class="sd">    entries&quot;&quot;&quot;</span>
+
+    <span class="n">myString</span> <span class="o">=</span> <span class="s">&#39;Hazard Layers</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;-------------------------</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myCurrentId</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">myCount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+        <span class="n">myItemText</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">myCount</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">myCount</span> <span class="o">==</span> <span class="n">myCurrentId</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;&gt;&gt; &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;   &#39;</span>
+        <span class="n">myString</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myItemText</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;Exposure Layers</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;-------------------------</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myCurrentId</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">myCount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+        <span class="n">myItemText</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">myCount</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">myCount</span> <span class="o">==</span> <span class="n">myCurrentId</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;&gt;&gt; &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;   &#39;</span>
+        <span class="n">myString</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myItemText</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;Functions</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;-------------------------</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myCurrentId</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">myCount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+        <span class="n">myItemText</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">myCount</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">myCount</span> <span class="o">==</span> <span class="n">myCurrentId</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;&gt;&gt; &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;   &#39;</span>
+        <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> (Function ID: </span><span class="si">%s</span><span class="s">)</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">myItemText</span><span class="p">),</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">getFunctionID</span><span class="p">(</span><span class="n">myCurrentId</span><span class="p">))</span>
+
+    <span class="n">myString</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n\n</span><span class="s"> &gt;&gt; means combo item is selected&#39;</span>
+    <span class="k">return</span> <span class="n">myString</span>
+</div>
+<div class="viewcode-block" id="setupScenario"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.setupScenario">[docs]</a><span class="k">def</span> <span class="nf">setupScenario</span><span class="p">(</span><span class="n">theHazard</span><span class="p">,</span> <span class="n">theExposure</span><span class="p">,</span> <span class="n">theFunction</span><span class="p">,</span> <span class="n">theFunctionId</span><span class="p">,</span>
+                  <span class="n">theOkButtonFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to set the gui state to a given scenario.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        theHazard str - (Required) name of the hazard combo entry to set.</span>
+<span class="sd">        theExposure str - (Required) name of exposure combo entry to set.</span>
+<span class="sd">        theFunction - (Required) name of the function combo entry to set.</span>
+<span class="sd">        theFunctionId - (Required) the imact function id that should be used.</span>
+<span class="sd">        theOkButtonFlag - (Optional) Whether the ok button should be enabled</span>
+<span class="sd">          after this scenario is set up.</span>
+
+<span class="sd">    We require both theFunction and theFunctionId because safe allows for</span>
+<span class="sd">    multiple functions with the same name but different id&#39;s so we need to be</span>
+<span class="sd">    sure we have the right one.</span>
+
+<span class="sd">    Returs: bool - Indicating if the setup was successful</span>
+<span class="sd">            str - A message indicating why it may have failed.</span>
+
+<span class="sd">    Raises: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">theHazard</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">theHazard</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Hazard Layer Not Found: </span><span class="si">%s</span><span class="se">\n</span><span class="s"> Combo State:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">theHazard</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">myIndex</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">theExposure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">theExposure</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Exposure Layer Not Found: </span><span class="si">%s</span><span class="se">\n</span><span class="s"> Combo State:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">theExposure</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">myIndex</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">theFunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">theFunction</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">Impact Function Not Found: </span><span class="si">%s</span><span class="se">\n</span><span class="s"> Combo State:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">myIndex</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+    <span class="c"># Check that layers and impact function are correct</span>
+    <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+
+    <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="n">theOkButtonFlag</span><span class="p">,</span>
+                      <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span> <span class="n">theFunction</span><span class="p">,</span>
+                      <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="n">theFunctionId</span><span class="p">,</span>
+                      <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="n">theHazard</span><span class="p">,</span>
+                      <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="n">theExposure</span><span class="p">}</span>
+
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected versus Actual State</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myMessage</span> <span class="o">+=</span> <span class="s">&#39;--------------------------------------------------------</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="k">for</span> <span class="n">myKey</span> <span class="ow">in</span> <span class="n">myExpectedDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">myMessage</span> <span class="o">+=</span> <span class="s">&#39;Expected </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myKey</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">[</span><span class="n">myKey</span><span class="p">])</span>
+        <span class="n">myMessage</span> <span class="o">+=</span> <span class="s">&#39;Actual   </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myKey</span><span class="p">,</span> <span class="n">myDict</span><span class="p">[</span><span class="n">myKey</span><span class="p">])</span>
+        <span class="n">myMessage</span> <span class="o">+=</span> <span class="s">&#39;----</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myMessage</span> <span class="o">+=</span> <span class="s">&#39;--------------------------------------------------------</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="n">myMessage</span> <span class="o">+=</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+
+    <span class="k">if</span>  <span class="n">myDict</span> <span class="o">!=</span> <span class="n">myExpectedDict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span>
+
+    <span class="k">return</span> <span class="bp">True</span><span class="p">,</span><span class="s">&#39;Matched ok.&#39;</span>
+
+</div>
+<div class="viewcode-block" id="populatemyDock"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.populatemyDock">[docs]</a><span class="k">def</span> <span class="nf">populatemyDock</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;A helper function to populate the DOCK and set it to a valid state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">loadStandardLayers</span><span class="p">()</span>
+    <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c">#QTest.mouseClick(myHazardItem, Qt.LeftButton)</span>
+    <span class="c">#QTest.mouseClick(myExposureItem, Qt.LeftButton)</span>
+
+</div>
+<div class="viewcode-block" id="loadStandardLayers"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.loadStandardLayers">[docs]</a><span class="k">def</span> <span class="nf">loadStandardLayers</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to load standard layers into the dialog.&quot;&quot;&quot;</span>
+    <span class="c"># NOTE: Adding new layers here may break existing tests since</span>
+    <span class="c"># combos are populated alphabetically. Each test will</span>
+    <span class="c"># provide a detailed diagnostic if you break it so make sure</span>
+    <span class="c"># to consult that and clean up accordingly.</span>
+    <span class="c">#</span>
+    <span class="c"># Update on above. We are refactoring tests so they use find on combos</span>
+    <span class="c"># to set them appropriately, instead of relative in combo position</span>
+    <span class="c"># so you should be able to put datasets in any order below.</span>
+    <span class="c"># If chancing the order does cause tests to fail, please update the tests</span>
+    <span class="c"># to also use find instead of relative position. (Tim)</span>
+    <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Padang_WGS84.shp&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">EXPDATA</span><span class="p">,</span> <span class="s">&#39;glp10ag.asc&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;Shakemap_Padang_2009.asc&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;tsunami_max_inundation_depth_utm56s.tif&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;tsunami_building_exposure.shp&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;Flood_Current_Depth_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;Population_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;eq_yogya_2006.asc&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span> <span class="s">&#39;Jakarta_RW_2007flood.shp&#39;</span><span class="p">),</span>
+                  <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;OSM_building_polygons_20110905.shp&#39;</span><span class="p">)]</span>
+    <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span>
+                                                          <span class="n">theDataDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">myHazardLayerCount</span> <span class="o">+</span> <span class="n">myExposureLayerCount</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">myFileList</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span>
+
+</div>
+<div class="viewcode-block" id="loadLayers"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.loadLayers">[docs]</a><span class="k">def</span> <span class="nf">loadLayers</span><span class="p">(</span><span class="n">theLayerList</span><span class="p">,</span> <span class="n">theClearFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">theDataDirectory</span><span class="o">=</span><span class="n">TESTDATA</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to load layers as defined in a python list.&quot;&quot;&quot;</span>
+    <span class="c"># First unload any layers that may already be loaded</span>
+    <span class="k">if</span> <span class="n">theClearFlag</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">myLayer</span> <span class="ow">in</span> <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">mapLayers</span><span class="p">():</span>
+            <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">removeMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+
+    <span class="c"># Now go ahead and load our layers</span>
+    <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">myHazardLayerCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">myCanvasLayers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># Now create our new layers</span>
+    <span class="k">for</span> <span class="n">myFile</span> <span class="ow">in</span> <span class="n">theLayerList</span><span class="p">:</span>
+
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="n">myFile</span><span class="p">,</span> <span class="n">theDataDirectory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&#39;hazard&#39;</span><span class="p">:</span>
+            <span class="n">myHazardLayerCount</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&#39;exposure&#39;</span><span class="p">:</span>
+            <span class="n">myExposureLayerCount</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c"># Add layer to the registry (that QGis knows about)</span>
+        <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">addMapLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+
+        <span class="c"># Create Map Canvas Layer Instance and add to list</span>
+        <span class="n">myCanvasLayers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QgsMapCanvasLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">))</span>
+
+    <span class="c"># Quickly add any existing CANVAS layers to our list first</span>
+    <span class="k">for</span> <span class="n">myLayer</span> <span class="ow">in</span> <span class="n">CANVAS</span><span class="o">.</span><span class="n">layers</span><span class="p">():</span>
+        <span class="n">myCanvasLayers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QgsMapCanvasLayer</span><span class="p">(</span><span class="n">myLayer</span><span class="p">))</span>
+    <span class="c"># now load all these layers in the CANVAS</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setLayerSet</span><span class="p">(</span><span class="n">myCanvasLayers</span><span class="p">)</span>
+    <span class="n">DOCK</span><span class="o">.</span><span class="n">getLayers</span><span class="p">()</span>
+
+    <span class="c"># Add MCL&#39;s to the CANVAS</span>
+    <span class="k">return</span> <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span>
+
+
+<span class="c">#def loadLayer(theLayerFile):</span>
+<span class="c">#    &quot;&quot;&quot;Helper to load and return a single QGIS layer&quot;&quot;&quot;</span>
+<span class="c">#    # Extract basename and absolute path</span>
+<span class="c">#    myBaseName, myExt = os.path.splitext(theLayerFile)</span>
+<span class="c">#    myPath = os.path.join(TESTDATA, theLayerFile)</span>
+<span class="c">#    myKeywordPath = myPath[:-4] + &#39;.keywords&#39;</span>
+<span class="c">#    # Determine if layer is hazard or exposure</span>
+<span class="c">#    myKeywords = read_keywords(myKeywordPath)</span>
+<span class="c">#    myType = &#39;undefined&#39;</span>
+<span class="c">#    if &#39;category&#39; in myKeywords:</span>
+<span class="c">#        myType = myKeywords[&#39;category&#39;]</span>
+<span class="c">#    myMessage = &#39;Could not read %s&#39; % myKeywordPath</span>
+<span class="c">#    assert myKeywords is not None, myMessage#</span>
+<span class="c">#</span>
+<span class="c">#    # Create QGis Layer Instance</span>
+<span class="c">#    if myExt in [&#39;.asc&#39;, &#39;.tif&#39;]:</span>
+<span class="c">#        myLayer = QgsRasterLayer(myPath, myBaseName)</span>
+<span class="c">#    elif myExt in [&#39;.shp&#39;]:</span>
+<span class="c">#        myLayer = QgsVectorLayer(myPath, myBaseName, &#39;ogr&#39;)</span>
+<span class="c">#    else:</span>
+<span class="c">#        myMessage = &#39;File %s had illegal extension&#39; % myPath</span>
+<span class="c">#        raise Exception(myMessage)#</span>
+<span class="c">#</span>
+<span class="c">#    myMessage = &#39;Layer &quot;%s&quot; is not valid&#39; % str(myLayer.source())</span>
+<span class="c">#    assert myLayer.isValid(), myMessage</span>
+<span class="c">#    return myLayer, myType</span>
+
+</div>
+<div class="viewcode-block" id="DockTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest">[docs]</a><span class="k">class</span> <span class="nc">DockTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test the InaSAFE GUI&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DockTest.setUp"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fixture run before all tests&quot;&quot;&quot;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">showOnlyVisibleLayersFlag</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">loadStandardLayers</span><span class="p">()</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">runInThreadFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">showOnlyVisibleLayersFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">setLayerNameFromTitleFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">zoomToImpactFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">hideExposureFlag</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="DockTest.tearDown"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.tearDown">[docs]</a>    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fixture run after each test&quot;&quot;&quot;</span>
+        <span class="n">QgsMapLayerRegistry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">removeAllMapLayers</span><span class="p">()</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_defaults"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">test_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test the GUI in its default state&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_validate"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_validate">[docs]</a>    <span class="k">def</span> <span class="nf">test_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validate function work as expected&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="c"># First check that we DONT validate a clear DOCK</span>
+        <span class="n">myFlag</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">myMessage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;No reason for failure given&#39;</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Validation expected to fail on a cleared DOCK.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">myFlag</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span><span class="p">)</span>
+
+        <span class="c"># Now check we DO validate a populated DOCK</span>
+        <span class="n">populatemyDock</span><span class="p">()</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Validation expected to pass on &#39;</span>
+                     <span class="s">&#39;a populated for with selections.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myFlag</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_setOkButtonStatus"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_setOkButtonStatus">[docs]</a>    <span class="k">def</span> <span class="nf">test_setOkButtonStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;OK button changes properly according to DOCK validity&quot;&quot;&quot;</span>
+        <span class="c"># First check that we ok ISNT enabled on a clear DOCK</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="n">myFlag</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">myMessage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;No reason for failure given&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Validation expected to fail on a cleared DOCK.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">myFlag</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">myMessage</span><span class="p">)</span>
+
+        <span class="c"># Now check OK IS enabled on a populated DOCK</span>
+        <span class="n">populatemyDock</span><span class="p">()</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Validation expected to pass on a &#39;</span> <span class="o">+</span>
+                     <span class="s">&#39;populated DOCK with selections.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myFlag</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runEarthQuakeGuidelinesFunction"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runEarthQuakeGuidelinesFunction">[docs]</a>    <span class="k">def</span> <span class="nf">test_runEarthQuakeGuidelinesFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;GUI runs with Shakemap 2009 and Padang Buildings&quot;&quot;&quot;</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setPadangGeoExtent</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c">#QTest.keyClick(DOCK.cboHazard, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboHazard, QtCore.Qt.Key_Enter)</span>
+        <span class="c">#</span>
+        <span class="c">#QTest.keyClick(DOCK.cboExposure, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboExposure, QtCore.Qt.Key_Enter)</span>
+
+        <span class="c"># Hazard layer</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">PADANG2009_title</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Padang 2009 scenario hazard layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layer</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Padang_WGS84&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Could not find layer Padang_WGS84:</span><span class="se">\n</span><span class="s">&#39;</span>
+                     <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)))</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Impact function</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Earthquake Guidelines function not &#39;</span>
+               <span class="s">&#39;found: &#39;</span> <span class="o">+</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="n">PADANG2009_title</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;Padang_WGS84&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got:</span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">myDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myDict</span> <span class="o">==</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="c"># Expected output:</span>
+        <span class="c">#Buildings    Total</span>
+        <span class="c">#All:    3160</span>
+        <span class="c">#Low damage (10-25%):    0</span>
+        <span class="c">#Medium damage (25-50%):    0</span>
+        <span class="c">#Pre merge of clip on steroids branch:</span>
+        <span class="c">#High damage (50-100%):    3160</span>
+        <span class="c"># Post merge of clip on steoids branch:</span>
+        <span class="c">#High damage (50-100%):    2993</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected result returned for Earthquake guidelines&#39;</span>
+               <span class="s">&#39;function. Expected:</span><span class="se">\n</span><span class="s"> &quot;All&quot; count of 2993, &#39;</span>
+               <span class="s">&#39;received: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;2993&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runEarthquakeFatalityFunction_small"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runEarthquakeFatalityFunction_small">[docs]</a>    <span class="k">def</span> <span class="nf">test_runEarthquakeFatalityFunction_small</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Padang 2009 fatalities estimated correctly (small extent)&quot;&quot;&quot;</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setPadangGeoExtent</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Simulate choosing another combo item and running</span>
+        <span class="c"># the model again</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">PADANG2009_title</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Padang 2009 scenario hazard layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layers</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;People&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;People&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Choose impact function</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Earthquake Fatality Function not &#39;</span>
+               <span class="s">&#39;found: &#39;</span> <span class="o">+</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="n">PADANG2009_title</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;People&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got unexpected state: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">myDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myDict</span> <span class="o">==</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c"># Check against expected output</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected result returned for Earthquake Fatality &#39;</span>
+                     <span class="s">&#39;Function Expected: fatality count of &#39;</span>
+                     <span class="s">&#39;116 , received: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;116&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected result returned for Earthquake Fatality &#39;</span>
+                     <span class="s">&#39;Function Expected: total population count of &#39;</span>
+                     <span class="s">&#39;847529 , received: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;847529&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runEarthquakeFatalityFunction_Padang_full"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runEarthquakeFatalityFunction_Padang_full">[docs]</a>    <span class="k">def</span> <span class="nf">test_runEarthquakeFatalityFunction_Padang_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Padang 2009 fatalities estimated correctly (large extent)&quot;&quot;&quot;</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setGeoExtent</span><span class="p">([</span><span class="mi">96</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>  <span class="c"># This covers all of the 2009 shaking</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Hazard layers</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">PADANG2009_title</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Padang 2009 scenario hazard layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layers</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;People&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;People&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Choose impact function</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Earthquake Fatality Function not &#39;</span>
+               <span class="s">&#39;found: &#39;</span> <span class="o">+</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="n">PADANG2009_title</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;People&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got unexpected state: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">myDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myDict</span> <span class="o">==</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c"># Check against expected output</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected result returned for Earthquake Fatality &#39;</span>
+                     <span class="s">&#39;Function Expected: fatality count of &#39;</span>
+                     <span class="s">&#39;500 , received: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;500&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected result returned for Earthquake Fatality &#39;</span>
+                     <span class="s">&#39;Function Expected: total population count of &#39;</span>
+                     <span class="s">&#39;31372262 , received: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;31372262&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runTsunamiBuildingImpactFunction"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runTsunamiBuildingImpactFunction">[docs]</a>    <span class="k">def</span> <span class="nf">test_runTsunamiBuildingImpactFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tsunami function runs in GUI with Batemans Bay model&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Raster and vector based function runs as expected.&quot;&quot;&quot;</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Hazard layers</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Tsunami Max Inundation&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Tsunami Max Inundation hazard layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layers</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Tsunami Building Exposure&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Tsunami Building Exposure layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Check that layers and impact function are correct</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Flood Building Impact Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Be temporarily closed&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="s">&#39;Tsunami Max Inundation&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;Tsunami Building Exposure&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got unexpected state: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">myDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myDict</span> <span class="o">==</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setBatemansBayGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c">#print myResult</span>
+        <span class="c"># Post clip on steroids refactor</span>
+        <span class="c"># &lt; 1 m:    1923</span>
+        <span class="c"># 1 - 3 m:    89</span>
+        <span class="c"># &gt; 3 m:    0</span>
+        <span class="c"># Post replacement of Batemans Bay dataset</span>
+        <span class="c">#&lt; 1 m:  10</span>
+        <span class="c">#1 - 3 m:    7</span>
+        <span class="c">#&gt; 3 m:  0</span>
+        <span class="c"># Post rewrite of impact function</span>
+        <span class="c">#Building type	Temporarily closed	Total</span>
+        <span class="c">#All	        7	                17</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="k">assert</span> <span class="s">&#39;17&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">assert</span> <span class="s">&#39;7&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+    <span class="k">def</span> <span class="nf">test_runFloodPopulationImpactFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flood function runs in GUI with Jakarta data</span>
+<span class="sd">           Raster on raster based function runs as expected.&quot;&quot;&quot;</span>
+
+        <span class="c"># FIXME (Ole):</span>
+        <span class="c"># Temporarily disabled as it was depending on old scaling method</span>
+        <span class="c"># specific to this dataset. After cleaning up the &#39;official&#39;</span>
+        <span class="c"># impact function, this one doesn&#39;t work. Use instead</span>
+        <span class="c"># HKV impact function in engine/impact_functions_for_testing</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Hazard layers - default is already Banjir Jakarta seperti 2007</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Jakarta 2007 flood hazard layer not found&#39;</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layers - Penduduk Jakarta</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;Penduduk Jakarta&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Penduduk Jakarta exposure layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Choose impact function - HKVtest</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;HKVtest&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;HKVtest impact function not &#39;</span>
+               <span class="s">&#39;found: &#39;</span> <span class="o">+</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+
+        <span class="c"># Exposure layers - Penduduk Jakarta</span>
+        <span class="c">#QTest.keyClick(DOCK.cboExposure, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboExposure, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboExposure, QtCore.Qt.Key_Enter)</span>
+
+        <span class="c"># Choose impact Terdampak</span>
+        <span class="c">#QTest.keyClick(DOCK.cboFunction, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboFunction, QtCore.Qt.Key_Down)</span>
+        <span class="c">#QTest.keyClick(DOCK.cboFunction, QtCore.Qt.Key_Enter)</span>
+
+        <span class="c"># Check that layers and impact function are correct</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="s">&#39;HKVtest&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;Penduduk Jakarta&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got unexpected state: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">myDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myDict</span> <span class="o">==</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c"># Check that the number is as what was calculated by</span>
+        <span class="c"># Marco Hartman form HKV</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="k">assert</span> <span class="s">&#39;2480&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>  <span class="c"># This is the expected impact number</span>
+<div class="viewcode-block" id="DockTest.test_runFloodPopulationImpactFunction"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runFloodPopulationImpactFunction">[docs]</a>    <span class="k">def</span> <span class="nf">test_runFloodPopulationImpactFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flood function runs in GUI with Jakarta data</span>
+<span class="sd">           Raster on raster based function runs as expected.&quot;&quot;&quot;</span>
+
+        <span class="c"># FIXME (Ole):</span>
+        <span class="c"># Temporarily disabled as it was depending on old scaling method</span>
+        <span class="c"># specific to this dataset. After cleaning up the &#39;official&#39;</span>
+        <span class="c"># impact function, this one doesn&#39;t work. Use instead</span>
+        <span class="c"># HKV impact function in engine/impact_functions_for_testing</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;Penduduk Jakarta&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;HKVtest&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;HKVtest&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c"># Check that the number is as what was calculated by</span>
+        <span class="c"># Marco Hartman form HKV</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="k">assert</span> <span class="s">&#39;2480&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>  <span class="c"># This is the expected impact number</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runFloodPopulationImpactFunction_scaling"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runFloodPopulationImpactFunction_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">test_runFloodPopulationImpactFunction_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flood function runs in GUI with 5x5km population data</span>
+<span class="sd">           Raster on raster based function runs as expected with scaling.&quot;&quot;&quot;</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;People&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;Need evacuation&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;Flood Evacuation Function&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+
+        <span class="c"># Check numbers are OK (within expected errors from resampling)</span>
+        <span class="k">assert</span> <span class="s">&#39;10484&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="k">assert</span> <span class="s">&#39;977&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>  <span class="c"># These are expected impact number</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_runFloodPopulationPolygonHazardImpactFunction"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_runFloodPopulationPolygonHazardImpactFunction">[docs]</a>    <span class="k">def</span> <span class="nf">test_runFloodPopulationPolygonHazardImpactFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flood function runs in GUI with Jakarta polygon flood hazard data.</span>
+<span class="sd">           Uses population raster exposure layer&quot;&quot;&quot;</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;A flood in Jakarta in RW areas identified&#39;</span>
+                      <span class="s">&#39; as flood prone&#39;</span><span class="p">),</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;Penduduk Jakarta&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;Need evacuation&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;Flood Evacuation Function Vector Hazard&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="c"># This is the expected number of people needing evacuation</span>
+        <span class="k">assert</span> <span class="s">&#39;134953000&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_ResultStyling"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_ResultStyling">[docs]</a>    <span class="k">def</span> <span class="nf">test_ResultStyling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that ouputs from a model are correctly styled (colours and</span>
+<span class="sd">        opacity. &quot;&quot;&quot;</span>
+
+        <span class="c"># Push OK with the left mouse button</span>
+
+        <span class="k">print</span> <span class="s">&#39;--------------------&#39;</span>
+        <span class="k">print</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">),</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;People&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;Need evacuation&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;Flood Evacuation Function&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGeoExtent</span><span class="p">()</span>
+
+        <span class="c"># Run manually so we can get the output layer</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">setupCalculator</span><span class="p">()</span>
+        <span class="n">myRunner</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+        <span class="n">myRunner</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c"># Run in same thread</span>
+        <span class="n">myEngineImpactLayer</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">impactLayer</span><span class="p">()</span>
+        <span class="n">myQgisImpactLayer</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">readImpactLayer</span><span class="p">(</span><span class="n">myEngineImpactLayer</span><span class="p">)</span>
+        <span class="n">myStyle</span> <span class="o">=</span> <span class="n">myEngineImpactLayer</span><span class="o">.</span><span class="n">get_style_info</span><span class="p">()</span>
+        <span class="c">#print myStyle</span>
+        <span class="n">setRasterStyle</span><span class="p">(</span><span class="n">myQgisImpactLayer</span><span class="p">,</span> <span class="n">myStyle</span><span class="p">)</span>
+        <span class="c"># simple test for now - we could test explicity for style state</span>
+        <span class="c"># later if needed.</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Raster layer was not assigned a ColorRampShader&#39;</span>
+                     <span class="s">&#39; as expected.&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myQgisImpactLayer</span><span class="o">.</span><span class="n">colorShadingAlgorithm</span><span class="p">()</span> <span class="o">==</span> \
+                <span class="n">QgsRasterLayer</span><span class="o">.</span><span class="n">ColorRampShader</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Raster layer was not assigned transparency&#39;</span>
+                     <span class="s">&#39;classes as expected.&#39;</span><span class="p">)</span>
+        <span class="n">myTransparencyList</span> <span class="o">=</span> <span class="p">(</span><span class="n">myQgisImpactLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span>
+                <span class="n">transparentSingleValuePixelList</span><span class="p">())</span>
+        <span class="c">#print &quot;Transparency list:&quot; + str(myTransparencyList)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">myTransparencyList</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_Issue47"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_Issue47">[docs]</a>    <span class="k">def</span> <span class="nf">test_Issue47</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Issue47: Problem when hazard &amp; exposure data are in different</span>
+<span class="sd">        proj to viewport.</span>
+<span class="sd">        See https://github.com/AIFDR/inasafe/issues/47&quot;&quot;&quot;</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;Penduduk Jakarta&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;HKVtest&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;HKVtest&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GOOGLECRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setJakartaGoogleExtent</span><span class="p">()</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="k">assert</span> <span class="s">&#39;2366&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_issue45"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_issue45">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue45</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Points near the edge of a raster hazard layer are interpolated OK&quot;&quot;&quot;</span>
+
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">setYogyaGeoExtent</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span> <span class="o">=</span> <span class="n">setupScenario</span><span class="p">(</span>
+            <span class="n">theHazard</span><span class="o">=</span><span class="s">&#39;An earthquake in Yogyakarta like in 2006&#39;</span><span class="p">,</span>
+            <span class="n">theExposure</span><span class="o">=</span><span class="s">&#39;OSM Building Polygons&#39;</span><span class="p">,</span>
+            <span class="n">theFunction</span><span class="o">=</span><span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">,</span>
+            <span class="n">theFunctionId</span><span class="o">=</span><span class="s">&#39;Earthquake Guidelines Function&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># This is the where nosetest sometims hangs when running the</span>
+        <span class="c"># guitest suite (Issue #103)</span>
+        <span class="c"># The QTest.mouseClick call some times never returns when run</span>
+        <span class="c"># with nosetest, but OK when run normally.</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="c"># Check that none of these  get a NaN value:</span>
+        <span class="k">assert</span> <span class="s">&#39;Unknown&#39;</span> <span class="ow">in</span> <span class="n">myResult</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Some buildings returned by Earthquake guidelines &#39;</span>
+                     <span class="s">&#39;function &#39;</span>
+                     <span class="s">&#39;had NaN values. Result: </span><span class="se">\n</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s">&#39;Unknown (NaN):	196&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># FIXME (Ole): A more robust test would be to load the</span>
+        <span class="c">#              result layer and check that all buildings</span>
+        <span class="c">#              have values.</span>
+        <span class="c">#              Tim, how do we get the output filename?</span>
+        <span class="c"># ANSWER</span>
+        <span class="c">#DOCK.calculator.impactLayer()</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_loadLayers"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_loadLayers">[docs]</a>    <span class="k">def</span> <span class="nf">test_loadLayers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Layers can be loaded and list widget was updated appropriately</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadStandardLayers</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expect </span><span class="si">%s</span><span class="s"> layer(s) in hazard list widget but got </span><span class="si">%s</span><span class="s">&#39;</span> \
+                     <span class="o">%</span> <span class="p">(</span><span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+        <span class="c"># pylint: disable=W0106</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                         <span class="n">myHazardLayerCount</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expect </span><span class="si">%s</span><span class="s"> layer(s) in exposure list widget but got </span><span class="si">%s</span><span class="s">&#39;</span> \
+              <span class="o">%</span> <span class="p">(</span><span class="n">myExposureLayerCount</span><span class="p">,</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                         <span class="n">myExposureLayerCount</span><span class="p">),</span> <span class="n">myMessage</span>
+        <span class="c"># pylint: disable=W0106</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_Issue71"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_Issue71">[docs]</a>    <span class="k">def</span> <span class="nf">test_Issue71</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test issue #71 in github - cbo changes should update ok button.&quot;&quot;&quot;</span>
+        <span class="c"># See https://github.com/AIFDR/inasafe/issues/71</span>
+        <span class="c"># Push OK with the left mouse button</span>
+        <span class="k">print</span> <span class="s">&#39;Using QGIS: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">qgisVersion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="c"># First part of scenario should have enabled run</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Flood_Current_Depth_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                      <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Population_Jakarta_geographic.asc&#39;</span><span class="p">)]</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span>
+                                                              <span class="n">theDataDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Hazard layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myHazardLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myHazardLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Exposure layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myExposureLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myExposureLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Second part of scenario - run disabled when adding invalid layer</span>
+        <span class="c"># and select it - run should be disabled</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;issue71.tif&#39;</span><span class="p">]</span>  <span class="c"># This layer has incorrect keywords</span>
+        <span class="n">myClearFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span> <span class="n">myClearFlag</span><span class="p">))</span>
+        <span class="c"># set exposure to : Population Density Estimate (5kmx5km)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;Population density (5kmx5km)&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Run button was not disabled when exposure set to </span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="s">&#39;</span><span class="se">\n</span><span class="s">UI State: </span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected State:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span>
+            <span class="n">myDict</span><span class="p">,</span>
+            <span class="n">myExpectedDict</span><span class="p">,</span>
+            <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myExpectedDict</span> <span class="o">==</span> <span class="n">myDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Now select again a valid layer and the run button</span>
+        <span class="c"># should be enabled</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled when exposure set to </span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> \
+            <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_Issue95"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_Issue95">[docs]</a>    <span class="k">def</span> <span class="nf">test_Issue95</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test issue #95 in github -check crs of impact layer.&quot;&quot;&quot;</span>
+        <span class="c"># See https://github.com/AIFDR/inasafe/issues/95</span>
+        <span class="c"># Push OK with the left mouse button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="c"># First part of scenario should have enabled run</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Flood_Current_Depth_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                      <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Population_Jakarta_geographic.asc&#39;</span><span class="p">)]</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span>
+                                                              <span class="n">theDataDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Hazard layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myHazardLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myHazardLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Exposure layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myExposureLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myExposureLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Second part of scenario - run disables when adding invalid layer</span>
+        <span class="c"># and select it - run should be disabled</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;issue71.tif&#39;</span><span class="p">]</span>  <span class="c"># This layer has incorrect keywords</span>
+        <span class="n">myClearFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span> <span class="n">myClearFlag</span><span class="p">))</span>
+        <span class="c"># set exposure to : Population density (5kmx5km)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="s">&#39;A flood in Jakarta like in 2007&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;Population density (5kmx5km)&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Run button was not disabled when exposure set to </span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="s">&#39;</span><span class="se">\n</span><span class="s">UI State: </span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected State:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span>
+            <span class="n">myDict</span><span class="p">,</span>
+            <span class="n">myExpectedDict</span><span class="p">,</span>
+            <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myExpectedDict</span> <span class="o">==</span> <span class="n">myDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Now select again a valid layer and the run button</span>
+        <span class="c"># should be enabled</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled when exposure set to </span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> \
+            <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_issue_160"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_issue_160">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue_160</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that multipart features can be used in a scenario - issue #160</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">myExposure</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">UNITDATA</span><span class="p">,</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span> <span class="s">&#39;buildings_osm_4326.shp&#39;</span><span class="p">)</span>
+        <span class="n">myHazard</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">UNITDATA</span><span class="p">,</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="s">&#39;multipart_polygons_osm_4326.shp&#39;</span><span class="p">)</span>
+                <span class="c"># See https://github.com/AIFDR/inasafe/issues/71</span>
+        <span class="c"># Push OK with the left mouse button</span>
+        <span class="k">print</span> <span class="s">&#39;Using QGIS: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">qgisVersion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">pbnRunStop</span>
+        <span class="c"># First part of scenario should have enabled run</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">myHazard</span><span class="p">,</span> <span class="n">myExposure</span><span class="p">]</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span>
+                                                        <span class="n">theDataDirectory</span><span class="o">=</span><span class="n">TESTDATA</span><span class="p">)</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Hazard layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myHazardLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myHazardLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Incorrect number of Exposure layers: expected 1 got </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="n">myExposureLayerCount</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myExposureLayerCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Run button was not enabled&#39;</span>
+        <span class="k">assert</span> <span class="n">myButton</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(),</span> <span class="n">myMessage</span>
+
+        <span class="c"># Second part of scenario - run disabled when adding invalid layer</span>
+        <span class="c"># and select it - run should be disabled</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;issue71.tif&#39;</span><span class="p">]</span>  <span class="c"># This layer has incorrect keywords</span>
+        <span class="n">myClearFlag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span> <span class="n">myClearFlag</span><span class="p">))</span>
+        <span class="c"># Hazard layers  -multipart_polygons_4326</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;multipart_polygons_osm_4326&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;multipart_polygons_4326 hazard layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+        <span class="c"># Exposure layers - buildings_osm_4326</span>
+        <span class="n">myIndex</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s">&#39;buildings_osm_4326&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myIndex</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;buildings_osm_4326 exposure layer not found&#39;</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">myIndex</span><span class="p">)</span>
+        <span class="n">myDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Run Button Enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Id&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Flood Building Impact Function&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Impact Function Title&#39;</span><span class="p">:</span>
+                              <span class="s">&#39;Be temporarily closed&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Hazard&#39;</span><span class="p">:</span> <span class="s">&#39;multipart_polygons_osm_4326&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;Exposure&#39;</span><span class="p">:</span> <span class="s">&#39;buildings_osm_4326&#39;</span><span class="p">}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Run button was not disabled when exposure set to </span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="s">&#39;</span><span class="se">\n</span><span class="s">UI State: </span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected State:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span>
+            <span class="n">myDict</span><span class="p">,</span>
+            <span class="n">myExpectedDict</span><span class="p">,</span>
+            <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">myExpectedDict</span> <span class="o">==</span> <span class="n">myDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Enable on-the-fly reprojection</span>
+        <span class="n">setCanvasCrs</span><span class="p">(</span><span class="n">GEOCRS</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">IFACE</span><span class="o">.</span><span class="n">mapCanvas</span><span class="p">()</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span>
+                                <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">106.788</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.193</span><span class="p">,</span> <span class="mf">106.853</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.167</span><span class="p">))</span>
+
+        <span class="c"># Press RUN</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="n">myResult</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">wvResults</span><span class="o">.</span><span class="n">page</span><span class="p">()</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">()</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Result not as expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myResult</span>
+        <span class="k">assert</span> <span class="s">&#39;68&#39;</span> <span class="ow">in</span> <span class="n">myResult</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_state"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_state">[docs]</a>    <span class="k">def</span> <span class="nf">test_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if the save/restore state methods work. See also</span>
+<span class="sd">        https://github.com/AIFDR/inasafe/issues/58</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="n">myExpectedDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="c">#myState = DOCK.state</span>
+        <span class="c"># Now reset and restore and check that it gets the old state</span>
+        <span class="c"># Html is not considered in restore test since the ready</span>
+        <span class="c"># message overwrites it in dock implementation</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboExposure</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">restoreState</span><span class="p">()</span>
+        <span class="n">myResultDict</span> <span class="o">=</span> <span class="n">getUiState</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got unexpected state: </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">myResultDict</span><span class="p">,</span> <span class="n">myExpectedDict</span><span class="p">,</span> <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">myExpectedDict</span> <span class="o">==</span> <span class="n">myResultDict</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Corner case test when two layers can have the</span>
+        <span class="c"># same functions - when switching layers the selected function should</span>
+        <span class="c"># remain unchanged</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tearDown</span><span class="p">()</span>
+        <span class="n">myFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Flood_Design_Depth_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                      <span class="n">join</span><span class="p">(</span><span class="n">HAZDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Flood_Current_Depth_Jakarta_geographic.asc&#39;</span><span class="p">),</span>
+                      <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span>
+                           <span class="s">&#39;Population_Jakarta_geographic.asc&#39;</span><span class="p">)]</span>
+        <span class="n">myHazardLayerCount</span><span class="p">,</span> <span class="n">myExposureLayerCount</span> <span class="o">=</span> <span class="n">loadLayers</span><span class="p">(</span><span class="n">myFileList</span><span class="p">,</span>
+                                                              <span class="n">theDataDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myHazardLayerCount</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">myExposureLayerCount</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myExpectedFunction</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="c"># Now move down one hazard in the combo then verify</span>
+        <span class="c"># the function remains unchanged</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="n">myCurrentFunction</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Expected selected impact function to remain unchanged &#39;</span>
+                     <span class="s">&#39;when choosing a different hazard of the same category:&#39;</span>
+                     <span class="s">&#39; </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">myExpectedFunction</span><span class="p">,</span>
+                <span class="n">myCurrentFunction</span><span class="p">,</span>
+                <span class="n">combosToString</span><span class="p">(</span><span class="n">DOCK</span><span class="p">)))</span>
+
+        <span class="k">assert</span> <span class="n">myExpectedFunction</span> <span class="o">==</span> <span class="n">myCurrentFunction</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">)</span>
+        <span class="n">QTest</span><span class="o">.</span><span class="n">keyClick</span><span class="p">(</span><span class="n">DOCK</span><span class="o">.</span><span class="n">cboHazard</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">)</span>
+        <span class="c"># Selected function should remain the same</span>
+        <span class="n">myExpectation</span> <span class="o">=</span> <span class="s">&#39;Need evacuation&#39;</span>
+        <span class="n">myFunction</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">cboFunction</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Expected: </span><span class="si">%s</span><span class="s">, Got: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myExpectation</span><span class="p">,</span> <span class="n">myFunction</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myFunction</span> <span class="o">==</span> <span class="n">myExpectation</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="DockTest.test_layerChanged"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_dock.html#safe_qgis.test_dock.DockTest.test_layerChanged">[docs]</a>    <span class="k">def</span> <span class="nf">test_layerChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test the metadata is updated as the user highlights different</span>
+<span class="sd">        QGIS layers. For inasafe outputs, the table of results should be shown</span>
+<span class="sd">        See also</span>
+<span class="sd">        https://github.com/AIFDR/inasafe/issues/58</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;issue58.tif&#39;</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected category for issue58.tif.</span><span class="se">\n</span><span class="s">Got:&#39;</span>
+                     <span class="s">&#39; </span><span class="si">%s</span><span class="se">\n</span><span class="s">Expected: undefined&#39;</span> <span class="o">%</span> <span class="n">myType</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&#39;undefined&#39;</span><span class="p">,</span> <span class="n">myMessage</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">layerChanged</span><span class="p">(</span><span class="n">myLayer</span><span class="p">)</span>
+        <span class="n">DOCK</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="n">myHtml</span> <span class="o">=</span> <span class="n">DOCK</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s">&#39;report&#39;</span><span class="p">]</span>
+        <span class="n">myExpectedString</span> <span class="o">=</span> <span class="s">&#39;4229&#39;</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s">Does not contain:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">myHtml</span><span class="p">,</span>
+                                <span class="n">myExpectedString</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myExpectedString</span> <span class="ow">in</span> <span class="n">myHtml</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">DockTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">DockTest</span><span class="p">,</span>
+                        <span class="s">&#39;test_runFloodPopulationPolygonHazardImpactFunction&#39;</span><span class="p">)</span>
+
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

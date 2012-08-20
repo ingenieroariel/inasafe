@@ -1,0 +1,313 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.plugin &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.safe_interface" href="safe_interface.html" />
+    <link rel="prev" title="Module: safe_qgis.map" href="map.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="safe_interface.html" title="Module: safe_qgis.safe_interface"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-plugin">
+<h1>Module:  safe_qgis.plugin<a class="headerlink" href="#module-safe-qgis-plugin" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.plugin</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.plugin"></span><dl class="docutils">
+<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
+<dd><strong>QGIS plugin implementation.</strong></dd>
+</dl>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.plugin.Plugin">
+<em class="property">class </em><tt class="descclassname">safe_qgis.plugin.</tt><tt class="descname">Plugin</tt><big>(</big><em>iface</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The QGIS interface implementation for the Risk in a box plugin.</p>
+<p>This class acts as the &#8216;glue&#8217; between QGIS and our custom logic.
+It creates a toolbar and menubar entry and launches the InaSAFE user
+interface if these are activated.</p>
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.initGui">
+<tt class="descname">initGui</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.initGui"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.initGui" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gui initialisation procedure (for QGIS plugin api).</p>
+<p>This method is called by QGIS and should be used to set up
+any graphical user interface elements that should appear in QGIS by
+default (i.e. before the user performs any explicit action with the
+plugin).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.layerChanged">
+<tt class="descname">layerChanged</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.layerChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.layerChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable or disable the keywords editor icon.</p>
+<p>This slot is called when the user clicks the keyword editor toolbar
+icon or menu item associated with this plugin</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.resetDock">
+<tt class="descname">resetDock</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.resetDock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.resetDock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the dock to its default state.</p>
+<p>This slot is called when the user clicks the reset icon in the toolbar
+or the reset menu item associated with this plugin</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.setupI18n">
+<tt class="descname">setupI18n</tt><big>(</big><em>thePreferredLocale=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.setupI18n"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.setupI18n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup internationalisation for the plugin.</p>
+<p>See if QGIS wants to override the system locale
+and then see if we can get a valid translation file
+for whatever locale is effectively being used.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>thePreferredLocale - optional parameter which if set
+will override any other way of determining locale..</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.showHideDockWidget">
+<tt class="descname">showHideDockWidget</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.showHideDockWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.showHideDockWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show or hide the dock widget.</p>
+<p>This slot is called when the user clicks the toolbar icon or
+menu item associated with this plugin. It will hide or show
+the dock depending on its current state.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.showKeywordsEditor">
+<tt class="descname">showKeywordsEditor</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.showKeywordsEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.showKeywordsEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the keywords editor.</p>
+<p>This slot is called when the user clicks the keyword editor toolbar
+icon or menu item associated with this plugin</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.showOptions">
+<tt class="descname">showOptions</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.showOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.showOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the options dialog.</p>
+<p>This slot is called when the user clicks the options toolbar
+icon or menu item associated with this plugin</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.tr">
+<tt class="descname">tr</tt><big>(</big><em>theString</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.tr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.tr" title="Permalink to this definition">¶</a></dt>
+<dd><p>We implement this ourself since we do not inherit QObject.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theString - string for translation.</dd>
+<dt>Returns:</dt>
+<dd>Translated version of theString.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.plugin.Plugin.unload">
+<tt class="descname">unload</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/plugin.html#Plugin.unload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.plugin.Plugin.unload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gui breakdown procedure (for QGIS plugin api).</p>
+<p>This method is called by QGIS and should be used to <em>remove</em>
+any graphical user interface elements that should appear in QGIS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None.</dd>
+<dt>Raises:</dt>
+<dd>no exceptions explicitly raised.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="map.html"
+                        title="previous chapter">Module:  safe_qgis.map</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="safe_interface.html"
+                        title="next chapter">Module:  safe_qgis.safe_interface</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/plugin.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="safe_interface.html" title="Module: safe_qgis.safe_interface"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

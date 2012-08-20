@@ -1,0 +1,490 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.safe_interface &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Package::safe_qgis (Unit Tests)" href="../safe_qgis_tests.html" />
+    <link rel="prev" title="Module: safe_qgis.plugin" href="plugin.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis_tests.html" title="Package::safe_qgis (Unit Tests)"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="plugin.html" title="Module: safe_qgis.plugin"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe-qgis-safe-interface">
+<h1>Module:  safe_qgis.safe_interface<a class="headerlink" href="#module-safe-qgis-safe-interface" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.safe_interface</strong>
+module.</p>
+<span class="target" id="module-safe_qgis.safe_interface"></span><p>InaSAFE Disaster risk assessment tool developed by AusAid -
+<strong>IS Safe Interface.</strong></p>
+<p>The purpose of the module is to centralise interactions between the gui
+package and the underlying InaSAFE packages. This should be the only place
+where SAFE modules are imported directly.</p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="function">
+<dt id="safe_qgis.safe_interface.availableFunctions">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">availableFunctions</tt><big>(</big><em>theKeywordList=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#availableFunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.availableFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the inasafe engine to see what plugins are available.</p>
+<p>Args:</p>
+<blockquote>
+<div><p>theKeywordList - an optional parameter which should contain
+a list of 2 dictionaries (the number of items in the list
+is not enforced). The dictionaries should be obtained by using
+readKeywordsFromFile e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">myFile1</span> <span class="o">=</span> <span class="n">foo</span><span class="o">.</span><span class="n">shp</span>
+<span class="n">myFile2</span> <span class="o">=</span> <span class="n">bar</span><span class="o">.</span><span class="n">asc</span>
+<span class="n">myKeywords1</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">myFile1</span><span class="p">)</span>
+<span class="n">myKeywords2</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">myFile2</span><span class="p">)</span>
+<span class="n">myList</span> <span class="o">=</span> <span class="p">[</span><span class="n">myKeywords1</span><span class="p">,</span> <span class="n">myKeywords2</span><span class="p">]</span>
+<span class="n">myFunctions</span> <span class="o">=</span> <span class="n">availableFunctions</span><span class="p">(</span><span class="n">myList</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><p class="first">A dictionary of strings where each is a plugin name.</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If theKeywordList is not provided, all available
+plugins will be returned in the list.</p>
+</div>
+</dd>
+<dt>Raises:</dt>
+<dd>NoFunctionsFoundException if no functions are found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.calculateSafeImpact">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">calculateSafeImpact</tt><big>(</big><em>theLayers</em>, <em>theFunction</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#calculateSafeImpact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.calculateSafeImpact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper around the safe calculate_impact function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theLayers - a list of layers to be used. They should be ordered
+with hazard layer first and exposure layer second.</li>
+<li>theFunction - SAFE impact function instance to be used</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A safe impact function is returned</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions are propogated</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.getBufferedExtent">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">getBufferedExtent</tt><big>(</big><em>theGeoExtent</em>, <em>theCellSize</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#getBufferedExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.getBufferedExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow bounding box with one unit of resolution in each direction.</p>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>theGeoExtent - Bounding box with format [W, S, E, N]</li>
+<li>theCellSize - (resx, resy) Raster resolution in each direction.</li>
+</ul>
+<p>If resolution is None bbox is returned unchanged.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Adjusted bounding box</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div>Any exceptions are propogated</div></blockquote>
+<dl class="docutils">
+<dt>Note: See docstring for underlying function buffered_bounding_box</dt>
+<dd>for more details.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.getFunctionTitle">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">getFunctionTitle</tt><big>(</big><em>theFunction</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#getFunctionTitle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.getFunctionTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper around the safe get_function_title.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theFunction - SAFE impact function instance to be used</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>The title of a safe impact function is returned</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions are propogated</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.getOptimalExtent">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">getOptimalExtent</tt><big>(</big><em>theHazardGeoExtent</em>, <em>theExposureGeoExtent</em>, <em>theViewportGeoExtent</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#getOptimalExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.getOptimalExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper function to determine what the optimal extent is.
+Optimal extent should be considered as the intersection between
+the three inputs. The inasafe library will perform various checks
+to ensure that the extent is tenable, includes data from both
+etc.</p>
+<p>This is just a thin wrapper around safe.api.bbox_intersection.</p>
+<p>Typically the result of this function will be used to clip
+input layers to a commone extent before processing.</p>
+<p>Args:</p>
+<blockquote>
+<div><blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>theHazardGeoExtent - an array representing the hazard layer</dt>
+<dd><p class="first last">extents in the form [xmin, ymin, xmax, ymax]. It is assumed
+that the coordinates are in EPSG:4326 although currently
+no checks are made to enforce this.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>theExposureGeoExtent - an array representing the exposure layer</dt>
+<dd><p class="first last">extents in the form [xmin, ymin, xmax, ymax]. It is assumed
+that the coordinates are in EPSG:4326 although currently
+no checks are made to enforce this.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>theViewPortGeoExtent - an array representing the viewport</dt>
+<dd><p class="first last">extents in the form [xmin, ymin, xmax, ymax]. It is assumed
+that the coordinates are in EPSG:4326 although currently
+no checks are made to enforce this.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>..note:: We do minimal checking as the inasafe library takes</dt>
+<dd>care of it for us.</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><p class="first">An array containing an extent in the form [xmin, ymin, xmax, ymax]
+e.g.:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="mf">100.03</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.14</span><span class="p">,</span> <span class="mf">100.81</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.73</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions raised by the InaSAFE library will be propogated.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.getSafeImpactFunctions">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">getSafeImpactFunctions</tt><big>(</big><em>theFunction=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#getSafeImpactFunctions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.getSafeImpactFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper around the safe impact_functions function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theFunction - optional str giving a specific plugins name that should
+be fetched.</dd>
+<dt>Returns:</dt>
+<dd>A safe impact function is returned</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions are propogated</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.getStyleInfo">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">getStyleInfo</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#getStyleInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.getStyleInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get styleinfo associated with a layer.</p>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>theLayer - InaSAFE layer (raster or vector)</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A list of dictionaries containing styleinfo info for a layer.</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div><ul class="simple">
+<li>StyleInfoNotFoundException if the style is not found.</li>
+<li>InvalidParameterException if the paramers are not correct.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.makeAscii">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">makeAscii</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#makeAscii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.makeAscii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert QgsString to ASCII</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.readKeywordsFromFile">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">readKeywordsFromFile</tt><big>(</big><em>theLayerPath</em>, <em>theKeyword=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#readKeywordsFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.readKeywordsFromFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get metadata from the keywords file associated with a local
+file in the file system.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Requires a str representing a file path instance
+as parameter As opposed to readKeywordsFromLayer which
+takes a inasafe file object as parameter.</p>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">readKeywordsFromLayer</p>
+</div>
+<p>Args:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>theLayerPath - a string representing a path to a layer</dt>
+<dd><p class="first last">(e.g. &#8216;/tmp/foo.shp&#8217;, &#8216;/tmp/foo.tif&#8217;)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">theKeyword - optional - the metadata keyword to retrieve e.g. &#8216;title&#8217;</p>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A string containing the retrieved value for the keyword if
+the keyword argument is specified, otherwise the
+complete keywords dictionary is returned.</dd>
+<dt>Raises:</dt>
+<dd>KeywordNotFoundException if the keyword is not recognised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.readKeywordsFromLayer">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">readKeywordsFromLayer</tt><big>(</big><em>theLayer</em>, <em>keyword</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#readKeywordsFromLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.readKeywordsFromLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get metadata from the keywords file associated with a layer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Requires a inasafe layer instance as parameter.</p>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">getKeywordFromPath</p>
+</div>
+<p>Args:</p>
+<blockquote>
+<div><ul class="simple">
+<li>theLayer - a InaSAFE layer (vector or raster)</li>
+<li>keyword - the metadata keyword to retrieve e.g. &#8216;title&#8217;</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A string containing the retrieved value for the keyword.</dd>
+<dt>Raises:</dt>
+<dd>KeywordNotFoundException if the keyword is not recognised.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.readSafeLayer">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">readSafeLayer</tt><big>(</big><em>thePath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#readSafeLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.readSafeLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper around the safe read_layer function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>thePath - str representing path to layer that must be opened.</dd>
+<dt>Returns:</dt>
+<dd>A safe readSafeLayer object is returned.</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions are propogated</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.tr">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">tr</tt><big>(</big><em>theText</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#tr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.tr" title="Permalink to this definition">¶</a></dt>
+<dd><p>We define a tr() alias here since the is_safe_interface implementation
+below is not a class and does not inherit from QObject.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference external" href="http://tinyurl.com/pyqt-differences">http://tinyurl.com/pyqt-differences</a></p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>theText - string to be translated</dd>
+<dt>Returns:</dt>
+<dd>Translated version of the given string if available, otherwise
+the original string.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.verify">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">verify</tt><big>(</big><em>theStatement</em>, <em>theMessage=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#verify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.verify" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is just a thin wrapper around safe.api.verify.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>theStatement - expression to verify</li>
+<li>theMessage - message to display on failure</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>VerificationError</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.safe_interface.writeKeywordsToFile">
+<tt class="descclassname">safe_qgis.safe_interface.</tt><tt class="descname">writeKeywordsToFile</tt><big>(</big><em>theFilename</em>, <em>theKeywords</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/safe_interface.html#writeKeywordsToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.safe_interface.writeKeywordsToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper around the safe write_keywords function.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>thePath - str representing path to layer that must be written.
+If the file does not end in .keywords, its extension will be
+stripped off and the basename + .keywords will be used as the file.</li>
+<li>theKeywords - a dictionary of keywords to be written</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>Any exceptions are propogated</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plugin.html"
+                        title="previous chapter">Module:  safe_qgis.plugin</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../safe_qgis_tests.html"
+                        title="next chapter">Package::safe_qgis (Unit Tests)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/safe_interface.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../safe_qgis_tests.html" title="Package::safe_qgis (Unit Tests)"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="plugin.html" title="Module: safe_qgis.plugin"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

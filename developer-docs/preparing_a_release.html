@@ -1,0 +1,595 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Preparing a release &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Continuous Integration Testing with Jenkins" href="jenkins_ci.html" />
+    <link rel="prev" title="Reporting bugs and getting help" href="bug_reporting.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="jenkins_ci.html" title="Continuous Integration Testing with Jenkins"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="bug_reporting.html" title="Reporting bugs and getting help"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="preparing-a-release">
+<h1>Preparing a release<a class="headerlink" href="#preparing-a-release" title="Permalink to this headline">¶</a></h1>
+<p>This document outlines the steps that need to be carried out in order
+to issue a new release of the InaSAFE plugin. The steps can be outlined
+as follows and are described in detail below:</p>
+<ul class="simple">
+<li>Identify what version number the new release will be assigned.</li>
+<li>Close all issues marked as blockers for the release.</li>
+<li>If needed, create a release branch</li>
+<li>Update all source files to the new version number.</li>
+<li>Update all source files for PEP8 and PEP257 compliance.</li>
+<li>Ensure no assert statements are critical to code flow</li>
+<li>Ensure that Qt resources and user interface files have been compiled</li>
+<li>Ensure that user interface files meet HIG compliance</li>
+<li>Enure all unit tests complete successfully and that tests that are expected
+to fail are documented.</li>
+<li>Ensure that user acceptance testing has been carried out.</li>
+<li>Ensure that all translation string lists have been updated and that the
+translation process has been carried out.</li>
+<li>Ensure that all new and existing features are adequately documented.</li>
+<li>Ensure that the API documentation is up to date.</li>
+<li>Update the changelog.</li>
+<li>Ensure that the sphinx documentation is compiled.</li>
+<li>Generate python optimsed (.pyo) files for all sources.</li>
+<li>Update the plugin metadata to reflect current version.</li>
+<li>Generate a test package and validate in a clean room environment.</li>
+<li>Optionally branch the release in the revision control system.</li>
+<li>Tag the release in the revision control system.</li>
+<li>Upload the updated package zip file to old QGIS python plugin repository.</li>
+<li>Upload the updated package zip file to the new QGIS python plugin repository.</li>
+<li>Make announcements and press releases as needed.</li>
+</ul>
+<div class="section" id="release-numbering">
+<h2>Release numbering<a class="headerlink" href="#release-numbering" title="Permalink to this headline">¶</a></h2>
+<p>InaSAFE will follow the <a class="reference external" href="http://semver.org/">semantic versioning system</a>.
+Simply put, the following scheme should be applied to version numbers:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Version Increment</th>
+<th class="head">Intention</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Major e.g 1.0.0</td>
+<td>API incompatibility with the previous major release.</td>
+</tr>
+<tr class="row-odd"><td>Minor e.g. 1.1.0</td>
+<td>API compatibility and extension over previous minor release.</td>
+</tr>
+<tr class="row-even"><td>Point e.g. 1.1.1</td>
+<td>API compatibility, bug fixes for previous point release.</td>
+</tr>
+<tr class="row-odd"><td>Alpha e.g. 1.0.0a</td>
+<td>Feature incomplete preview of a minor or major release</td>
+</tr>
+<tr class="row-even"><td>RC e.g. 1.1.0rc1</td>
+<td>Feature complete preview of a minor or major release</td>
+</tr>
+</tbody>
+</table>
+<p>To identify the next release number, the table above can simply be appled. Here
+are a couple of examples.</p>
+<ul class="simple">
+<li>You have fixed various bugs without adding new features or breaking the API,
+and you are ready to immediately publish your work. Result: <strong>New point
+release.</strong></li>
+<li>You have implemented many new features, some of which required breaking API
+compatibility with the existing major release. Now you would like to make
+a public preview of your work before committing to a final release. Result:
+<strong>New major release candidate.</strong></li>
+</ul>
+<p><strong>Outcome:</strong> A version number for the next release eg. 0.1.0.</p>
+</div>
+<div class="section" id="issue-completion">
+<h2>Issue completion<a class="headerlink" href="#issue-completion" title="Permalink to this headline">¶</a></h2>
+<p>Having determined the release number, you should use the GitHub <em>labels</em>
+capability to assign a label matching the release to each blocking ticket.
+There is no fixed rule on which tickets should be tagged for the release - the
+best judgment of developers and managers should be used based on severity of
+issues, available time to deadline, budget etc.</p>
+<p><strong>Outcome:</strong> At the end of  this step all <a class="reference external" href="https://github.com/AIFDR/inasafe/issues">issues</a>
+tagged for the release should be closed.</p>
+</div>
+<div class="section" id="branching">
+<h2>Branching<a class="headerlink" href="#branching" title="Permalink to this headline">¶</a></h2>
+<p>Branching is requred for Major and Minor releases. The process of branching
+is described in <a class="reference internal" href="version_control.html"><em>Version Control</em></a> whose accompanying illustration is
+repeated below for your convenience:</p>
+<div class="figure align-center">
+<img alt="../_images/release-workflow.png" src="../_images/release-workflow.png" />
+</div>
+<p>The purpose of creating a branch is to isolate incompatible and possibly
+unstable changes that take place in the <em>master branch</em> from stable code
+that forms the basis of a release. You will note from the diagram above
+that branches are named after the minor version, and are tagged with the point
+version at the point of release.</p>
+<p><strong>Outcome:</strong> If needed, create a release branch which provides a &#8216;known good&#8217;
+version that can be returned to at any point in time.</p>
+</div>
+<div class="section" id="updating-the-source-version-number">
+<h2>Updating the source version number<a class="headerlink" href="#updating-the-source-version-number" title="Permalink to this headline">¶</a></h2>
+<p>In the preample to any source file there should be a standard header as
+described in the <a class="reference internal" href="coding_standards.html"><em>Coding Standards</em></a> document. Included in this header
+section is the version number e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.1.0&#39;</span>
+</pre></div>
+</div>
+<p>This number should be updated in every source file prior to release. Under
+linux this can easily be done using the <strong class="command">rpl</strong> command (which can
+easily be installed (by doing for example <strong class="command">sudo apt-get install rpl</strong>).</p>
+<p>Using th example above, to update version numbers for minor release &#8216;0.1.1&#8217;
+you could issue the following command at the root of the plugin source tree:</p>
+<div class="highlight-python"><pre>rpl "__version__ = '0.1.0'" "__version__ = '0.1.1'" *.py</pre>
+</div>
+<p><strong>Outcome::</strong> Every source file should be updated to indicate the version number.</p>
+</div>
+<div class="section" id="pep8-and-pep257-compliance">
+<h2>PEP8 and PEP257 compliance<a class="headerlink" href="#pep8-and-pep257-compliance" title="Permalink to this headline">¶</a></h2>
+<p>These <strong>Python Enhancement Proposals</strong> (PEP) relate to the formatting
+of python source code. In particular they mandate spacing, layout, line lengths
+and so on. The outcome of PEP8 and PEP257 compliance is code that is
+consistently formatted accross the whole code base, regardless of authorship.</p>
+<p>This consistency makes it easier to incorporate new members into the project
+team and to collaborate effectively within the team. A number of tools are
+available to help you to identify PEP8 and PEP257 transgressions, and there
+is a Makefile target (<strong class="command">make pep8</strong> which will do a PEP8 test for you).
+Under the Eclipse/PyDev IDE, there is also on the fly checking support which
+can be enabled and that will notify you of any compliance issues as illutrated
+in the screenshot below.</p>
+<div class="figure align-center">
+<img alt="../_images/pep8-highlighting.jpeg" src="../_images/pep8-highlighting.jpeg" />
+</div>
+<p><strong>Outcome:</strong> All source files for PEP8 and PEP257 compliance.</p>
+</div>
+<div class="section" id="check-for-assert-statements">
+<h2>Check for assert statements<a class="headerlink" href="#check-for-assert-statements" title="Permalink to this headline">¶</a></h2>
+<p>Using assert to raise exceptions in non test code can have bad side effects
+because if python is run in optimised mode e.g. python -O, these lines are
+ignored and the program logic will no longer work as expected.
+On some platforms the use of python optimised code is mandated and we are
+likely to get hard to investigate bug reports from end users at some
+unspecified point in the future.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is a &#8216;soft&#8217; requirement - since the python code for the plugin
+will be executed by the QGIS python internals, we can be fairly certain that
+python code will be executed with out the -O optimisation option for the
+short term.</p>
+</div>
+<p><strong>Outcome:</strong> No assert statements used to control logic flow.</p>
+</div>
+<div class="section" id="compile-qt-resources-and-user-interface-files">
+<h2>Compile Qt resources and user interface files<a class="headerlink" href="#compile-qt-resources-and-user-interface-files" title="Permalink to this headline">¶</a></h2>
+<p>The Qt4 resource and user interface definition files supplied with Risk in a
+Box need to be compiled before they can be deployed. There are two utility
+functions provided by Qt4 for this purpose:</p>
+<ul class="simple">
+<li><strong class="command">pyuic4</strong> - A tool to compile Qt4 user interface definition files
+(.ui) into python source code. The .ui files contain xml which describes the
+placement of widgets within a user interface file.</li>
+<li><strong class="command">pyrcc4</strong> - A tool to compile Qt4 resource files into python source
+code. Qt4 resources are &#8216;in-code&#8217; representations of application resources
+needed at run time. These include images, icons, html, css etc. - whatever
+the application may need to use at runtime without resorting to retrieving
+assets from the filesystem.</li>
+</ul>
+<p>The compilation of these resources if the default make target in the root and
+<em>gui</em> python package. To compile them simply do:</p>
+<div class="highlight-python"><pre>cd &lt;inasafe source&gt;
+make</pre>
+</div>
+<p><strong>Outcome:</strong> Qt resources and user interface files have been compiled</p>
+</div>
+<div class="section" id="hig-compliance">
+<h2>HIG Compliance<a class="headerlink" href="#hig-compliance" title="Permalink to this headline">¶</a></h2>
+<p>The InaSAFE human interface guidelnes (HIG) are described in the <a class="reference internal" href="coding_standards.html#hig-label"><em>Human Interface Guidelines</em></a>
+document. User interface should strive to comply with these guidelines. As
+an over-arching principle, before any release, the user interface elements that
+comprise that release should be tested both for usability and to ensure that
+they are functional.</p>
+<p>There is no automated test system for HIG. Before making a release of HIG
+compliance, each dialog should be manually tested and inspected.</p>
+<p><strong>Outcome:</strong> A consistent, user friendly and functional graphical user interface
+environment for the software that comprises the releases.</p>
+</div>
+<div class="section" id="unit-testing">
+<h2>Unit Testing<a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a></h2>
+<p>During the development process, unit tests should be written (following the
+principles of test driven development). A good test suite allows the code to
+be shipped with confidence knowing it will behave as expected. At the time of
+release, all the tests in the test suite should either pass or have documented
+reasons as to why they fail, and that they are expected to fail.</p>
+<p>In addition, tests should provide a code coverage of 80% or better of the
+shipped code base. More informationn on running unit tests is included in
+<a class="reference internal" href="platform_linux.html#running-tests-label"><em>Running tests</em></a>.</p>
+<p><strong>Outcome:</strong> All unit tests complete successfully, or when expected
+to fail are documented accordingly.</p>
+<div class="section" id="user-acceptance-testing">
+<h3>User Acceptance Testing<a class="headerlink" href="#user-acceptance-testing" title="Permalink to this headline">¶</a></h3>
+<p>While unit testing provides a quantitative measure of the code&#8217;s robustness,
+user acceptance testing provides a qualitative measure. The plugin should
+be made available to &#8216;invested&#8217; users to test with real world data and in
+real world usage scenarios. Any issues with workflow, ease of use, quality of
+model outputs and reports etc. should be identified at this point and remedied.</p>
+<p><strong>Outcome:</strong> Software that works in real world usage.</p>
+</div>
+<div class="section" id="document-new-features">
+<h3>Document new features<a class="headerlink" href="#document-new-features" title="Permalink to this headline">¶</a></h3>
+<p>New features in the release should be well documented using the procedure
+described in <a class="reference internal" href="maintaining_documentation.html#documenting-new-features-howto-label"><em>Documenting new features</em></a>.</p>
+<p><strong>Outcome:</strong> All new and existing features are adequately documented.</p>
+</div>
+<div class="section" id="api-documentation">
+<h3>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h3>
+<p>In addition to documenting new features, any new python modules introduced
+during the development work leading up to the release need to be included
+in the API documentation. This process is described in detail in the
+<a class="reference internal" href="maintaining_documentation.html#api-documentation-howto-label"><em>Creating API Documentation</em></a> document.</p>
+<p><strong>Outcome:</strong> The API is completely documented with rich, relevant documentation.</p>
+</div>
+<div class="section" id="update-the-changelog">
+<h3>Update the changelog<a class="headerlink" href="#update-the-changelog" title="Permalink to this headline">¶</a></h3>
+<p>A changelog should be maintained (<tt class="file docutils literal"><span class="pre">docs/sources/user-docs/changelog.rst</span></tt>)
+that lists the key new features and improvement made with each release. Use
+the <a class="reference internal" href="../user-docs/changelog.html"><em>Whats new?</em></a> file to guide the style of any edits and
+additions made.</p>
+<p>The changelog should not exhaustively list every commit that took place. Rather
+it should list the key features and bug fixes that were made during the
+release cycle.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">New release changesets should be introduced to this file <strong>at the top</strong>
+so that the newest release is alwas listed first.</p>
+</div>
+<p><strong>Outcome:</strong> A succinct list of changes and improvements that were made during
+the release cycle.</p>
+</div>
+</div>
+<div class="section" id="finalise-translations">
+<h2>Finalise translations<a class="headerlink" href="#finalise-translations" title="Permalink to this headline">¶</a></h2>
+<p>The InaSAFE plugin is built from the ground up for internationalization.
+In particular the following two languages are supported as part of this
+project:</p>
+<ul class="simple">
+<li>English</li>
+<li>Bahasa Indonesian</li>
+</ul>
+<p>There are three components of the project that require translation:</p>
+<ul class="simple">
+<li>The Graphical User Interface - primarily the <tt class="file docutils literal"><span class="pre">gui</span></tt> python package.
+Qt4 .ts files are used for these translations.</li>
+<li>The InaSAFE libraries - these components provide the underlying
+functionality of the scenario assessment. Python gettext is used for these
+translations.</li>
+<li>The sphinx documentation - this is translated using gettext.</li>
+</ul>
+<p>The translation process for the first two items above is documented in
+detail in <a class="reference internal" href="i18n.html"><em>Internationalisation Support</em></a>. The sphinx translation process is not yet well
+documented, although it will be similar to the gettext process.</p>
+<p>The final strings should be made available to translators before the release,
+during which time a string freeze should be in effect on the release code tree.</p>
+<p>Once the translation files have been updated, they should be converted to
+compiled string lists (.qm and .mo files for Qt4 and gettext respectively) and
+made available as part of the distribution.</p>
+<p><strong>Outcome:</strong> The released plugin will be multilingual supporting both
+indonesian and english.</p>
+<div class="section" id="compile-the-sphinx-documentation">
+<h3>Compile the sphinx documentation<a class="headerlink" href="#compile-the-sphinx-documentation" title="Permalink to this headline">¶</a></h3>
+<p>Once documentation is completed, it should be compiled using
+<strong class="command">make docs</strong> and the <strong class="command">git status</strong> command should be used to
+ensure that all generated documentation is also under version control.</p>
+<p><strong>Outcome:</strong> Sphinx documentation is compiled providing complete documentation
+to be shipped with the plugin.</p>
+</div>
+<div class="section" id="update-plugin-metadata">
+<h3>Update plugin metadata<a class="headerlink" href="#update-plugin-metadata" title="Permalink to this headline">¶</a></h3>
+<p>QGIS uses specific metadata to register the plugin. At the time of writing
+the mechanism for registering this metadata is in transition from an in-source
+based system to an .ini file based system. In the interim, both should be
+maintained.</p>
+<p>The in-source metadata is updated by editing the <tt class="file docutils literal"><span class="pre">__init__.py</span></tt> file
+in the top level directory of the source tree:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">name</span><span class="p">():</span>
+   <span class="sd">&quot;&quot;&quot;A user friendly name for the plugin.&quot;&quot;&quot;</span>
+   <span class="k">return</span> <span class="s">&#39;|project_name|&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">description</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;A one line description for the plugin.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;InaSAFE Disaster risk assessment tool developed by AusAid and World Bank&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Version of the plugin.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;Version 0.1&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">icon</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Icon path for the plugin.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;icon.png&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">qgisMinimumVersion</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Minimum version of QGIS needed to run this plugin -</span>
+<span class="sd">    currently set to 1.7.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;1.7&#39;</span>
+</pre></div>
+</div>
+<p>In general only the version function needs to be updated to reflect the new
+version of the InaSAFE plugin.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The above will be deprecated with the release of QGIS 2.0, see
+below for the alternative method of describing the plugin.</p>
+</div>
+<p>For newer versions of QGIS (1.8+), the <tt class="file docutils literal"><span class="pre">metadata.txt</span></tt> will be used to
+store descriptive information about the plugin. Simply edit this file with
+a text editor and update it as needed.</p>
+<p><strong>Outcome:</strong> The plugin metadata to reflects the current version of Risk in a
+Box.</p>
+</div>
+<div class="section" id="generate-a-test-package">
+<h3>Generate a test package<a class="headerlink" href="#generate-a-test-package" title="Permalink to this headline">¶</a></h3>
+<p>At this point a test package should be generated that can be used to test
+the plugin in a clean room environment. A clean room environment comprises a
+system that has a fresh operating system installation with the desired version
+of QGIS installed, and <strong>no other software</strong>. It is probably a good practice
+to use machine virtualisation for this purpose, for example with images
+of a windows and a linux system installed. Some virtualisation tools such as
+vmware provide the ability to create a system snapshot and roll back to it.</p>
+<p>To generate a test package, use the <tt class="file docutils literal"><span class="pre">scripts/release.sh</span></tt> bash script.</p>
+<p>For exampled to create a test package for version 0.1.0 of the software,
+issue the following command:</p>
+<div class="highlight-python"><pre>scripts/release.sh 0.1.0</pre>
+</div>
+<p>The generated package will be placed in the /tmp directory of your linux system.</p>
+<p>Once the clean system is started, extract the package contents into the user&#8217;s
+personal plugin directory. For example under Linux:</p>
+<div class="highlight-python"><pre>mkdir -p ~/.qgis/python/plugins
+cd ~/.qgis/python/plugins
+unzip inasafe.0.1.0.zip</pre>
+</div>
+<p>Now start QGIS and enable the plugin in the QGIS plugin manager (
+<em class="menuselection">Plugins ‣ Manage Plugins</em>).</p>
+</div>
+<div class="section" id="branch-the-release">
+<h3>Branch the release<a class="headerlink" href="#branch-the-release" title="Permalink to this headline">¶</a></h3>
+<p>This step is only done for minor and major releases, point releases are only
+tagged. The branch should be named after the major and minor version numbers
+only - for example: <tt class="samp docutils literal"><span class="pre">version-1_0</span></tt>. The following console log illustrates
+how to create a local branch, push it to the origin repository, remove the local
+branch and then track the repository version of the branch localy:</p>
+<div class="highlight-python"><pre>git branch version-0_1
+git push origin version-0_1
+git branch -D version-0_1
+git fetch origin
+git branch --track version-0_1 origin/version-0_1
+git checkout version-0_1</pre>
+</div>
+<p><strong>Outcome:</strong> A branch on the remote repository named after the majon and minor
+version numbers.</p>
+</div>
+<div class="section" id="tag-the-release">
+<h3>Tag the release<a class="headerlink" href="#tag-the-release" title="Permalink to this headline">¶</a></h3>
+<p>Tagging the release provides a &#8216;known good&#8217; state for the software which
+represents a point in time where all of the above items in this list have
+been checked. The tag should be named after the major, minor and point release
+for example <tt class="samp docutils literal"><span class="pre">version-0_1_0</span></tt>. If the release is a releas candidate or
+and alpha release the letters <tt class="samp docutils literal"><span class="pre">rc</span></tt> or <tt class="samp docutils literal"><span class="pre">a</span></tt> resepectively should
+be appended respectively, along with the related number. For example version
+0.1.0 alpha 1 would be tagged as <tt class="samp docutils literal"><span class="pre">version-0_1_0a1</span></tt>. To tag the release
+simply do it in git as illustrated below.:</p>
+<div class="highlight-python"><pre>git tag version-0_1_0
+git push --tags origin version-0_1_0</pre>
+</div>
+<p><strong>Outcome:</strong> The release is tagged in GIT and can be checked out at any point
+in the future. The tagged source tree can easily be downloaded at any point by
+visiting <a class="reference external" href="https://github.com/AIFDR/inasafe/tags">https://github.com/AIFDR/inasafe/tags</a></p>
+</div>
+<div class="section" id="upload-the-package">
+<h3>Upload the package<a class="headerlink" href="#upload-the-package" title="Permalink to this headline">¶</a></h3>
+<p>QGIS provides an online plugin repository that centralizes the distribution
+and retrieval of plugins. It is the most efficient way to make your plugin
+available to the world at large.</p>
+<ul class="simple">
+<li>Upload the updated package zip file to old QGIS python plugin repository.</li>
+<li>Upload the updated package zip file to the new QGIS python plugin repository.</li>
+</ul>
+</div>
+<div class="section" id="press-announcements">
+<h3>Press announcements<a class="headerlink" href="#press-announcements" title="Permalink to this headline">¶</a></h3>
+<p>Once the release has been made, an announcement should be made to inform
+interested parties about the availability of the new software. A pro-forma
+announcement is provided below <strong>(Trevor or Ole todo)</strong>:</p>
+<div class="highlight-python"><pre>Dear |project_name| Users
+
+We are pleased to announce the immediate availability of the newest
+version of |project_name| (version X.X.X). This version includes numerous
+bug fixes and improvements over the previous release::
+
+----- changelog goes here -------------
+
+We welcome any feedback you may have on this release. You can use our
+issue tracker (requires free account) to notify us of any issues you may
+have encountered whilst using the system. The tracker is available here:
+
+https://github.com/AIFDR/inasafe/issues
+
+This project is supported by the Australian Aid Agency and the World Bank.
+
+Best regards
+
+(Name of person)</pre>
+</div>
+<p>A standard list of contacts should be compiled and the notification sent to
+all those listed.</p>
+<p><strong>Outcome:</strong> Interested parties are informed about the availability of the
+new release.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Preparing a release</a><ul>
+<li><a class="reference internal" href="#release-numbering">Release numbering</a></li>
+<li><a class="reference internal" href="#issue-completion">Issue completion</a></li>
+<li><a class="reference internal" href="#branching">Branching</a></li>
+<li><a class="reference internal" href="#updating-the-source-version-number">Updating the source version number</a></li>
+<li><a class="reference internal" href="#pep8-and-pep257-compliance">PEP8 and PEP257 compliance</a></li>
+<li><a class="reference internal" href="#check-for-assert-statements">Check for assert statements</a></li>
+<li><a class="reference internal" href="#compile-qt-resources-and-user-interface-files">Compile Qt resources and user interface files</a></li>
+<li><a class="reference internal" href="#hig-compliance">HIG Compliance</a></li>
+<li><a class="reference internal" href="#unit-testing">Unit Testing</a><ul>
+<li><a class="reference internal" href="#user-acceptance-testing">User Acceptance Testing</a></li>
+<li><a class="reference internal" href="#document-new-features">Document new features</a></li>
+<li><a class="reference internal" href="#api-documentation">API Documentation</a></li>
+<li><a class="reference internal" href="#update-the-changelog">Update the changelog</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#finalise-translations">Finalise translations</a><ul>
+<li><a class="reference internal" href="#compile-the-sphinx-documentation">Compile the sphinx documentation</a></li>
+<li><a class="reference internal" href="#update-plugin-metadata">Update plugin metadata</a></li>
+<li><a class="reference internal" href="#generate-a-test-package">Generate a test package</a></li>
+<li><a class="reference internal" href="#branch-the-release">Branch the release</a></li>
+<li><a class="reference internal" href="#tag-the-release">Tag the release</a></li>
+<li><a class="reference internal" href="#upload-the-package">Upload the package</a></li>
+<li><a class="reference internal" href="#press-announcements">Press announcements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bug_reporting.html"
+                        title="previous chapter">Reporting bugs and getting help</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="jenkins_ci.html"
+                        title="next chapter">Continuous Integration Testing with Jenkins</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/preparing_a_release.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="jenkins_ci.html" title="Continuous Integration Testing with Jenkins"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="bug_reporting.html" title="Reporting bugs and getting help"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

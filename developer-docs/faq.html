@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Frequently Asked Questions &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../index.html" />
+    <link rel="up" title="InaSAFE developer documentation" href="index.html" />
+    <link rel="next" title="Todo List" href="todo.html" />
+    <link rel="prev" title="Continuous Integration Testing with Jenkins" href="jenkins_ci.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="todo.html" title="Todo List"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="jenkins_ci.html" title="Continuous Integration Testing with Jenkins"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="frequently-asked-questions">
+<h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="how-does-the-documentation-work">
+<h2>How does the documentation work?<a class="headerlink" href="#how-does-the-documentation-work" title="Permalink to this headline">¶</a></h2>
+<p>The InaSAFE documentation files are written using the RST format
+(<a class="reference external" href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">quickreference guide</a>)
+and stored with the source code in github:</p>
+<div class="highlight-python"><pre>https://github.com/AIFDR/inasafe/tree/master/docs/source</pre>
+</div>
+<dl class="docutils">
+<dt>The RST files are used for two products:</dt>
+<dd><ul class="first simple">
+<li>HTML files generated using Sphinx (<a class="reference external" href="http://sphinx.pocoo.org">http://sphinx.pocoo.org</a>) by running
+<a class="reference external" href="https://github.com/AIFDR/inasafe/blob/master/docs/Makefile">https://github.com/AIFDR/inasafe/blob/master/docs/Makefile</a>. These
+files are accessible through both the file browser and the help button
+available in InaSAFE</li>
+<li>The web site <a class="reference external" href="http://readthedocs.org/docs/inasafe">http://readthedocs.org/docs/inasafe</a> which automatically
+reads the RST files from github to update its content. The steps to achieve
+this are</li>
+</ul>
+<ol class="last arabic simple">
+<li>Register the project on the dashboard at ReadTheDocs
+(<a class="reference external" href="http://readthedocs.org/dashboard/inasafe/edit">http://readthedocs.org/dashboard/inasafe/edit</a>).
+In particular, this form points to the github repository where the RST
+files reside.</li>
+<li>Either manually build the project by clicking &#8216;Build latest version&#8217; on
+<a class="reference external" href="http://readthedocs.org/dashboard/inasafe/">http://readthedocs.org/dashboard/inasafe/</a> or by activating the
+service hook for ReadTheDocs at github:
+<a class="reference external" href="https://github.com/AIFDR/inasafe/admin/hooks">https://github.com/AIFDR/inasafe/admin/hooks</a></li>
+</ol>
+</dd>
+</dl>
+</div>
+<div class="section" id="how-do-i-replace-a-string-across-multiple-files">
+<h2>How do I replace a string across multiple files<a class="headerlink" href="#how-do-i-replace-a-string-across-multiple-files" title="Permalink to this headline">¶</a></h2>
+<p>To replace string layer_type, say, with layertype across all python files
+in project, do:</p>
+<div class="highlight-python"><pre>find . -name "*.py" -print | xargs sed -i 's/layer_type/layertype/g'</pre>
+</div>
+<p>Alternative you can install the &#8216;rpl&#8217; command line tool:</p>
+<div class="highlight-python"><pre>sudo apt-get install rpl</pre>
+</div>
+<p>Using rpl is much simpler, just do:</p>
+<div class="highlight-python"><pre>rpl "oldstring" "newstring" *.py</pre>
+</div>
+<p>For details on the find command see <a class="reference external" href="http://rushi.wordpress.com/2008/08/05/find-replace-across-multiple-files-in-linux/">this article</a>.</p>
+</div>
+<div class="section" id="how-did-you-embed-the-git-version-sha1-into-each-py-file">
+<span id="faq-revision-label"></span><h2>How did you embed the git version SHA1 into each .py file?<a class="headerlink" href="#how-did-you-embed-the-git-version-sha1-into-each-py-file" title="Permalink to this headline">¶</a></h2>
+<p>The format was derived using the <a class="reference external" href="http://schacon.github.com/git/git-log.html">git log format tag</a>.
+It is stored in the source of each python as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+</pre></div>
+</div>
+<p>&#8216;%H&#8217; being the format tag for the SHA1. The __revision__ is <strong>not</strong> updated
+with each commit. Rather is is registered with git for replacement when using
+git-archive by doing this:</p>
+<div class="highlight-python"><pre>echo "*.py export-subst" &gt; .gitattributes
+git add .gitattributes</pre>
+</div>
+<p>The above only needs to be done once and then all python files with format
+substitutions will be replaced when running git-archive. The actual substition
+takes place at the time that a git archive is generated (git archive creates a
+copy of the repo with all repository metadata stripped out). For example:</p>
+<div class="highlight-python"><pre>git archive version-0_3 | tar -x -C /tmp/inasafe-0.3.0</pre>
+</div>
+<p>You can verify SHA1 replacement has been made by doing:</p>
+<div class="highlight-python"><pre>cat /tmp/inasafe/gui/is_plugin.py | grep revision
+__revision__ = 'a515345e43b25d065e1ae0d73687c13531ea4c9c'</pre>
+</div>
+<p>The deployment of version tagged files is automated by using the
+<tt class="file docutils literal"><span class="pre">scriptsrelease.sh</span></tt> script.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../contents.html">
+          <img class="logo" src="../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Frequently Asked Questions</a><ul>
+<li><a class="reference internal" href="#how-does-the-documentation-work">How does the documentation work?</a></li>
+<li><a class="reference internal" href="#how-do-i-replace-a-string-across-multiple-files">How do I replace a string across multiple files</a></li>
+<li><a class="reference internal" href="#how-did-you-embed-the-git-version-sha1-into-each-py-file">How did you embed the git version SHA1 into each .py file?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="jenkins_ci.html"
+                        title="previous chapter">Continuous Integration Testing with Jenkins</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="todo.html"
+                        title="next chapter">Todo List</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/developer-docs/faq.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="todo.html" title="Todo List"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="jenkins_ci.html" title="Continuous Integration Testing with Jenkins"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Home</a> &raquo;</li>
+    <li><a href="../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="index.html" >InaSAFE developer documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

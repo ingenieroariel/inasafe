@@ -1,0 +1,488 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.plugin &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.plugin</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">  **QGIS plugin implementation.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Import the PyQt and QGIS libraries</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QObject</span><span class="p">,</span>
+                          <span class="n">QLocale</span><span class="p">,</span>
+                          <span class="n">QTranslator</span><span class="p">,</span>
+                          <span class="n">SIGNAL</span><span class="p">,</span>
+                          <span class="n">QCoreApplication</span><span class="p">,</span>
+                          <span class="n">Qt</span><span class="p">,</span>
+                          <span class="n">QSettings</span><span class="p">,</span>
+                          <span class="n">QVariant</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtGui</span> <span class="kn">import</span> <span class="n">QAction</span><span class="p">,</span> <span class="n">QIcon</span><span class="p">,</span> <span class="n">QApplication</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">TranslationLoadException</span>
+<span class="c">#see if we can import pydev - see development docs for details</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydevd</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pylint: disable=F0401</span>
+    <span class="k">print</span> <span class="s">&#39;Remote debugging is enabled.&#39;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Debugging was disabled&#39;</span>
+
+
+<div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The QGIS interface implementation for the Risk in a box plugin.</span>
+
+<span class="sd">    This class acts as the &#39;glue&#39; between QGIS and our custom logic.</span>
+<span class="sd">    It creates a toolbar and menubar entry and launches the InaSAFE user</span>
+<span class="sd">    interface if these are activated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iface</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class constructor.</span>
+
+<span class="sd">        On instantiation, the plugin instance will be assigned a copy</span>
+<span class="sd">        of the QGIS iface object which will allow this plugin to access and</span>
+<span class="sd">        manipulate the running QGIS instance that spawned it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           iface - a Quantum GIS QGisAppInterface instance. This instance</span>
+<span class="sd">           is automatically passed to the plugin by QGIS when it loads the</span>
+<span class="sd">           plugin.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Save reference to the QGIS interface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span> <span class="o">=</span> <span class="n">iface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translator</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupI18n</span><span class="p">()</span>
+        <span class="c">#print self.tr(&#39;InaSAFE&#39;)</span>
+
+<div class="viewcode-block" id="Plugin.setupI18n"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.setupI18n">[docs]</a>    <span class="k">def</span> <span class="nf">setupI18n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thePreferredLocale</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setup internationalisation for the plugin.</span>
+
+<span class="sd">        See if QGIS wants to override the system locale</span>
+<span class="sd">        and then see if we can get a valid translation file</span>
+<span class="sd">        for whatever locale is effectively being used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           thePreferredLocale - optional parameter which if set</span>
+<span class="sd">           will override any other way of determining locale..</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myOverrideFlag</span> <span class="o">=</span> <span class="n">QSettings</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s">&#39;locale/overrideFlag&#39;</span><span class="p">,</span>
+                                            <span class="n">QVariant</span><span class="p">(</span><span class="bp">False</span><span class="p">))</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="n">myLocaleName</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">thePreferredLocale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myLocaleName</span> <span class="o">=</span> <span class="n">thePreferredLocale</span>
+        <span class="k">elif</span> <span class="n">myOverrideFlag</span><span class="p">:</span>
+            <span class="n">myLocaleName</span> <span class="o">=</span> <span class="n">QSettings</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s">&#39;locale/userLocale&#39;</span><span class="p">,</span>
+                                             <span class="n">QVariant</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myLocaleName</span> <span class="o">=</span> <span class="n">QLocale</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+        <span class="c"># Also set the system locale to the user overridden local</span>
+        <span class="c"># so that the inasafe library functions gettext will work</span>
+        <span class="c"># .. see:: :py:func:`common.utilities`</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;LANG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myLocaleName</span><span class="p">)</span>
+
+        <span class="n">myRoot</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+        <span class="n">myTranslationPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myRoot</span><span class="p">,</span> <span class="s">&#39;safe_qgis&#39;</span><span class="p">,</span> <span class="s">&#39;i18n&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;inasafe_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">myLocaleName</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.qm&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">myTranslationPath</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">translator</span> <span class="o">=</span> <span class="n">QTranslator</span><span class="p">()</span>
+            <span class="n">myResult</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">myTranslationPath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">myResult</span><span class="p">:</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Failed to load translation for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myLocaleName</span>
+                <span class="k">raise</span> <span class="n">TranslationLoadException</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+            <span class="n">QCoreApplication</span><span class="o">.</span><span class="n">installTranslator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Plugin.tr"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.tr">[docs]</a>    <span class="k">def</span> <span class="nf">tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theString</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;We implement this ourself since we do not inherit QObject.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           theString - string for translation.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           Translated version of theString.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">QCoreApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&#39;Plugin&#39;</span><span class="p">,</span> <span class="n">theString</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Plugin.initGui"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.initGui">[docs]</a>    <span class="k">def</span> <span class="nf">initGui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gui initialisation procedure (for QGIS plugin api).</span>
+
+<span class="sd">        This method is called by QGIS and should be used to set up</span>
+<span class="sd">        any graphical user interface elements that should appear in QGIS by</span>
+<span class="sd">        default (i.e. before the user performs any explicit action with the</span>
+<span class="sd">        plugin).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Import dock here as it needs to be imported AFTER i18n is set up</span>
+        <span class="kn">from</span> <span class="nn">safe_qgis.dock</span> <span class="kn">import</span> <span class="n">Dock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># Create action for plugin dockable window (show/hide)</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># pylint: disable=W0201</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/icon.png&#39;</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Toggle InaSAFE Dock&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                            <span class="s">&#39;Show/hide InaSAFE dock widget&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                            <span class="s">&#39;Show/hide InaSAFE dock widget&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">showHideDockWidget</span><span class="p">)</span>
+        <span class="c"># add to plugin toolbar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="p">)</span>
+        <span class="c"># add to plugin menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addPluginToMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="p">)</span>
+
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># Create action for keywords editor</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span>
+                            <span class="n">QIcon</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/keywords.png&#39;</span><span class="p">),</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Keyword Editor&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Open the keywords editor&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Open the keywords editor&#39;</span><span class="p">))</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">showKeywordsEditor</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addPluginToMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="p">)</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># Create action for reset icon</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span>
+                            <span class="n">QIcon</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/reload.png&#39;</span><span class="p">),</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Reset Dock&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Reset the InaSAFE Dock&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Reset the InaSAFE Dock&#39;</span><span class="p">))</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">resetDock</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addPluginToMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="p">)</span>
+
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># Create action for options dialog</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span>
+                        <span class="n">QIcon</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/options.png&#39;</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE Options&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Open InaSAFE options dialog&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span>
+                                    <span class="s">&#39;Open InaSAFE options dialog&#39;</span><span class="p">))</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered()&#39;</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">showOptions</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addPluginToMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="p">)</span>
+
+        <span class="c">#--------------------------------------</span>
+        <span class="c"># create dockwidget and tabify it with the legend</span>
+        <span class="c">#--------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span> <span class="o">=</span> <span class="n">Dock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+        <span class="n">myLegendTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">()</span><span class="o">.</span><span class="n">findChild</span><span class="p">(</span><span class="n">QApplication</span><span class="p">,</span> <span class="s">&#39;Legend&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">myLegendTab</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">()</span><span class="o">.</span><span class="n">tabifyDockWidget</span><span class="p">(</span>
+                                            <span class="n">myLegendTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+        <span class="c">#</span>
+        <span class="c"># Hook up a slot for when the current layer is changed</span>
+        <span class="c">#</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="p">,</span>
+            <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;currentLayerChanged(QgsMapLayer*)&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layerChanged</span><span class="p">)</span>
+        <span class="c"># pylint: disable=W0201</span>
+</div>
+<div class="viewcode-block" id="Plugin.unload"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.unload">[docs]</a>    <span class="k">def</span> <span class="nf">unload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gui breakdown procedure (for QGIS plugin api).</span>
+
+<span class="sd">        This method is called by QGIS and should be used to *remove*</span>
+<span class="sd">        any graphical user interface elements that should appear in QGIS.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Remove the plugin menu item and icon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removePluginMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removeToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removePluginMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removeToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removePluginMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removeToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionResetDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removePluginMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">removeToolBarIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionOptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">()</span><span class="o">.</span><span class="n">removeDockWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="n">QObject</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="p">,</span>
+            <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;currentLayerChanged(QgsMapLayer*)&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layerChanged</span><span class="p">)</span>
+
+    <span class="c"># Run method that performs all the real work</span></div>
+<div class="viewcode-block" id="Plugin.showHideDockWidget"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.showHideDockWidget">[docs]</a>    <span class="k">def</span> <span class="nf">showHideDockWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Show or hide the dock widget.</span>
+
+<span class="sd">        This slot is called when the user clicks the toolbar icon or</span>
+<span class="sd">        menu item associated with this plugin. It will hide or show</span>
+<span class="sd">        the dock depending on its current state.</span>
+
+<span class="sd">        .. see also:: :func:`Plugin.initGui`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Plugin.showOptions"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.showOptions">[docs]</a>    <span class="k">def</span> <span class="nf">showOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Show the options dialog.</span>
+
+<span class="sd">        This slot is called when the user clicks the options toolbar</span>
+<span class="sd">        icon or menu item associated with this plugin</span>
+
+<span class="sd">        .. see also:: :func:`Plugin.initGui`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># import here only so that it is AFTER i18n set up</span>
+        <span class="kn">from</span> <span class="nn">safe_qgis.options_dialog</span> <span class="kn">import</span> <span class="n">OptionsDialog</span>
+
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">OptionsDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">(),</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Plugin.showKeywordsEditor"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.showKeywordsEditor">[docs]</a>    <span class="k">def</span> <span class="nf">showKeywordsEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Show the keywords editor.</span>
+
+<span class="sd">        This slot is called when the user clicks the keyword editor toolbar</span>
+<span class="sd">        icon or menu item associated with this plugin</span>
+
+<span class="sd">        .. see also:: :func:`Plugin.initGui`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># import here only so that it is AFTER i18n set up</span>
+        <span class="kn">from</span> <span class="nn">safe_qgis.keywords_dialog</span> <span class="kn">import</span> <span class="n">KeywordsDialog</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">activeLayer</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">myDialog</span> <span class="o">=</span> <span class="n">KeywordsDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">(),</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+        <span class="n">myDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Plugin.resetDock"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.resetDock">[docs]</a>    <span class="k">def</span> <span class="nf">resetDock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the dock to its default state.</span>
+
+<span class="sd">        This slot is called when the user clicks the reset icon in the toolbar</span>
+<span class="sd">        or the reset menu item associated with this plugin</span>
+
+<span class="sd">        .. see also:: :func:`Plugin.initGui`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">getLayers</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Plugin.layerChanged"><a class="viewcode-back" href="../../api-docs/safe_qgis/plugin.html#safe_qgis.plugin.Plugin.layerChanged">[docs]</a>    <span class="k">def</span> <span class="nf">layerChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theLayer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Enable or disable the keywords editor icon.</span>
+
+<span class="sd">        This slot is called when the user clicks the keyword editor toolbar</span>
+<span class="sd">        icon or menu item associated with this plugin</span>
+
+<span class="sd">        .. see also:: :func:`Plugin.initGui`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">           None.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">theLayer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionKeywordsDialog</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">layerChanged</span><span class="p">(</span><span class="n">theLayer</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>
