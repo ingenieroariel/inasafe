@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.earthquake.itb_building_impact_model &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.earthquake.itb_building_impact_model</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Impact function based on ITB vulnerability model</span>
+
+<span class="sd">   This model was developed by Institut Tecknologi Bandung (ITB) and</span>
+<span class="sd">   implemented by Dr Hyeuk Ryu, Geoscience Australia</span>
+
+<span class="sd">   Reference:</span>
+
+<span class="sd">   Indonesian Earthquake Building-Damage and Fatality Models and</span>
+<span class="sd">   Post Disaster Survey Guidelines Development,</span>
+<span class="sd">   Bali, 27-28 February 2012, 54pp.</span>
+
+<span class="sd">   Methodology:</span>
+<span class="sd">   The ITB vulnerabilty model was heuristically developed (i.e. based on</span>
+<span class="sd">   expert opinion) through the Bali workshop. The model is defined with</span>
+<span class="sd">   two parameters (median, and lognormal standard deviation) of cumulative</span>
+<span class="sd">   lognormal distribution. The building type classification used in the</span>
+<span class="sd">   model was endorsed by expert group in thel Bali workshop.</span>
+
+<span class="sd">   Limitations:</span>
+<span class="sd">   The current model contains some dummy numbers.</span>
+<span class="sd">   It should be updated once ITB publishes the final report on</span>
+<span class="sd">   earthquake building damage model development.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">safe.common.numerics</span> <span class="kn">import</span> <span class="n">lognormal_cdf</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">TESTDATA</span><span class="p">,</span> <span class="n">HAZDATA</span><span class="p">,</span> <span class="n">EXPDATA</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AutoVivification"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/earthquake/itb_building_impact_model.html#safe.impact_functions.earthquake.itb_building_impact_model.AutoVivification">[docs]</a><span class="k">class</span> <span class="nc">AutoVivification</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation of perl&#39;s autovivification feature.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)()</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+<span class="c"># read vulnerability information</span></div>
+<span class="n">eng_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&#39;itb_vulnerability_eng.csv&#39;</span><span class="p">)</span>
+<span class="n">non_eng_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&#39;itb_vulnerability_non_eng.csv&#39;</span><span class="p">)</span>
+
+<span class="n">vul_curves</span> <span class="o">=</span> <span class="n">AutoVivification</span><span class="p">()</span>
+<span class="c"># Non-Engineere dbuildings</span>
+<span class="n">a</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">non_eng_filename</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># structural type index</span>
+    <span class="n">vul_curves</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s">&#39;median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+    <span class="n">vul_curves</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+<span class="c"># Engineered buildings</span>
+<span class="n">a</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">eng_filename</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># structural type index</span>
+    <span class="n">vul_curves</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s">&#39;median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+    <span class="n">vul_curves</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s">&#39;beta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="ITBEarthquakeBuildingDamageFunction"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/earthquake/itb_building_impact_model.html#safe.impact_functions.earthquake.itb_building_impact_model.ITBEarthquakeBuildingDamageFunction">[docs]</a><span class="k">class</span> <span class="nc">ITBEarthquakeBuildingDamageFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for ITB earthquake damage to buildings in Padang</span>
+
+<span class="sd">    :param requires category == &#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory == &#39;earthquake&#39; and \</span>
+<span class="sd">                    layertype == &#39;raster&#39; and \</span>
+<span class="sd">                    unit == &#39;MMI&#39; and \</span>
+<span class="sd">                    disabled == True</span>
+
+<span class="sd">    :param requires category == &#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory in [&#39;building&#39;, &#39;structure&#39;] and \</span>
+<span class="sd">                    layertype == &#39;vector&#39; and \</span>
+<span class="sd">                    datatype in [&#39;osm&#39;, &#39;itb&#39;, &#39;sigab&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Be damaged depending on building type&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ITBEarthquakeBuildingDamageFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/earthquake/itb_building_impact_model.html#safe.impact_functions.earthquake.itb_building_impact_model.ITBEarthquakeBuildingDamageFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for Padang building survey</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Extract data</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Ground shaking</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Building locations</span>
+
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">()[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span>
+        <span class="n">vclass_tag</span> <span class="o">=</span> <span class="s">&#39;ITB_Class&#39;</span>
+        <span class="k">if</span> <span class="n">datatype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;osm&#39;</span><span class="p">:</span>
+            <span class="c"># Map from OSM attributes to the ITB building classes</span>
+<span class="c">#            Emap = osm2itb(E)</span>
+            <span class="k">print</span> <span class="s">&#39;osm2itb has not been implemented&#39;</span>
+        <span class="k">elif</span> <span class="n">datatype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;sigab&#39;</span><span class="p">:</span>
+<span class="c">#            Emap = sigabitb(E)</span>
+            <span class="k">print</span> <span class="s">&#39;sigab2itb has not been implemented&#39;</span>
+        <span class="k">elif</span> <span class="n">datatype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;itb&#39;</span><span class="p">:</span>
+            <span class="n">Emap</span> <span class="o">=</span> <span class="n">E</span>
+
+        <span class="c"># Interpolate hazard level to building locations</span>
+        <span class="n">Hi</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">Emap</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;MMI&#39;</span><span class="p">)</span>
+
+        <span class="c"># Extract relevant numerical data</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">Emap</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">shaking</span> <span class="o">=</span> <span class="n">Hi</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shaking</span><span class="p">)</span>
+
+        <span class="c"># List attributes to carry forward to result layer</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">Emap</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+        <span class="c"># Calculate building damage</span>
+        <span class="n">count50</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count25</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count10</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">building_damage</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">mmi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">shaking</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;MMI&#39;</span><span class="p">])</span>
+
+            <span class="n">building_class</span> <span class="o">=</span> <span class="n">Emap</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">vclass_tag</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="n">building_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">building_class</span><span class="p">)</span>
+            <span class="n">damage_params</span> <span class="o">=</span> <span class="n">vul_curves</span><span class="p">[</span><span class="n">building_type</span><span class="p">]</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">damage_params</span><span class="p">[</span><span class="s">&#39;beta&#39;</span><span class="p">]</span>
+            <span class="n">median</span> <span class="o">=</span> <span class="n">damage_params</span><span class="p">[</span><span class="s">&#39;median&#39;</span><span class="p">]</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Invalid parameter value for &#39;</span> <span class="o">+</span> <span class="n">building_type</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">beta</span> <span class="o">+</span> <span class="n">median</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="n">percent_damage</span> <span class="o">=</span> <span class="n">lognormal_cdf</span><span class="p">(</span><span class="n">mmi</span><span class="p">,</span>
+                                           <span class="n">median</span><span class="o">=</span><span class="n">median</span><span class="p">,</span>
+                                           <span class="n">sigma</span><span class="o">=</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+            <span class="c"># Collect shake level and calculated damage</span>
+            <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">:</span> <span class="n">percent_damage</span><span class="p">,</span>
+                           <span class="s">&#39;MMI&#39;</span><span class="p">:</span> <span class="n">mmi</span><span class="p">}</span>
+
+            <span class="c"># Carry all orginal attributes forward</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Emap</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="c"># Record result for this feature</span>
+            <span class="n">building_damage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result_dict</span><span class="p">)</span>
+
+            <span class="c"># Debugging</span>
+            <span class="c">#if percent_damage &gt; 0.01:</span>
+            <span class="c">#    print mmi, percent_damage</span>
+
+            <span class="c"># Calculate statistics</span>
+            <span class="k">if</span> <span class="n">percent_damage</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">count0</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">percent_damage</span> <span class="o">&lt;</span> <span class="mi">33</span><span class="p">:</span>
+                <span class="n">count10</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="mi">33</span> <span class="o">&lt;=</span> <span class="n">percent_damage</span> <span class="o">&lt;</span> <span class="mi">66</span><span class="p">:</span>
+                <span class="n">count25</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="mi">66</span> <span class="o">&lt;=</span> <span class="n">percent_damage</span><span class="p">:</span>
+                <span class="n">count50</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c">#        fid.close()</span>
+        <span class="c"># Create report</span>
+        <span class="n">Hname</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+        <span class="n">Ename</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span>
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&lt;b&gt;In case of &quot;</span><span class="si">%s</span><span class="s">&quot; the estimated impact to &#39;</span>
+                           <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; &#39;</span>
+                           <span class="s">&#39;is&amp;#58;&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;p&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Hname</span><span class="p">,</span> <span class="n">Ename</span><span class="p">))</span>
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;&lt;table border=&quot;0&quot; width=&quot;320px&quot;&gt;&#39;</span>
+                   <span class="s">&#39;   &lt;tr&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;/th&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s">&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s"> (&lt;10</span><span class="si">%%</span><span class="s">)&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s"> (10-33</span><span class="si">%%</span><span class="s">)&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s"> (33-66</span><span class="si">%%</span><span class="s">)&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s"> (66-100</span><span class="si">%%</span><span class="s">)&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;&lt;/table&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Buildings&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Total&#39;</span><span class="p">),</span>
+                                    <span class="n">_</span><span class="p">(</span><span class="s">&#39;All&#39;</span><span class="p">),</span> <span class="n">N</span><span class="p">,</span>
+                                    <span class="n">_</span><span class="p">(</span><span class="s">&#39;No damage&#39;</span><span class="p">),</span> <span class="n">count0</span><span class="p">,</span>
+                                    <span class="n">_</span><span class="p">(</span><span class="s">&#39;Low damage&#39;</span><span class="p">),</span> <span class="n">count10</span><span class="p">,</span>
+                                    <span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium damage&#39;</span><span class="p">),</span> <span class="n">count25</span><span class="p">,</span>
+                                    <span class="n">_</span><span class="p">(</span><span class="s">&#39;High damage&#39;</span><span class="p">),</span> <span class="n">count50</span><span class="p">))</span>
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="s">&#39;&lt;br&gt;&#39;</span>  <span class="c"># Blank separation row</span>
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="s">&#39;&lt;b&gt;&#39;</span> <span class="o">+</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Assumption&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;&amp;#58;&lt;/b&gt;&lt;br&gt;&#39;</span>
+        <span class="c"># This is the proper text:</span>
+        <span class="c">#_(&#39;Levels of impact are defined by post 2009 &#39;</span>
+        <span class="c">#  &#39;Padang earthquake survey conducted by Geoscience &#39;</span>
+        <span class="c">#  &#39;Australia and Institute of Teknologi Bandung.&#39;))</span>
+        <span class="c">#_(&#39;Unreinforced masonry is assumed where no &#39;</span>
+        <span class="c">#  &#39;structural information is available.&#39;))</span>
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Levels of impact are defined by post 2009 &#39;</span>
+                            <span class="s">&#39;Padang earthquake survey conducted by Geoscience &#39;</span>
+                            <span class="s">&#39;Australia and Institute of Teknologi Bandung.&#39;</span><span class="p">)</span>
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Unreinforced masonry is assumed where no &#39;</span>
+                            <span class="s">&#39;structural information is available.&#39;</span><span class="p">)</span>
+        <span class="c"># Create style</span>
+        <span class="n">style_classes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;No damage&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#00ff00&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Low damage&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#ffff00&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium damage&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">66</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#ffaa00&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;High damage&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">66</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#ff0000&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">style_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target_field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">,</span>
+                          <span class="n">style_classes</span><span class="o">=</span><span class="n">style_classes</span><span class="p">)</span>
+
+        <span class="c"># Create vector layer and return</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">building_damage</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">coordinates</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;Estimated pct damage&#39;</span><span class="p">,</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">},</span>
+                   <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

@@ -1,0 +1,665 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.core &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.core</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Function to manage self-registering plugins</span>
+
+<span class="sd">The design is based on http://effbot.org/zone/metaclass-plugins.htm</span>
+
+<span class="sd">To register the plugin, the module must be imported by the Python process</span>
+<span class="sd">using it.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">keyword</span>
+<span class="kn">from</span> <span class="nn">safe.common.polygon</span> <span class="kn">import</span> <span class="n">inside_polygon</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.tables</span> <span class="kn">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">TableCell</span><span class="p">,</span> <span class="n">TableRow</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.utilities</span> <span class="kn">import</span> <span class="p">(</span><span class="n">admissible_plugins_to_str</span><span class="p">,</span>
+                                             <span class="n">keywords_to_str</span><span class="p">)</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">PluginMount</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&#39;plugins&#39;</span><span class="p">):</span>
+            <span class="c"># This branch only executes when processing the mount point itself.</span>
+            <span class="c"># So, since this is a new plugin type, not an implementation, this</span>
+            <span class="c"># class shouldn&#39;t be registered as a plugin. Instead, it sets up a</span>
+            <span class="c"># list where plugins can be registered later.</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># This must be a plugin implementation, which should be registered.</span>
+            <span class="c"># Simply appending it to the list is all that&#39;s needed to keep</span>
+            <span class="c"># track of it later.</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FunctionProvider"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.FunctionProvider">[docs]</a><span class="k">class</span> <span class="nc">FunctionProvider</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Mount point for plugins which refer to actions that can be performed.</span>
+
+<span class="sd">    Plugins implementing this reference should provide the following method:</span>
+
+<span class="sd">    run(layers)</span>
+
+<span class="sd">    ===============  =========================</span>
+<span class="sd">    layers           A list of layers</span>
+<span class="sd">    result           A list of layers</span>
+<span class="sd">    ===============  =========================</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">PluginMount</span>
+
+    <span class="n">target_field</span> <span class="o">=</span> <span class="s">&#39;DAMAGE&#39;</span>
+    <span class="n">symbol_field</span> <span class="o">=</span> <span class="s">&#39;USE_MAJOR&#39;</span>
+
+</div>
+<div class="viewcode-block" id="get_function_title"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_function_title">[docs]</a><span class="k">def</span> <span class="nf">get_function_title</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get title for impact function</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        func: Impact function class</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        it&#39;s title if available as an attribute in the class description,</span>
+<span class="sd">        otherwise what is returned by the function pretty_function_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;title&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">func</span><span class="o">.</span><span class="n">title</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pretty_function_name</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_plugins">[docs]</a><span class="k">def</span> <span class="nf">get_plugins</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieve a list of plugins that match the name you pass</span>
+
+<span class="sd">       Or all of them if no name is passed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugins_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">pretty_function_name</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">p</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">FunctionProvider</span><span class="o">.</span><span class="n">plugins</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">plugins_dict</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="c"># Add the names</span>
+        <span class="n">plugins_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">FunctionProvider</span><span class="o">.</span><span class="n">plugins</span><span class="p">]))</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;No plugin named &quot;</span><span class="si">%s</span><span class="s">&quot; was found. &#39;</span>
+               <span class="s">&#39;List of available plugins is: </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugins_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plugins_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[{</span><span class="n">name</span><span class="p">:</span> <span class="n">plugins_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]}]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;get_plugins expects either no parameters or a string &#39;</span>
+               <span class="s">&#39;with the name of the plugin, you passed: &#39;</span>
+               <span class="s">&#39;</span><span class="si">%s</span><span class="s"> which is a </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_plugin"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_plugin">[docs]</a><span class="k">def</span> <span class="nf">get_plugin</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get plugin that matches given name</span>
+
+<span class="sd">    This is just a wrapper around get_plugins to simplify</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">impact_function</span> <span class="o">=</span> <span class="n">plugin_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">impact_function</span>
+
+</div>
+<div class="viewcode-block" id="pretty_function_name"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.pretty_function_name">[docs]</a><span class="k">def</span> <span class="nf">pretty_function_name</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a human readable name for the function</span>
+<span class="sd">    if the function has a func.plugin_name use this</span>
+<span class="sd">    otherwise turn underscores to spaces and Caps to spaces &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;plugin_name&#39;</span><span class="p">):</span>
+        <span class="n">nounderscore_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nounderscore_name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">func_name</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">c</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">func_name</span> <span class="o">+=</span> <span class="n">c</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">plugin_name</span>
+    <span class="k">return</span> <span class="n">func_name</span>
+
+</div>
+<div class="viewcode-block" id="requirements_collect"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.requirements_collect">[docs]</a><span class="k">def</span> <span class="nf">requirements_collect</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collect the requirements from the plugin function doc</span>
+
+<span class="sd">    The requirements need to be specified using</span>
+<span class="sd">      :param requires &lt;valid python expression&gt;</span>
+<span class="sd">    The layer keywords are put into the local name space</span>
+<span class="sd">    each requires should be on a new line</span>
+<span class="sd">    a &#39;\&#39; at the end of a line will be a continuation</span>
+
+<span class="sd">    returns a (possibly empty) list of Python expressions</span>
+
+<span class="sd">    Example of valid requirements expression</span>
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory in [&#39;flood&#39;, &#39;tsunami&#39;] and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    unit==&#39;m&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">requires_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;__doc__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span><span class="p">:</span>
+
+        <span class="c"># Define tag that indentifies requirements expressions</span>
+        <span class="n">require_cmd</span> <span class="o">=</span> <span class="s">&#39;:param requires&#39;</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">require_cmd</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c"># Index where expression starts</span>
+
+        <span class="c"># Collect Python expressions from docstring</span>
+        <span class="n">docstr</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">docstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+            <span class="n">doc_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">doc_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">require_cmd</span><span class="p">):</span>
+                <span class="c"># Extract expression and remove excessive whitespace</span>
+                <span class="n">expression</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">doc_line</span><span class="p">[</span><span class="n">indent</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+                <span class="n">requires_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+
+    <span class="c"># Return list with one item per requirement</span>
+    <span class="k">return</span> <span class="n">requires_lines</span>
+
+</div>
+<div class="viewcode-block" id="requirement_check"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.requirement_check">[docs]</a><span class="k">def</span> <span class="nf">requirement_check</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">require_str</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks a dictionary params against the requirements defined</span>
+<span class="sd">    in require_str. Require_str must be a valid python expression</span>
+<span class="sd">    and evaluate to True or False&quot;&quot;&quot;</span>
+
+    <span class="c"># Some keyword should never go into the requirement check</span>
+    <span class="c"># FIXME (Ole): This is not the most robust way. If we get a</span>
+    <span class="c"># more general way of doing metadata we can treat impact_summary and</span>
+    <span class="c"># many other things separately. See issue #148</span>
+    <span class="n">excluded_keywords</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;impact_summary&#39;</span><span class="p">]</span>
+
+    <span class="n">execstr</span> <span class="o">=</span> <span class="s">&#39;def check():</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="c"># This should never happen</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Empty key found in requirements with &#39;</span>
+                       <span class="s">&#39;non-empty value: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">params</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">])</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+        <span class="c"># Check that symbol is not a Python keyword</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keyword</span><span class="o">.</span><span class="n">kwlist</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Error in plugin requirements&#39;</span>
+                   <span class="s">&#39;Must not use Python keywords as params: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="c">#print msg</span>
+            <span class="c">#logger.error(msg)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">excluded_keywords</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">execstr</span> <span class="o">+=</span> <span class="s">&#39;  </span><span class="si">%s</span><span class="s"> = &quot;</span><span class="si">%s</span><span class="s">&quot; </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">execstr</span> <span class="o">+=</span> <span class="s">&#39;  </span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s"> </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="n">execstr</span> <span class="o">+=</span> <span class="s">&#39;  return &#39;</span> <span class="o">+</span> <span class="n">require_str</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">execstr</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">execstr</span><span class="p">,</span> <span class="s">&#39;&lt;string&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;exec&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">check</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c"># This condition will happen frequently since the function</span>
+        <span class="c"># is evaled against many params that are not relevant and</span>
+        <span class="c"># hence correctly return False</span>
+        <span class="k">pass</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Requirements header could not compiled: </span><span class="si">%s</span><span class="s">. &#39;</span>
+               <span class="s">&#39;Original message: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">execstr</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="c">#print msg</span>
+        <span class="c">#logger.error(msg)</span>
+
+    <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="requirements_met"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.requirements_met">[docs]</a><span class="k">def</span> <span class="nf">requirements_met</span><span class="p">(</span><span class="n">requirements</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks the plugin can run with a given layer.</span>
+
+<span class="sd">       Based on the requirements specified in the doc string.</span>
+
+<span class="sd">       Returns:</span>
+<span class="sd">           True:  if there are no requirements or they are all met.</span>
+<span class="sd">           False: if it has requirements and none of them are met.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">requirements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># If the function has no requirements, then they are all met.</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">for</span> <span class="n">requires</span> <span class="ow">in</span> <span class="n">requirements</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">requirement_check</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">requires</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c"># If none of the conditions above is met, return False.</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="compatible_layers"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.compatible_layers">[docs]</a><span class="k">def</span> <span class="nf">compatible_layers</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">layer_descriptors</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fetches all the layers that match the plugin requirements.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        func: ? (FIXME(Ole): Ted, can you fill in here?</span>
+<span class="sd">        layer_descriptor: Layer names and meta data (keywords, type, etc)</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Array of compatible layers, can be an empty list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">requirements</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">layer_name</span><span class="p">,</span> <span class="n">layer_params</span> <span class="ow">in</span> <span class="n">layer_descriptors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">requirements_met</span><span class="p">(</span><span class="n">requirements</span><span class="p">,</span> <span class="n">layer_params</span><span class="p">):</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">layers</span>
+
+
+<span class="c">#-------------------------------</span>
+<span class="c"># Helpers for individual plugins</span>
+<span class="c">#-------------------------------</span></div>
+<div class="viewcode-block" id="get_hazard_layers"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_hazard_layers">[docs]</a><span class="k">def</span> <span class="nf">get_hazard_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get list of layers that have category==&#39;hazard&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">extract_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="s">&#39;hazard&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_hazard_layer"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_hazard_layer">[docs]</a><span class="k">def</span> <span class="nf">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get hazard layer from list of layers</span>
+
+<span class="sd">    If there are more than one, only the first is returned.</span>
+<span class="sd">    Use get_hazard_layers if more are expected and needed</span>
+
+<span class="sd">    If no layers fit the description None is returned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">L</span> <span class="o">=</span> <span class="n">get_hazard_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="get_exposure_layers"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_exposure_layers">[docs]</a><span class="k">def</span> <span class="nf">get_exposure_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get list of layers that have category==&#39;exposure&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">extract_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="s">&#39;exposure&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_exposure_layer"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_exposure_layer">[docs]</a><span class="k">def</span> <span class="nf">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get exposure layer from list of layers</span>
+
+<span class="sd">    If there are more than one, only the first is returned.</span>
+<span class="sd">    Use get_hazard_layers if more are expected and needed</span>
+
+<span class="sd">    If no layers fit the description None is returned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">L</span> <span class="o">=</span> <span class="n">get_exposure_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="extract_layers"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.extract_layers">[docs]</a><span class="k">def</span> <span class="nf">extract_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract layers with specified keyword/value pair</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">extracted_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">(</span><span class="n">keyword</span><span class="p">):</span>
+            <span class="n">extracted_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">extracted_layers</span>
+
+</div>
+<div class="viewcode-block" id="get_question"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_question">[docs]</a><span class="k">def</span> <span class="nf">get_question</span><span class="p">(</span><span class="n">hazard_title</span><span class="p">,</span> <span class="n">exposure_title</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rephrase the question asked</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        hazard_title: string</span>
+<span class="sd">        exposure_title: string</span>
+<span class="sd">        func: impact function class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">function_title</span> <span class="o">=</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;In the event of &lt;i&gt;</span><span class="si">%(hazard)s</span><span class="s">&lt;/i&gt; how many &#39;</span>
+              <span class="s">&#39;&lt;i&gt;</span><span class="si">%(exposure)s</span><span class="s">&lt;/i&gt; might &lt;i&gt;</span><span class="si">%(impact)s</span><span class="s">&lt;/i&gt;&#39;</span><span class="p">)</span>
+            <span class="o">%</span> <span class="p">{</span><span class="s">&#39;hazard&#39;</span><span class="p">:</span> <span class="n">hazard_title</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+               <span class="s">&#39;exposure&#39;</span><span class="p">:</span> <span class="n">exposure_title</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+               <span class="s">&#39;impact&#39;</span><span class="p">:</span> <span class="n">function_title</span><span class="o">.</span><span class="n">lower</span><span class="p">()})</span>
+
+</div>
+<div class="viewcode-block" id="aggregate_point_data"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.aggregate_point_data">[docs]</a><span class="k">def</span> <span class="nf">aggregate_point_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">attribute_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">aggregation_function</span><span class="o">=</span><span class="s">&#39;count&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip data to boundaries and aggregate their values for each.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        data: Point dataset</span>
+<span class="sd">        boundaries: Polygon dataset</span>
+<span class="sd">        attribute_name: Name of attribute to aggrate over.</span>
+<span class="sd">        aggregation_function: Function to apply (&#39;count&#39; or &#39;sum&#39;)</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        List of aggregated values for each polygon.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">        Aggregated values depend on aggregation function:</span>
+<span class="sd">        &#39;sum&#39;: Sum of values for attribute_name</span>
+<span class="sd">        &#39;count&#39;: Dictionary with counts of occurences of each value</span>
+<span class="sd">                 of attribute_name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input argument &quot;data&quot; must be point type. I got type: </span><span class="si">%s</span><span class="s">&#39;</span>
+           <span class="o">%</span> <span class="n">data</span><span class="o">.</span><span class="n">get_geometry_type</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input argument &quot;boundaries&quot; must be polygon type. I got type: </span><span class="si">%s</span><span class="s">&#39;</span>
+           <span class="o">%</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">get_geometry_type</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">polygon_geoms</span> <span class="o">=</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+    <span class="n">polygon_attrs</span> <span class="o">=</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">polygon_geoms</span><span class="p">):</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">inside_polygon</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+
+        <span class="c">#print &#39;Found %i points in polygon %i&#39; % (len(indices), i)</span>
+
+        <span class="c"># Aggregate numbers</span>
+        <span class="k">if</span> <span class="n">aggregation_function</span> <span class="o">==</span> <span class="s">&#39;count&#39;</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">att</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">att</span><span class="p">[</span><span class="n">attribute_name</span><span class="p">]</span>
+
+                <span class="c"># Count occurences of val</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bins</span><span class="p">:</span>
+                    <span class="n">bins</span><span class="p">[</span><span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">bins</span><span class="p">[</span><span class="n">val</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">aggregation_function</span> <span class="o">==</span> <span class="s">&#39;sum&#39;</span><span class="p">:</span>
+            <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">att</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">att</span><span class="p">[</span><span class="n">attribute_name</span><span class="p">]</span>
+                <span class="nb">sum</span> <span class="o">+=</span> <span class="n">val</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="aggregate"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.aggregate">[docs]</a><span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">attribute_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">aggregation_function</span><span class="o">=</span><span class="s">&#39;count&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip data to boundaries and aggregate their values for each.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        data: Point or Raster dataset</span>
+<span class="sd">        boundaries: Polygon dataset</span>
+<span class="sd">        attribute_name: Name of attribute to aggrate over.</span>
+<span class="sd">                        This is only applicable for vector data</span>
+<span class="sd">        aggregation_function: Function to apply (&#39;count&#39; or &#39;sum&#39;)</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        Dictionary of {boundary_name: aggregated value}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">aggregate_point_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">,</span>
+                                   <span class="n">attribute_name</span><span class="p">,</span> <span class="n">aggregation_function</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">is_raster_data</span><span class="p">:</span>
+        <span class="c"># Convert to point data</span>
+        <span class="c"># Call point aggregation function</span>
+        <span class="c">#aggregate_point_data(data, boundaries,</span>
+        <span class="c">#                     attribute_name, aggregation_function)</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input argument &quot;data&quot; must be point or raster data. &#39;</span>
+               <span class="s">&#39;I got type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="o">.</span><span class="n">get_geometry_type</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+
+<span class="c"># FIXME (Ole): Maybe filter by name too, rename to get_impact_functions</span>
+<span class="c">#              and remove some of the other functions.</span></div>
+<div class="viewcode-block" id="get_admissible_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_admissible_plugins">[docs]</a><span class="k">def</span> <span class="nf">get_admissible_plugins</span><span class="p">(</span><span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>  <span class="c"># , name=None):</span>
+    <span class="sd">&quot;&quot;&quot;Get plugins that match specified keywords</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        keywords: Either dictionary or list of dictionaries containing</span>
+<span class="sd">                  layer keywords of the form</span>
+<span class="sd">                  {&#39;category&#39;: &#39;hazard&#39;, &#39;subcategory&#39;: &#39;flood&#39;, ...}</span>
+
+<span class="sd">                  If None or empty all plugins are returned</span>
+<span class="sd">#        name: Optional impact function name (or part of function name)</span>
+<span class="sd">#              used to further filter the result.</span>
+<span class="sd">#              If None all names are considered to match</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        Dictionary of impact functions ({name: class})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># This is very verbose, but sometimes useful</span>
+    <span class="c"># LOGGER.debug(keywords_to_str(keywords))</span>
+
+    <span class="c"># Input checks</span>
+    <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">keywords</span><span class="p">]</span>
+
+    <span class="c"># Get all impact functions</span>
+    <span class="n">plugin_dict</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">()</span>
+
+    <span class="c"># Build dictionary of those that match given keywords</span>
+    <span class="n">admissible_plugins</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">f_name</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">plugin_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="c"># Required keywords for func</span>
+        <span class="n">requirelines</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="c"># Keep impact function if requirements are met for all given keywords</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">kw_dict</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">requirements_met</span><span class="p">(</span><span class="n">requirelines</span><span class="p">,</span> <span class="n">kw_dict</span><span class="p">):</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">admissible_plugins</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+
+    <span class="c"># This is very verbose, but sometimes useful</span>
+    <span class="c"># LOGGER.debug(admissible_plugins_to_str(admissible_plugins))</span>
+
+    <span class="c"># Return (possibly empty) dictionary</span>
+    <span class="k">return</span> <span class="n">admissible_plugins</span>
+
+</div>
+<div class="viewcode-block" id="get_plugins_as_table"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/core.html#safe.impact_functions.core.get_plugins_as_table">[docs]</a><span class="k">def</span> <span class="nf">get_plugins_as_table</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieve a table listing all plugins and their requirements.</span>
+
+<span class="sd">       Or just a single plugin if name is passed.</span>
+
+<span class="sd">       Args: name str optional name of a specific plugin.</span>
+
+<span class="sd">       Returns: table instance containing plugin descriptive data</span>
+
+<span class="sd">       Raises: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">table_body</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Title&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;ID&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Requirements&#39;</span><span class="p">)],</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+    <span class="n">plugins_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">pretty_function_name</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">FunctionProvider</span><span class="o">.</span><span class="n">plugins</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="c"># Add the names</span>
+            <span class="n">plugins_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">FunctionProvider</span><span class="o">.</span><span class="n">plugins</span><span class="p">]))</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;No plugin named &quot;</span><span class="si">%s</span><span class="s">&quot; was found. &#39;</span>
+                   <span class="s">&#39;List of available plugins is: </span><span class="si">%s</span><span class="s">&#39;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugins_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plugins_dict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">plugins_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">plugins_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;get_plugins expects either no parameters or a string &#39;</span>
+                   <span class="s">&#39;with the name of the plugin, you passed: &#39;</span>
+                   <span class="s">&#39;</span><span class="si">%s</span><span class="s"> which is a </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="c"># Now loop through the plugins adding them to the table</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">plugins_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">requirement</span> <span class="ow">in</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableCell</span><span class="p">(</span><span class="n">get_function_title</span><span class="p">(</span><span class="n">func</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">requirement</span><span class="p">)</span>
+            <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Available Impact Functions&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">table</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

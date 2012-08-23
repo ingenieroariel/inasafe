@@ -1,0 +1,256 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.impact_functions.experimental.mappings &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Package::safe.impact_functions.experimental" href="../experimental.html" />
+    <link rel="next" title="Module: safe.impact_functions.experimental.tsunami_population_impact" href="tsunami_population_impact.html" />
+    <link rel="prev" title="Package::safe.impact_functions.experimental" href="../experimental.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="tsunami_population_impact.html" title="Module: safe.impact_functions.experimental.tsunami_population_impact"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../experimental.html" title="Package::safe.impact_functions.experimental"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../../impact_functions.html" >Package::safe.impact_functions</a> &raquo;</li>
+          <li><a href="../experimental.html" accesskey="U">Package::safe.impact_functions.experimental</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.impact_functions.experimental.mappings">
+<span id="module-safe-impact-functions-experimental-mappings"></span><h1>Module:  safe.impact_functions.experimental.mappings<a class="headerlink" href="#module-safe.impact_functions.experimental.mappings" title="Permalink to this headline">¶</a></h1>
+<p>Collection of mappings for standard vulnerability classes</p>
+<dl class="function">
+<dt id="safe.impact_functions.experimental.mappings.osm2bnpb">
+<tt class="descclassname">safe.impact_functions.experimental.mappings.</tt><tt class="descname">osm2bnpb</tt><big>(</big><em>E</em>, <em>target_attribute='VCLASS'</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/impact_functions/experimental/mappings.html#osm2bnpb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.experimental.mappings.osm2bnpb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map OSM attributes to BNPB vulnerability classes</p>
+<p>This maps attributes collected in the OpenStreetMap exposure data
+(data.kompetisiosm.org) to 2 vulnerability classes identified by
+BNPB in Kajian Risiko Gempabumi VERS 1.0, 2011. They are
+URM: Unreinforced Masonry and RM: Reinforced Masonry</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">E: Vector object representing the OSM data
+target_attribute: Optional name of the attribute containing</p>
+<blockquote class="last">
+<div>the mapped vulnerability class. Default
+value is &#8216;VCLASS&#8217;</div></blockquote>
+</dd>
+<dt>Output:</dt>
+<dd>Vector object like E, but with one new attribute (e.g. &#8216;VCLASS&#8217;)
+representing the vulnerability class used in the guidelines</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.experimental.mappings.osm2padang">
+<tt class="descclassname">safe.impact_functions.experimental.mappings.</tt><tt class="descname">osm2padang</tt><big>(</big><em>E</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/impact_functions/experimental/mappings.html#osm2padang"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.experimental.mappings.osm2padang" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map OSM attributes to Padang vulnerability classes</p>
+<p>This maps attributes collected in the OpenStreetMap exposure data
+(data.kompetisiosm.org) to 9 vulnerability classes identified by
+Geoscience Australia and ITB in the post 2009 Padang earthquake
+survey (<a class="reference external" href="http://trove.nla.gov.au/work/38470066">http://trove.nla.gov.au/work/38470066</a>).
+The mapping was developed by Abigail Baca, GFDRR.</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>E: Vector object representing the OSM data</dd>
+<dt>Output:</dt>
+<dd>Vector object like E, but with one new attribute (&#8216;VCLASS&#8217;)
+representing the vulnerability class used in the Padang dataset</dd>
+</dl>
+<p>Algorithm</p>
+<ol class="arabic simple">
+<li>Class the &#8220;levels&#8221; field into height bands where 1-3 = low,
+4-10 = mid, &gt;10 = high</li>
+<li>Where height band = mid then building type = 4
+&#8220;RC medium rise Frame with Masonry in-fill walls&#8221;</li>
+<li>Where height band = high then building type = 6
+&#8220;Concrete Shear wall high rise* Hazus C2H&#8221;</li>
+<li>Where height band = low and structure = (plastered or
+reinforced_masonry) then building type = 7
+&#8220;RC low rise Frame with Masonry in-fill walls&#8221;</li>
+<li>Where height band = low and structure = confined_masonry then
+building type = 8 &#8220;Confined Masonry&#8221;</li>
+<li>Where height band = low and structure = unreinforced_masonry then
+building type = 2 &#8220;URM with Metal Roof&#8221;</li>
+</ol>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.experimental.mappings.sigab2bnpb">
+<tt class="descclassname">safe.impact_functions.experimental.mappings.</tt><tt class="descname">sigab2bnpb</tt><big>(</big><em>E</em>, <em>target_attribute='VCLASS'</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/impact_functions/experimental/mappings.html#sigab2bnpb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.experimental.mappings.sigab2bnpb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map SIGAB point data to BNPB vulnerability classes</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">E: Vector object representing the OSM data
+target_attribute: Optional name of the attribute containing</p>
+<blockquote class="last">
+<div>the mapped vulnerability class. Default
+value is &#8216;VCLASS&#8217;</div></blockquote>
+</dd>
+<dt>Output:</dt>
+<dd>Vector object like E, but with one new attribute (e.g. &#8216;VCLASS&#8217;)
+representing the vulnerability class used in the guidelines</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.experimental.mappings.sigab2padang">
+<tt class="descclassname">safe.impact_functions.experimental.mappings.</tt><tt class="descname">sigab2padang</tt><big>(</big><em>E</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/impact_functions/experimental/mappings.html#sigab2padang"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.experimental.mappings.sigab2padang" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map SIGAB attributes to Padang vulnerability classes</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>E: Vector object representing the SIGAB data</dd>
+<dt>Output:</dt>
+<dd>Vector object like E, but with one new attribute (&#8216;VCLASS&#8217;)
+representing the vulnerability class used in the Padang dataset</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.experimental.mappings.unspecific2bnpb">
+<tt class="descclassname">safe.impact_functions.experimental.mappings.</tt><tt class="descname">unspecific2bnpb</tt><big>(</big><em>E</em>, <em>target_attribute='VCLASS'</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/impact_functions/experimental/mappings.html#unspecific2bnpb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.experimental.mappings.unspecific2bnpb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map Unspecific point data to BNPB vulnerability classes</p>
+<p>This makes no assumptions about attributes and maps everything to
+URM: Unreinforced Masonry</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">E: Vector object representing the OSM data
+target_attribute: Optional name of the attribute containing</p>
+<blockquote class="last">
+<div>the mapped vulnerability class. Default
+value is &#8216;VCLASS&#8217;</div></blockquote>
+</dd>
+<dt>Output:</dt>
+<dd>Vector object like E, but with one new attribute (e.g. &#8216;VCLASS&#8217;)
+representing the vulnerability class used in the guidelines</dd>
+</dl>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../experimental.html"
+                        title="previous chapter">Package::safe.impact_functions.experimental</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tsunami_population_impact.html"
+                        title="next chapter">Module:  safe.impact_functions.experimental.tsunami_population_impact</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/api-docs/safe/impact_functions/experimental/mappings.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="tsunami_population_impact.html" title="Module: safe.impact_functions.experimental.tsunami_population_impact"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../experimental.html" title="Package::safe.impact_functions.experimental"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../../impact_functions.html" >Package::safe.impact_functions</a> &raquo;</li>
+          <li><a href="../experimental.html" >Package::safe.impact_functions.experimental</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

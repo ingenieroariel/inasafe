@@ -1,0 +1,296 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.storage.test_clipping &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.storage.test_clipping</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">TESTDATA</span>
+<span class="kn">from</span> <span class="nn">safe.common.polygon</span> <span class="kn">import</span> <span class="n">is_inside_polygon</span><span class="p">,</span> <span class="n">inside_polygon</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">safe.storage.core</span> <span class="kn">import</span> <span class="n">read_layer</span>
+<span class="kn">from</span> <span class="nn">safe.storage.clipping</span> <span class="kn">import</span> <span class="n">clip_raster_by_polygons</span>
+
+
+<div class="viewcode-block" id="Test_Clipping"><a class="viewcode-back" href="../../../api-docs/safe/storage/test_clipping.html#safe.storage.test_clipping.Test_Clipping">[docs]</a><span class="k">class</span> <span class="nc">Test_Clipping</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests for clipping module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Test_Clipping.test_clip_points_by_polygons"><a class="viewcode-back" href="../../../api-docs/safe/storage/test_clipping.html#safe.storage.test_clipping.Test_Clipping.test_clip_points_by_polygons">[docs]</a>    <span class="k">def</span> <span class="nf">test_clip_points_by_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Points can be clipped by polygons (real data)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Name input files</span>
+        <span class="n">point_name</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;population_5x5_jakarta_points.shp&#39;</span><span class="p">)</span>
+        <span class="n">point_layer</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">point_name</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">point_layer</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">())</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">point_layer</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="c"># Loop through polygons</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;polygon_0.shp&#39;</span><span class="p">,</span> <span class="s">&#39;polygon_1.shp&#39;</span><span class="p">,</span> <span class="s">&#39;polygon_2.shp&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;polygon_3.shp&#39;</span><span class="p">,</span> <span class="s">&#39;polygon_4.shp&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;polygon_5.shp&#39;</span><span class="p">,</span> <span class="s">&#39;polygon_6.shp&#39;</span><span class="p">]:</span>
+
+            <span class="n">polygon_layer</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+            <span class="n">polygon</span> <span class="o">=</span> <span class="n">polygon_layer</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># Clip</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">inside_polygon</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+
+            <span class="c"># Sanity</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:]:</span>
+                <span class="k">assert</span> <span class="n">is_inside_polygon</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+
+            <span class="c"># Explicit tests</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_0.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_1.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:],</span>
+                                      <span class="p">[</span><span class="mf">106.8125</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.1875</span><span class="p">])</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:],</span>
+                                      <span class="p">[</span><span class="mf">106.8541667</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.1875</span><span class="p">])</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s">&#39;value&#39;</span><span class="p">],</span>
+                                      <span class="mf">331941.6875</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s">&#39;value&#39;</span><span class="p">],</span>
+                                      <span class="mf">496445.8125</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_2.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_3.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c"># Degenerate</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_4.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c"># Degenerate</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_5.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span>
+            <span class="k">elif</span> <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;polygon_6.shp&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+</div>
+    <span class="n">test_clip_points_by_polygons</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="Test_Clipping.test_clip_raster_by_polygons"><a class="viewcode-back" href="../../../api-docs/safe/storage/test_clipping.html#safe.storage.test_clipping.Test_Clipping.test_clip_raster_by_polygons">[docs]</a>    <span class="k">def</span> <span class="nf">test_clip_raster_by_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raster grids can be clipped by polygon layers</span>
+
+<span class="sd">        # See qgis project in test data: raster_point_and_clipping_test.qgs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Name input files</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;kabupaten_jakarta_singlepart.shp&#39;</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;population_5x5_jakarta.asc&#39;</span><span class="p">)</span>
+
+        <span class="c"># Get layers using API</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">56</span>
+
+        <span class="c"># Clip</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">clip_raster_by_polygons</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">==</span> <span class="n">M</span>
+
+        <span class="c"># Check points inside polygon</span>
+        <span class="n">tot</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">C</span><span class="p">:</span>
+            <span class="n">tot</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">tot</span> <span class="o">==</span> <span class="mi">14</span>
+
+        <span class="c"># Check that points are inside the right polygon</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()):</span>
+
+            <span class="n">points</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c"># Sanity first</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">is_inside_polygon</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+
+            <span class="c"># Specific tests against raster pixel values inside polygons</span>
+            <span class="c"># The values are read from qgis</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">200951</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">283237</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">278385</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">516061</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">207414</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="mi">344466</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Got wrong coordinates </span><span class="si">%s</span><span class="s">, expected </span><span class="si">%s</span><span class="s">&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]),</span> <span class="nb">str</span><span class="p">([</span><span class="mf">106.8125</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.1875</span><span class="p">])))</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="p">[</span><span class="mf">106.8125</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.1875</span><span class="p">]),</span> <span class="n">msg</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="p">[</span><span class="mf">106.8541667</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.1875</span><span class="p">])</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">331942</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">496446</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">268579</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">155795</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">403674</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">259280</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">284526</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="mi">334370</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">143325</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c"># Degenerate</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c"># Degenerate</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">279103</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">205762</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">428705</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">331093</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">227514</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="mi">249308</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">215739</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="mi">147447</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">61836.4</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">165723</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">151307</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">343787</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mi">303627</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="mi">225232</span><span class="p">)</span>
+
+            <span class="c"># Generate layer objects</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">point_layer</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+                                 <span class="n">projection</span><span class="o">=</span><span class="n">P</span><span class="o">.</span><span class="n">get_projection</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="n">point_layer</span><span class="o">.</span><span class="n">is_point_data</span>
+
+            <span class="n">polygon_layer</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">polygon</span><span class="p">],</span>
+                                   <span class="n">projection</span><span class="o">=</span><span class="n">P</span><span class="o">.</span><span class="n">get_projection</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="n">polygon_layer</span><span class="o">.</span><span class="n">is_polygon_data</span>
+
+            <span class="c"># Generate spatial data for visualisation with e.g. QGIS</span>
+            <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">point_layer</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="s">&#39;points_</span><span class="si">%i</span><span class="s">.shp&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">polygon_layer</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="s">&#39;polygon_</span><span class="si">%i</span><span class="s">.shp&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+</div>
+    <span class="n">test_clip_raster_by_polygons</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="mi">1</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">Test_Clipping</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

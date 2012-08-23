@@ -1,0 +1,1102 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.storage.utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.storage.utilities</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Utilities for storage module</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">mkstemp</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.numerics</span> <span class="kn">import</span> <span class="n">ensure_numeric</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span><span class="p">,</span> <span class="n">VerificationError</span>
+
+<span class="c"># Default attribute to assign to vector layers</span>
+<span class="n">DEFAULT_ATTRIBUTE</span> <span class="o">=</span> <span class="s">&#39;Affected&#39;</span>
+
+<span class="c"># Spatial layer file extensions that are recognised in Risiko</span>
+<span class="c"># FIXME: Perhaps add &#39;.gml&#39;, &#39;.zip&#39;, ...</span>
+<span class="n">LAYER_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.shp&#39;</span><span class="p">,</span> <span class="s">&#39;.asc&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">,</span> <span class="s">&#39;.tiff&#39;</span><span class="p">,</span> <span class="s">&#39;.geotif&#39;</span><span class="p">,</span> <span class="s">&#39;.geotiff&#39;</span><span class="p">]</span>
+
+<span class="c"># Map between extensions and ORG drivers</span>
+<span class="n">DRIVER_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;.sqlite&#39;</span><span class="p">:</span> <span class="s">&#39;SQLITE&#39;</span><span class="p">,</span>
+              <span class="s">&#39;.shp&#39;</span><span class="p">:</span> <span class="s">&#39;ESRI Shapefile&#39;</span><span class="p">,</span>
+              <span class="s">&#39;.gml&#39;</span><span class="p">:</span> <span class="s">&#39;GML&#39;</span><span class="p">,</span>
+              <span class="s">&#39;.tif&#39;</span><span class="p">:</span> <span class="s">&#39;GTiff&#39;</span><span class="p">,</span>
+              <span class="s">&#39;.asc&#39;</span><span class="p">:</span> <span class="s">&#39;AAIGrid&#39;</span><span class="p">}</span>
+
+<span class="c"># Map between Python types and OGR field types</span>
+<span class="c"># FIXME (Ole): I can&#39;t find a double precision type for OGR</span>
+<span class="n">TYPE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">None</span><span class="p">):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTString</span><span class="p">,</span>  <span class="c"># What else should this be?</span>
+            <span class="nb">type</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTString</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTInteger</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTInteger</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="mf">0.0</span><span class="p">):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTReal</span><span class="p">,</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTReal</span><span class="p">,</span>  <span class="c"># numpy.float64</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTReal</span><span class="p">}</span>  <span class="c"># numpy.ndarray</span>
+
+<span class="c"># Map between verbose types and OGR geometry types</span>
+<span class="n">INVERSE_GEOMETRY_TYPE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;point&#39;</span><span class="p">:</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span><span class="p">,</span>
+                             <span class="s">&#39;line&#39;</span><span class="p">:</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbLineString</span><span class="p">,</span>
+                             <span class="s">&#39;polygon&#39;</span><span class="p">:</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPolygon</span><span class="p">}</span>
+
+
+<span class="c"># Miscellaneous auxiliary functions</span>
+<div class="viewcode-block" id="unique_filename"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.unique_filename">[docs]</a><span class="k">def</span> <span class="nf">unique_filename</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create new filename guaranteed not to exist previously</span>
+
+<span class="sd">    Use mkstemp to create the file, then remove it and return the name</span>
+
+<span class="sd">    If dir is specified, the tempfile will be created in the path specified</span>
+<span class="sd">    otherwise the file will be created in a directory following this scheme:</span>
+
+<span class="sd">    :file:`/tmp/inasafe/&lt;dd-mm-yyyy&gt;/&lt;user&gt;/impacts&#39;</span>
+
+<span class="sd">    See http://docs.python.org/library/tempfile.html for details.</span>
+
+<span class="sd">    Example usage:</span>
+
+<span class="sd">    tempdir = temp_dir(sub_dir=&#39;test&#39;)</span>
+<span class="sd">    filename = unique_filename(suffix=&#39;.keywords&#39;, dir=tempdir)</span>
+<span class="sd">    print filename</span>
+<span class="sd">    /tmp/inasafe/23-08-2012/timlinux/test/tmpyeO5VR.keywords</span>
+
+<span class="sd">    Or with no preferred subdir, a default subdir of &#39;impacts&#39; is used:</span>
+
+<span class="sd">    filename = unique_filename(suffix=&#39;.shp&#39;)</span>
+<span class="sd">    print filename</span>
+<span class="sd">    /tmp/inasafe/23-08-2012/timlinux/impacts/tmpoOAmOi.shp</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s">&#39;dir&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">temp_dir</span><span class="p">(</span><span class="s">&#39;impacts&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dir&#39;</span><span class="p">]):</span>
+        <span class="c"># Ensure that the dir mask won&#39;t conflict with the mode</span>
+        <span class="c"># Umask sets the new mask and returns the old</span>
+        <span class="n">umask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mo">0000</span><span class="p">)</span>
+        <span class="c"># Ensure that the dir is world writable by explictly setting mode</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;dir&#39;</span><span class="p">],</span> <span class="mo">0777</span><span class="p">)</span>
+        <span class="c"># Reinstate the old mask for tmp dir</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">umask</span><span class="p">)</span>
+    <span class="c"># Now we have the working dir set up go on and return the filename</span>
+    <span class="n">handle</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">mkstemp</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c"># Need to close it using the filehandle first for windows!</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">filename</span>
+
+</div>
+<div class="viewcode-block" id="temp_dir"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.temp_dir">[docs]</a><span class="k">def</span> <span class="nf">temp_dir</span><span class="p">(</span><span class="n">sub_dir</span><span class="o">=</span><span class="s">&#39;work&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Obtain the temporary working directory for the operating system.</span>
+
+<span class="sd">    An inasafe subdirectory will automatically be created under this and</span>
+<span class="sd">    if specified, a user subdirectory under that.</span>
+
+<span class="sd">    .. note:: You can use this together with unique_filename to create</span>
+<span class="sd">       a file in a temporary directory under the inasafe workspace. e.g.</span>
+
+<span class="sd">       tmpdir = temp_dir(&#39;testing&#39;)</span>
+<span class="sd">       tmpfile = unique_filename(dir=tmpdir)</span>
+<span class="sd">       print tmpfile</span>
+<span class="sd">       /tmp/inasafe/23-08-2012/timlinux/work/testing/tmpMRpF_C</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sub_dir str - optional argument which will cause an additional</span>
+<span class="sd">                subirectory to be created e.g. /tmp/inasafe/foo/</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to the output clipped layer (placed in the system temp dir).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">       Any errors from the underlying system calls.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">current_date</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">date_string</span> <span class="o">=</span> <span class="n">current_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">-%m-%Y&quot;</span><span class="p">)</span>
+    <span class="c"># Following 4 lines are a workaround for tempfile.tempdir() unreliabilty</span>
+    <span class="n">handle</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">mkstemp</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s">&#39;inasafe&#39;</span><span class="p">,</span> <span class="n">date_string</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">sub_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="c"># Ensure that the dir is world writable</span>
+        <span class="c"># Umask sets the new mask and returns the old</span>
+        <span class="n">old_mask</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="mo">0000</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mo">0777</span><span class="p">)</span>
+        <span class="c"># Resinstate the old mask for tmp</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">umask</span><span class="p">(</span><span class="n">old_mask</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_keywords_to_string</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="n">sublayer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a string from a keywords dict.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * keywords: A required dictionary containing the keywords to stringify.</span>
+<span class="sd">        * sublayer: str optional group marker for a sub layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: a String containing the rendered keywords list</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Any exceptions are propogated.</span>
+
+<span class="sd">    .. note: Only simple keyword dicts should be passed here, not multilayer</span>
+<span class="sd">       dicts.</span>
+
+<span class="sd">    For example you pass a dict like this::</span>
+
+<span class="sd">        {&#39;datatype&#39;: &#39;osm&#39;,</span>
+<span class="sd">         &#39;category&#39;: &#39;exposure&#39;,</span>
+<span class="sd">         &#39;title&#39;: &#39;buildings_osm_4326&#39;,</span>
+<span class="sd">         &#39;subcategory&#39;: &#39;building&#39;,</span>
+<span class="sd">         &#39;purpose&#39;: &#39;dki&#39;}</span>
+
+<span class="sd">    and the following string would be returned:</span>
+
+<span class="sd">        datatype: osm</span>
+<span class="sd">        category: exposure</span>
+<span class="sd">        title: buildings_osm_4326</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        purpose: dki</span>
+
+<span class="sd">    If sublayer is provided e.g. _keywords_to_string(keywords, sublayer=&#39;foo&#39;),</span>
+<span class="sd">    the following:</span>
+
+<span class="sd">        [foo]</span>
+<span class="sd">        datatype: osm</span>
+<span class="sd">        category: exposure</span>
+<span class="sd">        title: buildings_osm_4326</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        purpose: dki</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Write</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sublayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="si">%s</span><span class="s">]</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">sublayer</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c"># Create key</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Key in keywords dictionary must be a string. &#39;</span>
+               <span class="s">&#39;I got </span><span class="si">%s</span><span class="s"> with type </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">k</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Key in keywords dictionary must not contain the &quot;:&quot; &#39;</span>
+               <span class="s">&#39;character. I got &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+        <span class="n">verify</span><span class="p">(</span><span class="s">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Create value</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Value in keywords dictionary must be convertible to a string. &#39;</span>
+               <span class="s">&#39;For key </span><span class="si">%s</span><span class="s">, I got </span><span class="si">%s</span><span class="s"> with type </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Store</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="write_keywords"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.write_keywords">[docs]</a><span class="k">def</span> <span class="nf">write_keywords</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">sublayer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write keywords dictonary to file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * keywords: Dictionary of keyword, value pairs</span>
+<span class="sd">              filename: Name of keywords file. Extension expected to be</span>
+<span class="sd">              .keywords</span>
+<span class="sd">        * sublayer: str Optional sublayer applicable only to multilayer formats</span>
+<span class="sd">             such as sqlite or netcdf which can potentially hold more than</span>
+<span class="sd">             one layer. The string should map to the layer group as per the</span>
+<span class="sd">             example below. **If the keywords file contains sublayer definitions</span>
+<span class="sd">             but no sublayer was defined, keywords file content will be removed</span>
+<span class="sd">             and replaced with only the keywords provided here.**</span>
+
+<span class="sd">    Returns: None</span>
+
+<span class="sd">    Raises: None</span>
+
+<span class="sd">    A keyword file with sublayers may look like this:</span>
+
+<span class="sd">        [osm_buildings]</span>
+<span class="sd">        datatype: osm</span>
+<span class="sd">        category: exposure</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        purpose: dki</span>
+<span class="sd">        title: buildings_osm_4326</span>
+
+<span class="sd">        [osm_flood]</span>
+<span class="sd">        datatype: flood</span>
+<span class="sd">        category: hazard</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        title: flood_osm_4326</span>
+
+<span class="sd">    Keys must be strings not containing the &quot;:&quot; character</span>
+<span class="sd">    Values can be anything that can be converted to a string (using</span>
+<span class="sd">    Python&#39;s str function)</span>
+
+<span class="sd">    Surrounding whitespace is removed from values, but keys are unmodified</span>
+<span class="sd">    The reason being that keys must always be valid for the dictionary they</span>
+<span class="sd">    came from. For values we have decided to be flexible and treat entries like</span>
+<span class="sd">    &#39;unit:m&#39; the same as &#39;unit: m&#39;, or indeed &#39;unit: m &#39;.</span>
+<span class="sd">    Otherwise, unintentional whitespace in values would lead to surprising</span>
+<span class="sd">    errors in the application.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input checks</span>
+    <span class="n">basename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unknown extension for file </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;Expected </span><span class="si">%s</span><span class="s">.keywords&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">basename</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.keywords&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># First read any keywords out of the file so that we can retain</span>
+    <span class="c"># keywords for other sublayers</span>
+    <span class="n">existing_keywords</span> <span class="o">=</span> <span class="n">read_keywords</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">all_blocks</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">first_value</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">existing_keywords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">first_value</span> <span class="o">=</span> <span class="n">existing_keywords</span><span class="p">[</span><span class="n">existing_keywords</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">multilayer_flag</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">first_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span>
+
+    <span class="n">handle</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">multilayer_flag</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sublayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sublayer</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="c">#replace existing keywords / add new for this layer</span>
+            <span class="n">existing_keywords</span><span class="p">[</span><span class="n">sublayer</span><span class="p">]</span> <span class="o">=</span> <span class="n">keywords</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">existing_keywords</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_keywords_to_string</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sublayer</span><span class="o">=</span><span class="n">key</span><span class="p">))</span>
+                <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># It is currently a multilayer but we will replace it with</span>
+            <span class="c"># a single keyword block since the user passed no sublayer</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_keywords_to_string</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c">#currently a simple layer so replace it with our content</span>
+        <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_keywords_to_string</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="n">sublayer</span><span class="o">=</span><span class="n">sublayer</span><span class="p">))</span>
+
+    <span class="n">handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="read_keywords"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.read_keywords">[docs]</a><span class="k">def</span> <span class="nf">read_keywords</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sublayer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">all_blocks</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read keywords dictionary from file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * filename: Name of keywords file. Extension expected to be .keywords</span>
+<span class="sd">             The format of one line is expected to be either</span>
+<span class="sd">             string: string or string</span>
+<span class="sd">        * sublayer: str Optional sublayer applicable only to multilayer formats</span>
+<span class="sd">             such as sqlite or netcdf which can potentially hold more than</span>
+<span class="sd">             one layer. The string should map to the layer group as per the</span>
+<span class="sd">             example below. If the keywords file contains sublayer definitions</span>
+<span class="sd">             but no sublayer was defined, the first layer group will be</span>
+<span class="sd">             returned.</span>
+<span class="sd">        * all_blocks: bool Optional, defaults to False. If True will return</span>
+<span class="sd">            a dict of dicts, where the top level dict entries each represent</span>
+<span class="sd">            a sublayer, and the values of that dict will be dicts of keyword</span>
+<span class="sd">            entries.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        keywords: Dictionary of keyword, value pairs</span>
+
+<span class="sd">    Raises: None</span>
+
+<span class="sd">    A keyword layer with sublayers may look like this:</span>
+
+<span class="sd">        [osm_buildings]</span>
+<span class="sd">        datatype: osm</span>
+<span class="sd">        category: exposure</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        purpose: dki</span>
+<span class="sd">        title: buildings_osm_4326</span>
+
+<span class="sd">        [osm_flood]</span>
+<span class="sd">        datatype: flood</span>
+<span class="sd">        category: hazard</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        title: flood_osm_4326</span>
+
+<span class="sd">    Wheras a simple keywords file would look like this</span>
+
+<span class="sd">        datatype: flood</span>
+<span class="sd">        category: hazard</span>
+<span class="sd">        subcategory: building</span>
+<span class="sd">        title: flood_osm_4326</span>
+
+<span class="sd">    If filename does not exist, an empty dictionary is returned</span>
+<span class="sd">    Blank lines are ignored</span>
+<span class="sd">    Surrounding whitespace is removed from values, but keys are unmodified</span>
+<span class="sd">    If there are no &#39;:&#39;, then the keyword is treated as a key with no value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input checks</span>
+    <span class="n">basename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unknown extension for file </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;Expected </span><span class="si">%s</span><span class="s">.keywords&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">basename</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.keywords&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c"># Read all entries</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">current_block</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">first_keywords</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+        <span class="c"># Remove trailing (but not preceeding!) whitespace</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="c"># Ignore blank lines</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c"># Check if it is an ini style group header</span>
+        <span class="n">block_flag</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">r&#39;^\[.*]$&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">block_flag</span><span class="p">:</span>
+            <span class="c"># Write the old block if it exists - must have a current</span>
+            <span class="c"># block to prevent orphans</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">current_block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">blocks</span><span class="p">[</span><span class="n">current_block</span><span class="p">]</span> <span class="o">=</span> <span class="n">keywords</span>
+            <span class="k">if</span> <span class="n">first_keywords</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">first_keywords</span> <span class="o">=</span> <span class="n">keywords</span>
+            <span class="c"># now set up for a new block</span>
+            <span class="n">current_block</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c"># reset the keywords each time we encounter a new block</span>
+            <span class="c"># until we know we are on the desired one</span>
+            <span class="n">keywords</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="s">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Get splitting point</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+
+            <span class="c"># Take key as everything up to the first &#39;:&#39;</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="c"># Take value as everything after the first &#39;:&#39;</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c"># Add entry to dictionary</span>
+        <span class="n">keywords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c"># Write our any unfinalised block data</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">current_block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">blocks</span><span class="p">[</span><span class="n">current_block</span><span class="p">]</span> <span class="o">=</span> <span class="n">keywords</span>
+    <span class="k">if</span> <span class="n">first_keywords</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">first_keywords</span> <span class="o">=</span> <span class="n">keywords</span>
+
+    <span class="c"># Ok we have generated a structure that looks like this:</span>
+    <span class="c"># blocks = {{ &#39;foo&#39; : { &#39;a&#39;: &#39;b&#39;, &#39;c&#39;: &#39;d&#39;},</span>
+    <span class="c">#           { &#39;bar&#39; : { &#39;d&#39;: &#39;e&#39;, &#39;f&#39;: &#39;g&#39;}}</span>
+    <span class="c"># where foo and bar are sublayers and their dicts are the sublayer keywords</span>
+    <span class="k">if</span> <span class="n">all_blocks</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blocks</span>
+    <span class="k">if</span> <span class="n">sublayer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sublayer</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">blocks</span><span class="p">[</span><span class="n">sublayer</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">first_keywords</span>
+
+</div>
+<div class="viewcode-block" id="geotransform2bbox"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.geotransform2bbox">[docs]</a><span class="k">def</span> <span class="nf">geotransform2bbox</span><span class="p">(</span><span class="n">geotransform</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">rows</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert geotransform to bounding box</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        geotransform: GDAL geotransform (6-tuple).</span>
+<span class="sd">                      (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                      top left y, rotation, n-s pixel resolution).</span>
+<span class="sd">                      See e.g. http://www.gdal.org/gdal_tutorial.html</span>
+<span class="sd">        columns: Number of columns in grid</span>
+<span class="sd">        rows: Number of rows in grid</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        bbox: Bounding box as a list of geographic coordinates</span>
+<span class="sd">              [west, south, east, north]</span>
+
+<span class="sd">    Rows and columns are needed to determine eastern and northern bounds.</span>
+<span class="sd">    FIXME: Not sure if the pixel vs gridline registration issue is observed</span>
+<span class="sd">    correctly here. Need to check against gdal &gt; v1.7</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_origin</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># top left x</span>
+    <span class="n">y_origin</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="c"># top left y</span>
+    <span class="n">x_res</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>     <span class="c"># w-e pixel resolution</span>
+    <span class="n">y_res</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>     <span class="c"># n-s pixel resolution</span>
+    <span class="n">x_pix</span> <span class="o">=</span> <span class="n">columns</span>
+    <span class="n">y_pix</span> <span class="o">=</span> <span class="n">rows</span>
+
+    <span class="n">minx</span> <span class="o">=</span> <span class="n">x_origin</span>
+    <span class="n">maxx</span> <span class="o">=</span> <span class="n">x_origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">x_pix</span> <span class="o">*</span> <span class="n">x_res</span><span class="p">)</span>
+    <span class="n">miny</span> <span class="o">=</span> <span class="n">y_origin</span> <span class="o">+</span> <span class="p">(</span><span class="n">y_pix</span> <span class="o">*</span> <span class="n">y_res</span><span class="p">)</span>
+    <span class="n">maxy</span> <span class="o">=</span> <span class="n">y_origin</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="geotransform2resolution"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.geotransform2resolution">[docs]</a><span class="k">def</span> <span class="nf">geotransform2resolution</span><span class="p">(</span><span class="n">geotransform</span><span class="p">,</span> <span class="n">isotropic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                            <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert geotransform to resolution</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        geotransform: GDAL geotransform (6-tuple).</span>
+<span class="sd">                      (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                      top left y, rotation, n-s pixel resolution).</span>
+<span class="sd">                      See e.g. http://www.gdal.org/gdal_tutorial.html</span>
+<span class="sd">        Input</span>
+<span class="sd">            isotropic: If True, verify that dx == dy and return dx</span>
+<span class="sd">                       If False (default) return 2-tuple (dx, dy)</span>
+<span class="sd">            rtol, atol: Used to control how close dx and dy must be</span>
+<span class="sd">                        to quality for isotropic. These are passed on to</span>
+<span class="sd">                        numpy.allclose for comparison.</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        resolution: grid spacing (resx, resy) in (positive) decimal</span>
+<span class="sd">                    degrees ordered as longitude first, then latitude.</span>
+<span class="sd">                    or resx (if isotropic is True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">resx</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>   <span class="c"># w-e pixel resolution</span>
+    <span class="n">resy</span> <span class="o">=</span> <span class="o">-</span><span class="n">geotransform</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>  <span class="c"># n-s pixel resolution (always negative)</span>
+
+    <span class="k">if</span> <span class="n">isotropic</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resolution requested with &#39;</span>
+               <span class="s">&#39;isotropic=True, but &#39;</span>
+               <span class="s">&#39;resolutions in the horizontal and vertical &#39;</span>
+               <span class="s">&#39;are different: resx = </span><span class="si">%.12f</span><span class="s">, resy = </span><span class="si">%.12f</span><span class="s">. &#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">resx</span><span class="p">,</span> <span class="n">resy</span><span class="p">))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">resx</span><span class="p">,</span> <span class="n">resy</span><span class="p">,</span>
+                              <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">resx</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">resx</span><span class="p">,</span> <span class="n">resy</span>
+
+</div>
+<div class="viewcode-block" id="raster_geometry2geotransform"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.raster_geometry2geotransform">[docs]</a><span class="k">def</span> <span class="nf">raster_geometry2geotransform</span><span class="p">(</span><span class="n">longitudes</span><span class="p">,</span> <span class="n">latitudes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert vectors of longitudes and latitudes to geotransform</span>
+
+<span class="sd">    This is the inverse operation of Raster.get_geometry().</span>
+
+<span class="sd">    Input</span>
+<span class="sd">       longitudes, latitudes: Vectors of geographic coordinates</span>
+
+<span class="sd">    Output</span>
+<span class="sd">       geotransform: 6-tuple (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                              top left y, rotation, n-s pixel resolution)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">longitudes</span><span class="p">)</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">latitudes</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;You must specify more than 1 longitude to make geotransform: &#39;</span>
+           <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">longitudes</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">nx</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;You must specify more than 1 latitude to make geotransform: &#39;</span>
+           <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">latitudes</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">ny</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">longitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c"># Longitudinal resolution</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">latitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">latitudes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c"># Latitudinal resolution (neg)</span>
+
+    <span class="c"># Define pixel centers along each directions</span>
+    <span class="c"># This is to achieve pixel registration rather</span>
+    <span class="c"># than gridline registration</span>
+    <span class="n">dx2</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">dy2</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">geotransform</span> <span class="o">=</span> <span class="p">(</span><span class="n">longitudes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx2</span><span class="p">,</span>  <span class="c"># Longitude of upper left corner</span>
+                    <span class="n">dx</span><span class="p">,</span>                   <span class="c"># w-e pixel resolution</span>
+                    <span class="mi">0</span><span class="p">,</span>                    <span class="c"># rotation</span>
+                    <span class="n">latitudes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dy2</span><span class="p">,</span>  <span class="c"># Latitude of upper left corner</span>
+                    <span class="mi">0</span><span class="p">,</span>                    <span class="c"># rotation</span>
+                    <span class="n">dy</span><span class="p">)</span>                   <span class="c"># n-s pixel resolution</span>
+
+    <span class="k">return</span> <span class="n">geotransform</span>
+
+</div>
+<div class="viewcode-block" id="bbox_intersection"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.bbox_intersection">[docs]</a><span class="k">def</span> <span class="nf">bbox_intersection</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute intersection between two or more bounding boxes</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        args: two or more bounding boxes.</span>
+<span class="sd">              Each is assumed to be a list or a tuple with</span>
+<span class="sd">              four coordinates (W, S, E, N)</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        result: The minimal common bounding box</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Function bbox_intersection must take at least 2 arguments.&#39;</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box expected to be a list of the &#39;</span>
+               <span class="s">&#39;form [W, S, E, N]. &#39;</span>
+               <span class="s">&#39;Instead i got &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">box</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Western boundary must be less than eastern. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">box</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">box</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Southern boundary must be less than northern. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">box</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">box</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Compute intersection</span>
+
+        <span class="c"># West and South</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c"># East and North</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c"># Check validity and return</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">result</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="minimal_bounding_box"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.minimal_bounding_box">[docs]</a><span class="k">def</span> <span class="nf">minimal_bounding_box</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">min_res</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Grow bounding box to exceed specified resolution if needed</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        bbox: Bounding box with format [W, S, E, N]</span>
+<span class="sd">        min_res: Minimal acceptable resolution to exceed</span>
+<span class="sd">        eps: Optional tolerance that will be applied to &#39;buffer&#39; result</span>
+
+<span class="sd">    Ouput</span>
+<span class="sd">        Adjusted bounding box guaranteed to exceed specified resolution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># FIXME (Ole): Probably obsolete now</span>
+
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">bbox</span><span class="p">))</span>
+
+    <span class="n">delta_x</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">delta_y</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">delta_x</span> <span class="o">&lt;</span> <span class="n">min_res</span><span class="p">:</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_res</span> <span class="o">-</span> <span class="n">delta_x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">eps</span>
+        <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">dx</span>
+        <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dx</span>
+
+    <span class="k">if</span> <span class="n">delta_y</span> <span class="o">&lt;</span> <span class="n">min_res</span><span class="p">:</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_res</span> <span class="o">-</span> <span class="n">delta_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">eps</span>
+        <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">dy</span>
+        <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dy</span>
+
+    <span class="k">return</span> <span class="n">bbox</span>
+
+</div>
+<div class="viewcode-block" id="buffered_bounding_box"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.buffered_bounding_box">[docs]</a><span class="k">def</span> <span class="nf">buffered_bounding_box</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">resolution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Grow bounding box with one unit of resolution in each direction</span>
+
+<span class="sd">    This will ensure there is enough pixels to robustly provide</span>
+<span class="sd">    interpolated values without having to painstakingly deal with</span>
+<span class="sd">    all corner cases such as 1 x 1, 1 x 2 and 2 x 1 arrays.</span>
+
+<span class="sd">    The border will also make sure that points that would otherwise fall</span>
+<span class="sd">    outside the domain (as defined by a tight bounding box) get assigned</span>
+<span class="sd">    values.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        bbox: Bounding box with format [W, S, E, N]</span>
+<span class="sd">        resolution: (resx, resy) - Raster resolution in each direction.</span>
+<span class="sd">                    res - Raster resolution in either direction</span>
+<span class="sd">                    If resolution is None bbox is returned unchanged.</span>
+
+<span class="sd">    Ouput</span>
+<span class="sd">        Adjusted bounding box</span>
+
+
+<span class="sd">    Case in point: Interpolation point O would fall outside this domain</span>
+<span class="sd">                   even though there are enough grid points to support it</span>
+
+<span class="sd">    --------------</span>
+<span class="sd">    |            |</span>
+<span class="sd">    |   *     *  | *    *</span>
+<span class="sd">    |           O|</span>
+<span class="sd">    |            |</span>
+<span class="sd">    |   *     *  | *    *</span>
+<span class="sd">    --------------</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">bbox</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">bbox</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resx</span><span class="p">,</span> <span class="n">resy</span> <span class="o">=</span> <span class="n">resolution</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">resx</span> <span class="o">=</span> <span class="n">resy</span> <span class="o">=</span> <span class="n">resolution</span>
+
+    <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">resx</span>
+    <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">resy</span>
+    <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">resx</span>
+    <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">resy</span>
+
+    <span class="k">return</span> <span class="n">bbox</span>
+
+</div>
+<div class="viewcode-block" id="get_geometry_type"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.get_geometry_type">[docs]</a><span class="k">def</span> <span class="nf">get_geometry_type</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">geometry_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine geometry type based on data</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        geometry: A list of either point coordinates [lon, lat] or polygons</span>
+<span class="sd">                  which are assumed to be numpy arrays of coordinates</span>
+<span class="sd">        geometry_type: Optional type - &#39;point&#39;, &#39;line&#39;, &#39;polygon&#39; or None</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        geometry_type: Either ogr.wkbPoint, ogr.wkbLineString or ogr.wkbPolygon</span>
+
+<span class="sd">    If geometry type cannot be determined an Exception is raised.</span>
+
+<span class="sd">    Note, there is no consistency check across all entries of the</span>
+<span class="sd">    geometry list, only the first element is used in this determination.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># FIXME (Ole): Perhaps use OGR&#39;s own symbols</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Argument geometry_type must be either &quot;point&quot;, &quot;line&quot;, &#39;</span>
+           <span class="s">&#39;&quot;polygon&quot; or None&#39;</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">geometry_type</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span>
+           <span class="n">geometry_type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="ow">or</span>
+           <span class="n">geometry_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;point&#39;</span><span class="p">,</span> <span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="s">&#39;polygon&#39;</span><span class="p">],</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">geometry_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry_type</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">INVERSE_GEOMETRY_TYPE_MAP</span><span class="p">[</span><span class="n">geometry_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">geometry_type</span>
+        <span class="c"># FIXME (Ole): Should add some additional checks to see if choice</span>
+        <span class="c">#              makes sense</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Argument geometry must be a sequence. I got </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># Default to point if there is no data</span>
+        <span class="k">return</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;The first element in geometry must be a sequence of length &gt; 2. &#39;</span>
+           <span class="s">&#39;I got </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># This geometry appears to be point data</span>
+            <span class="n">geometry_type</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># This geometry appears to be polygon data</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">geometry_type</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPolygon</span>
+
+    <span class="k">if</span> <span class="n">geometry_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not determine geometry type&#39;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">geometry_type</span>
+
+</div>
+<div class="viewcode-block" id="is_sequence"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.is_sequence">[docs]</a><span class="k">def</span> <span class="nf">is_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine if x behaves like a true sequence but not a string</span>
+
+<span class="sd">    This will for example return True for lists, tuples and numpy arrays</span>
+<span class="sd">    but False for strings and dictionaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="array2wkt"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.array2wkt">[docs]</a><span class="k">def</span> <span class="nf">array2wkt</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">geom_type</span><span class="o">=</span><span class="s">&#39;POLYGON&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert coordinates to wkt format</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        A: Nx2 Array of coordinates representing either a polygon or a line.</span>
+<span class="sd">           A can be either a numpy array or a list of coordinates.</span>
+<span class="sd">        geom_type: Determines output keyword &#39;POLYGON&#39; or &#39;LINESTRING&#39;</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        wkt: geometry in the format known to ogr: Examples</span>
+
+<span class="sd">        POLYGON((1020 1030,1020 1045,1050 1045,1050 1030,1020 1030))</span>
+<span class="sd">        LINESTRING(1000 1000, 1100 1050)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">ensure_numeric</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Array (</span><span class="si">%s</span><span class="s">) could not be converted to numeric array: </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">geom_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">A</span><span class="p">))))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Array must be a 2d array of vertices. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;A array must have two columns. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s">&#39;LINESTRING&#39;</span><span class="p">:</span>
+        <span class="c"># One bracket</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s">&#39;POLYGON&#39;</span><span class="p">:</span>
+        <span class="c"># Two brackets (tsk tsk)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Unknown geom_type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">geom_type</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">wkt_string</span> <span class="o">=</span> <span class="n">geom_type</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">*</span> <span class="n">n</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="c"># Works for both lists and arrays</span>
+        <span class="n">wkt_string</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%f</span><span class="s"> </span><span class="si">%f</span><span class="s">, &#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">wkt_string</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span> <span class="o">*</span> <span class="n">n</span>
+
+<span class="c"># Map of ogr numerical geometry types to their textual representation</span>
+<span class="c"># FIXME (Ole): Some of them don&#39;t exist, even though they show up</span>
+<span class="c"># when doing dir(ogr) - Why?:</span></div>
+<span class="n">geometry_type_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span><span class="p">:</span> <span class="s">&#39;Point&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint25D</span><span class="p">:</span> <span class="s">&#39;Point25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPolygon</span><span class="p">:</span> <span class="s">&#39;Polygon&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPolygon25D</span><span class="p">:</span> <span class="s">&#39;Polygon25D&#39;</span><span class="p">,</span>
+                     <span class="c">#ogr.wkbLinePoint: &#39;LinePoint&#39;,  # ??</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbGeometryCollection</span><span class="p">:</span> <span class="s">&#39;GeometryCollection&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbGeometryCollection25D</span><span class="p">:</span> <span class="s">&#39;GeometryCollection25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbLineString</span><span class="p">:</span> <span class="s">&#39;LineString&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbLineString25D</span><span class="p">:</span> <span class="s">&#39;LineString25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbLinearRing</span><span class="p">:</span> <span class="s">&#39;LinearRing&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiLineString</span><span class="p">:</span> <span class="s">&#39;MultiLineString&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiLineString25D</span><span class="p">:</span> <span class="s">&#39;MultiLineString25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPoint</span><span class="p">:</span> <span class="s">&#39;MultiPoint&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPoint25D</span><span class="p">:</span> <span class="s">&#39;MultiPoint25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPolygon</span><span class="p">:</span> <span class="s">&#39;MultiPolygon&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPolygon25D</span><span class="p">:</span> <span class="s">&#39;MultiPolygon25D&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbNDR</span><span class="p">:</span> <span class="s">&#39;NDR&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbNone</span><span class="p">:</span> <span class="s">&#39;None&#39;</span><span class="p">,</span>
+                     <span class="n">ogr</span><span class="o">.</span><span class="n">wkbUnknown</span><span class="p">:</span> <span class="s">&#39;Unknown&#39;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="geometrytype2string"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.geometrytype2string">[docs]</a><span class="k">def</span> <span class="nf">geometrytype2string</span><span class="p">(</span><span class="n">g_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provides string representation of numeric geometry types</span>
+
+<span class="sd">    FIXME (Ole): I can&#39;t find anything like this in ORG. Why?</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">g_type</span> <span class="ow">in</span> <span class="n">geometry_type_map</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">geometry_type_map</span><span class="p">[</span><span class="n">g_type</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">g_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;No geometry type assigned&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;Unknown geometry type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">g_type</span><span class="p">)</span>
+
+
+<span class="c"># FIXME: Move to common numerics area along with polygon.py</span></div>
+<div class="viewcode-block" id="calculate_polygon_area"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.calculate_polygon_area">[docs]</a><span class="k">def</span> <span class="nf">calculate_polygon_area</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the signed area of non-self-intersecting polygon</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        polygon: Numeric array of points (longitude, latitude). It is assumed</span>
+<span class="sd">                 to be closed, i.e. first and last points are identical</span>
+<span class="sd">        signed: Optional flag deciding whether returned area retains its sign:</span>
+<span class="sd">                If points are ordered counter clockwise, the signed area</span>
+<span class="sd">                will be positive.</span>
+<span class="sd">                If points are ordered clockwise, it will be negative</span>
+<span class="sd">                Default is False which means that the area is always positive.</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        area: Area of polygon (subject to the value of argument signed)</span>
+
+<span class="sd">    Sources</span>
+<span class="sd">        http://paulbourke.net/geometry/polyarea/</span>
+<span class="sd">        http://en.wikipedia.org/wiki/Centroid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Make sure it is numeric</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Polygon is assumed to consist of coordinate pairs. &#39;</span>
+           <span class="s">&#39;I got second dimension </span><span class="si">%i</span><span class="s"> instead of 2&#39;</span> <span class="o">%</span> <span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># Calculate 0.5 sum_{i=0}^{N-1} (x_i y_{i+1} - x_{i+1} y_i)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+
+    <span class="k">if</span> <span class="n">signed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">A</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="calculate_polygon_centroid"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.calculate_polygon_centroid">[docs]</a><span class="k">def</span> <span class="nf">calculate_polygon_centroid</span><span class="p">(</span><span class="n">polygon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the centroid of non-self-intersecting polygon</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        polygon: Numeric array of points (longitude, latitude). It is assumed</span>
+<span class="sd">                 to be closed, i.e. first and last points are identical</span>
+
+<span class="sd">    Sources</span>
+<span class="sd">        http://paulbourke.net/geometry/polyarea/</span>
+<span class="sd">        http://en.wikipedia.org/wiki/Centroid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Make sure it is numeric</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+
+    <span class="c"># Normalise to ensure numerical accurracy.</span>
+    <span class="c"># This requirement in backed by tests in test_io.py and without it</span>
+    <span class="c"># centroids at building footprint level may get shifted outside the</span>
+    <span class="c"># polygon!</span>
+    <span class="n">P_origin</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">P</span> <span class="o">-</span> <span class="n">P_origin</span>
+
+    <span class="c"># Get area. This calculation could be incorporated to save time</span>
+    <span class="c"># if necessary as the two formulas are very similar.</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">calculate_polygon_area</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># Calculate</span>
+    <span class="c"># Cx = sum_{i=0}^{N-1} (x_i + x_{i+1})(x_i y_{i+1} - x_{i+1} y_i)/(6A)</span>
+    <span class="c"># Cy = sum_{i=0}^{N-1} (y_i + y_{i+1})(x_i y_{i+1} - x_{i+1} y_i)/(6A)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">cy</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">Cx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cx</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.</span> <span class="o">*</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">Cy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cy</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.</span> <span class="o">*</span> <span class="n">A</span><span class="p">)</span>
+
+    <span class="c"># Translate back to real location</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Cx</span><span class="p">,</span> <span class="n">Cy</span><span class="p">])</span> <span class="o">+</span> <span class="n">P_origin</span>
+    <span class="k">return</span> <span class="n">C</span>
+
+</div>
+<div class="viewcode-block" id="points_between_points"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.points_between_points">[docs]</a><span class="k">def</span> <span class="nf">points_between_points</span><span class="p">(</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates an array of points between two points given a delta</span>
+
+<span class="sd">       u = (x1-x0, y1-y0)/L, where</span>
+<span class="sd">       L=sqrt( (x1-x0)^2 + (y1-y0)^2).</span>
+<span class="sd">       If r is the resolution, then the</span>
+<span class="sd">       points will be given by</span>
+<span class="sd">       (x0, y0) + u * n * r for n = 1, 2, ....</span>
+<span class="sd">       while len(n*u*r) &lt; L</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">point1</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">point2</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">((</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">((</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">L</span> <span class="o">/</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="n">uu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">])</span> <span class="o">/</span> <span class="n">L</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">point1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">nn</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pieces</span><span class="p">):</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">point1</span> <span class="o">+</span> <span class="n">uu</span> <span class="o">*</span> <span class="p">(</span><span class="n">nn</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="points_along_line"><a class="viewcode-back" href="../../../api-docs/safe/storage/utilities.html#safe.storage.utilities.points_along_line">[docs]</a><span class="k">def</span> <span class="nf">points_along_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate a list of points along a line with a given delta</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        line: Numeric array of points (longitude, latitude).</span>
+<span class="sd">        delta: Decimal number to be used as step</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        V: Numeric array of points (longitude, latitude).</span>
+
+<span class="sd">    Sources</span>
+<span class="sd">        http://paulbourke.net/geometry/polyarea/</span>
+<span class="sd">        http://en.wikipedia.org/wiki/Centroid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Make sure it is numeric</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="n">points_between_points</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">P</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="c"># If the first point of this list is the same</span>
+        <span class="c"># as the last one recorded, do not use it</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">C</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

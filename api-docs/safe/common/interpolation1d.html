@@ -1,0 +1,194 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.common.interpolation1d &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.common" href="../common.html" />
+    <link rel="next" title="Module: safe.common.polygon" href="polygon.html" />
+    <link rel="prev" title="Module: safe.common.interpolation2d" href="interpolation2d.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="polygon.html" title="Module: safe.common.polygon"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation2d.html" title="Module: safe.common.interpolation2d"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" accesskey="U">Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.common.interpolation1d">
+<span id="module-safe-common-interpolation1d"></span><h1>Module:  safe.common.interpolation1d<a class="headerlink" href="#module-safe.common.interpolation1d" title="Permalink to this headline">¶</a></h1>
+<p>Module for 1D interpolation</p>
+<p>This module
+* provides piecewise constant (nearest neighbour) and bilinear interpolation
+* is fast (based on numpy vector operations)
+* depends only on numpy
+* guarantees that interpolated values never exceed the two nearest neighbours
+* handles missing values in domain sensibly using NaN
+* is unit tested with a range of common and corner cases</p>
+<p>See interpolation2d.py for documentation of the mathematical derivation used.</p>
+<dl class="function">
+<dt id="safe.common.interpolation1d.check_inputs">
+<tt class="descclassname">safe.common.interpolation1d.</tt><tt class="descname">check_inputs</tt><big>(</big><em>x</em>, <em>z</em>, <em>points</em>, <em>mode</em>, <em>bounds_error</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/interpolation1d.html#check_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.interpolation1d.check_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check inputs for interpolate1d function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.interpolation1d.interpolate1d">
+<tt class="descclassname">safe.common.interpolation1d.</tt><tt class="descname">interpolate1d</tt><big>(</big><em>x</em>, <em>z</em>, <em>points</em>, <em>mode='linear'</em>, <em>bounds_error=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/interpolation1d.html#interpolate1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.interpolation1d.interpolate1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fundamental 2D interpolation routine</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">x: 1D array of x-coordinates on which to interpolate
+z: 1D array of values for each x
+points: 1D array of coordinates where interpolated values are sought
+mode: Determines the interpolation order. Options are</p>
+<blockquote>
+<div><p>&#8216;constant&#8217; - piecewise constant nearest neighbour interpolation
+&#8216;linear&#8217; - bilinear interpolation using the two</p>
+<blockquote>
+<div>nearest neighbours (default)</div></blockquote>
+</div></blockquote>
+<dl class="last docutils">
+<dt>bounds_error: Boolean flag. If True (default) an exception will</dt>
+<dd>be raised when interpolated values are requested
+outside the domain of the input data. If False, nan
+is returned for those values</dd>
+</dl>
+</dd>
+<dt>Output</dt>
+<dd>1D array with same length as points with interpolated values</dd>
+<dt>Notes</dt>
+<dd><p class="first">Input coordinates x are assumed to be monotonically increasing,
+but need not be equidistantly spaced.</p>
+<p class="last">z is assumed to have dimension M where M = len(x).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interpolation2d.html"
+                        title="previous chapter">Module:  safe.common.interpolation2d</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="polygon.html"
+                        title="next chapter">Module:  safe.common.polygon</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/common/interpolation1d.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="polygon.html" title="Module: safe.common.polygon"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation2d.html" title="Module: safe.common.interpolation2d"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" >Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

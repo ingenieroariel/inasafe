@@ -1,0 +1,307 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.common.interpolation1d &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.common.interpolation1d</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module for 1D interpolation</span>
+
+<span class="sd">This module</span>
+<span class="sd">* provides piecewise constant (nearest neighbour) and bilinear interpolation</span>
+<span class="sd">* is fast (based on numpy vector operations)</span>
+<span class="sd">* depends only on numpy</span>
+<span class="sd">* guarantees that interpolated values never exceed the two nearest neighbours</span>
+<span class="sd">* handles missing values in domain sensibly using NaN</span>
+<span class="sd">* is unit tested with a range of common and corner cases</span>
+
+<span class="sd">See interpolation2d.py for documentation of the mathematical derivation used.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="c"># pylint: disable=W0105</span>
+
+
+<div class="viewcode-block" id="interpolate1d"><a class="viewcode-back" href="../../../api-docs/safe/common/interpolation1d.html#safe.common.interpolation1d.interpolate1d">[docs]</a><span class="k">def</span> <span class="nf">interpolate1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fundamental 2D interpolation routine</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        x: 1D array of x-coordinates on which to interpolate</span>
+<span class="sd">        z: 1D array of values for each x</span>
+<span class="sd">        points: 1D array of coordinates where interpolated values are sought</span>
+<span class="sd">        mode: Determines the interpolation order. Options are</span>
+<span class="sd">              &#39;constant&#39; - piecewise constant nearest neighbour interpolation</span>
+<span class="sd">              &#39;linear&#39; - bilinear interpolation using the two</span>
+<span class="sd">                         nearest neighbours (default)</span>
+<span class="sd">        bounds_error: Boolean flag. If True (default) an exception will</span>
+<span class="sd">                      be raised when interpolated values are requested</span>
+<span class="sd">                      outside the domain of the input data. If False, nan</span>
+<span class="sd">                      is returned for those values</span>
+<span class="sd">    Output</span>
+<span class="sd">        1D array with same length as points with interpolated values</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">        Input coordinates x are assumed to be monotonically increasing,</span>
+<span class="sd">        but need not be equidistantly spaced.</span>
+
+<span class="sd">        z is assumed to have dimension M where M = len(x).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input checks</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xi</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">bounds_error</span><span class="p">)</span>
+
+    <span class="c"># Identify elements that are outside interpolation domain or NaN</span>
+    <span class="n">outside</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">xi</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">outside</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+
+    <span class="n">inside</span> <span class="o">=</span> <span class="o">-</span><span class="n">outside</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">xi</span><span class="p">[</span><span class="n">inside</span><span class="p">]</span>
+
+    <span class="c"># Find upper neighbours for each interpolation point</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">)</span>
+
+    <span class="c"># Internal check (index == 0 is OK)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Interpolation point outside domain. This should never happen. &#39;</span>
+           <span class="s">&#39;Please email Ole.Moller.Nielsen@gmail.com&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">max</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Get the two neighbours for each interpolation point</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">z0</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">z1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="c"># Coefficient for weighting between lower and upper bounds</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="c"># Bilinear interpolation formula</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">-</span> <span class="n">z0</span>
+        <span class="n">zeta</span> <span class="o">=</span> <span class="n">z0</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">dx</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Piecewise constant (as verified in input_check)</span>
+
+        <span class="c"># Set up masks for the quadrants</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+
+        <span class="c"># Initialise result array with all elements set to right neighbour</span>
+        <span class="n">zeta</span> <span class="o">=</span> <span class="n">z1</span>
+
+        <span class="c"># Then set the left neigbours</span>
+        <span class="n">zeta</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">=</span> <span class="n">z0</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+
+    <span class="c"># Self test</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mzeta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">zeta</span><span class="p">)</span>
+        <span class="n">mz</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Internal check failed. Max interpolated value </span><span class="si">%.15f</span><span class="s"> &#39;</span>
+               <span class="s">&#39;exceeds max grid value </span><span class="si">%.15f</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mzeta</span><span class="p">,</span> <span class="n">mz</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mzeta</span><span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mz</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">mzeta</span> <span class="o">&lt;=</span> <span class="n">mz</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Populate result with interpolated values for points inside domain</span>
+    <span class="c"># and NaN for values outside</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">inside</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeta</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">outside</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">r</span>
+
+</div>
+<div class="viewcode-block" id="check_inputs"><a class="viewcode-back" href="../../../api-docs/safe/common/interpolation1d.html#safe.common.interpolation1d.check_inputs">[docs]</a><span class="k">def</span> <span class="nf">check_inputs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">bounds_error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check inputs for interpolate1d function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Only mode &quot;linear&quot; and &quot;constant&quot; are implemented. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">mode</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="s">&#39;constant&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input vector x must be monotoneously increasing. I got &#39;</span>
+           <span class="s">&#39;min(x) == </span><span class="si">%.15f</span><span class="s">, but x[0] == </span><span class="si">%.15f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input vector x must be monotoneously increasing. I got &#39;</span>
+           <span class="s">&#39;max(x) == </span><span class="si">%.15f</span><span class="s">, but x[-1] == </span><span class="si">%.15f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Z must be a 1d numpy array&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">Nx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input array z must have same length as x (</span><span class="si">%i</span><span class="s">).&#39;</span>
+           <span class="s">&#39;However, Z has length </span><span class="si">%i</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Nx</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Nx</span> <span class="o">==</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Get interpolation points</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Interpolation points must be a 1d array&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:]</span>
+
+    <span class="k">if</span> <span class="n">bounds_error</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Interpolation point </span><span class="si">%f</span><span class="s"> was less than the smallest value in &#39;</span>
+               <span class="s">&#39;domain </span><span class="si">%f</span><span class="s"> and bounds_error was requested.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">xi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Interpolation point </span><span class="si">%f</span><span class="s"> was greater than the largest value in &#39;</span>
+               <span class="s">&#39;domain </span><span class="si">%f</span><span class="s"> and bounds_error was requested.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xi</span>
+
+<span class="c"># Mathematical derivation of the interpolation formula used</span></div>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Bilinear interpolation is based on the standard 1D linear interpolation</span>
+<span class="sd">formula:</span>
+
+<span class="sd">Given points (x0, y0) and (x1, x0) and a value of x where x0 &lt;= x &lt;= x1,</span>
+<span class="sd">the linearly interpolated value y at x is given as</span>
+
+<span class="sd">alpha*(y1-y0) + y0</span>
+
+<span class="sd">or</span>
+
+<span class="sd">alpha*y1 + (1-alpha)*y0                (1)</span>
+
+<span class="sd">where alpha = (x-x0)/(x1-x0)           (1a)</span>
+
+
+<span class="sd">Piecewise constant interpolation can be implemented using the same coefficients</span>
+<span class="sd">(1a) that are used for bilinear interpolation as they are a measure of</span>
+<span class="sd">the relative distance to the left and lower neigbours. A value of 0 will pick</span>
+<span class="sd">the lower bound whereas a value of 1 will pick the higher bound.</span>
+<span class="sd">Hence z can be assigned to its nearest neigbour as follows</span>
+
+<span class="sd">    | z0   alpha &lt; 0.5    # lower value</span>
+<span class="sd">z = |</span>
+<span class="sd">    | z1   alpha &gt;= 0.5   # higher value</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># pylint: enable=W0105</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

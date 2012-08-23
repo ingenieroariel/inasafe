@@ -1,0 +1,187 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.experimental.tsunami_population_impact &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.experimental.tsunami_population_impact</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.storage.raster</span> <span class="kn">import</span> <span class="n">Raster</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="c"># Largely superseded by flood impact functions, but keep as it</span>
+<span class="c"># shows a different way of breaking down the impact using</span>
+<span class="c"># multiple thresholds</span>
+
+
+<div class="viewcode-block" id="TsunamiPopulationImpactFunction"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/tsunami_population_impact.html#safe.impact_functions.experimental.tsunami_population_impact.TsunamiPopulationImpactFunction">[docs]</a><span class="k">class</span> <span class="nc">TsunamiPopulationImpactFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for tsunami impact on population data</span>
+
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;tsunami&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    unit==&#39;m&#39;</span>
+
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;population&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    disabled==True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TsunamiPopulationImpactFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/tsunami_population_impact.html#safe.impact_functions.experimental.tsunami_population_impact.TsunamiPopulationImpactFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for tsunami population</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="c">#threshold = 1  # Depth above which people are regarded affected [m]</span>
+
+        <span class="c"># Identify hazard and exposure layers</span>
+        <span class="n">inundation</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Tsunami inundation [m]</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Population density</span>
+
+        <span class="c"># Extract data as numeric arrays</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">inundation</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c"># Depth</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c"># Population density</span>
+
+        <span class="c"># Calculate impact as population exposed to depths &gt; 1m</span>
+        <span class="n">I_map</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span> <span class="o">&gt;</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Generate text with result for this study</span>
+        <span class="n">number_of_people_affected</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">I_map</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+
+        <span class="c"># Do breakdown</span>
+
+        <span class="c"># Create report</span>
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&lt;table border=&quot;0&quot; width=&quot;320px&quot;&gt;&#39;</span>
+                          <span class="s">&#39;   &lt;tr&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;/th&gt;&#39;</span>
+                          <span class="s">&#39;   &lt;tr&gt;&lt;/tr&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Ambang batas&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;Jumlah orang terdampak&#39;</span><span class="p">))</span>
+
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thresholds</span><span class="p">):</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">D</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">flat</span><span class="p">))</span>
+
+            <span class="n">impact_summary</span> <span class="o">+=</span> <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s"> m&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">threshold</span><span class="p">,</span> <span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">impact_summary</span> <span class="o">+=</span> <span class="s">&#39;&lt;/table&gt;&#39;</span>
+
+        <span class="c"># Create raster object and return</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">Raster</span><span class="p">(</span><span class="n">I_map</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geotransform</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;People affected by more than 1m of inundation&#39;</span><span class="p">,</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">R</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

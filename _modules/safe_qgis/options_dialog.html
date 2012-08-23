@@ -1,0 +1,279 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.options_dialog &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.options_dialog</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid - **Options Dialog.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">.. todo:: Check raster is single band</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+                 <span class="s">&#39;Disaster Reduction&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSignature</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.options_dialog_base</span> <span class="kn">import</span> <span class="n">Ui_OptionsDialogBase</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.help</span> <span class="kn">import</span> <span class="n">Help</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.keyword_io</span> <span class="kn">import</span> <span class="n">KeywordIO</span>
+
+<span class="c"># Don&#39;t remove this even if it is flagged as unused by your ide</span>
+<span class="c"># it is needed for qrc:/ url resolution. See Qt Resources docs.</span>
+<span class="kn">import</span> <span class="nn">safe_qgis.resources</span>  <span class="c"># pylint: disable=W0611</span>
+
+<span class="c">#see if we can import pydev - see development docs for details</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydevd</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c"># pylint: disable=F0401</span>
+    <span class="k">print</span> <span class="s">&#39;Remote debugging is enabled.&#39;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Debugging was disabled&#39;</span>
+
+
+<div class="viewcode-block" id="OptionsDialog"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog">[docs]</a><span class="k">class</span> <span class="nc">OptionsDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Ui_OptionsDialogBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Options dialog for the InaSAFE plugin.&quot;&quot;&quot;</span>
+<span class="c"># pylint: disable=W0231</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">iface</span><span class="p">,</span> <span class="n">theDock</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for the dialog.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">           * parent - parent widget of this dialog</span>
+<span class="sd">           * iface - a Quantum GIS QGisAppInterface instance.</span>
+<span class="sd">           * theDock - Optional dock widget instance that we can notify of</span>
+<span class="sd">             changes to the keywords.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           not applicable</span>
+<span class="sd">        Raises:</span>
+<span class="sd">           no exceptions explicitly raised</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="c"># pylint: enable=W0231</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;InaSAFE </span><span class="si">%s</span><span class="s"> Options&#39;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">))</span>
+        <span class="c"># Save reference to the QGIS interface and parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iface</span> <span class="o">=</span> <span class="n">iface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dock</span> <span class="o">=</span> <span class="n">theDock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span> <span class="o">=</span> <span class="n">KeywordIO</span><span class="p">()</span>
+        <span class="c"># Set up things for context help</span>
+        <span class="n">myButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="o">.</span><span class="n">Help</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">myButton</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;clicked()&#39;</span><span class="p">),</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">showHelp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grpNotImplemented</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustSize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreState</span><span class="p">()</span>
+
+<div class="viewcode-block" id="OptionsDialog.restoreState"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog.restoreState">[docs]</a>    <span class="k">def</span> <span class="nf">restoreState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args: Reinstate the options based on the user&#39;s stored session info</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mySettings</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSettings</span><span class="p">()</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/useThreadingFlag&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbxUseThread</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">myFlag</span><span class="p">)</span>
+
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/visibleLayersOnlyFlag&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbxVisibleLayersOnly</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">myFlag</span><span class="p">)</span>
+
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/setLayerNameFromTitleFlag&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbxSetLayerNameFromTitle</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">myFlag</span><span class="p">)</span>
+
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/setZoomToImpactFlag&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbxZoomToImpact</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">myFlag</span><span class="p">)</span>
+        <span class="c"># whether exposure layer should be hidden after model completes</span>
+        <span class="n">myFlag</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/setHideExposureFlag&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">toBool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cbxHideExposure</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">myFlag</span><span class="p">)</span>
+
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">mySettings</span><span class="o">.</span><span class="n">value</span><span class="p">(</span>
+                            <span class="s">&#39;inasafe/keywordCachePath&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">defaultKeywordDbPath</span><span class="p">())</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leKeywordCachePath</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="OptionsDialog.saveState"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog.saveState">[docs]</a>    <span class="k">def</span> <span class="nf">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args: Store the options into the user&#39;s stored session info</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mySettings</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSettings</span><span class="p">()</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/useThreadingFlag&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">cbxUseThread</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/visibleLayersOnlyFlag&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">cbxVisibleLayersOnly</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/setLayerNameFromTitleFlag&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">cbxSetLayerNameFromTitle</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/setZoomToImpactFlag&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">cbxZoomToImpact</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/setHideExposureFlag&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">cbxHideExposure</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
+        <span class="n">mySettings</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="s">&#39;inasafe/keywordCachePath&#39;</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">leKeywordCachePath</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="OptionsDialog.showHelp"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog.showHelp">[docs]</a>    <span class="k">def</span> <span class="nf">showHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load the help text for the options safe_qgis&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span> <span class="o">=</span> <span class="n">Help</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iface</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">(),</span> <span class="s">&#39;options&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">helpDialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="OptionsDialog.accept"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method invoked when ok button is clicked</span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">readSettings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+    <span class="nd">@pyqtSignature</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>  <span class="c"># prevents actions being handled twice</span>
+<div class="viewcode-block" id="OptionsDialog.on_toolKeywordCachePath_clicked"><a class="viewcode-back" href="../../api-docs/safe_qgis/options_dialog.html#safe_qgis.options_dialog.OptionsDialog.on_toolKeywordCachePath_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">on_toolKeywordCachePath_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Autoconnect slot activated when the select cache file tool button is</span>
+<span class="sd">        clicked,</span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myFilename</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Set keyword cache file&#39;</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keywordIO</span><span class="o">.</span><span class="n">defaultKeywordDbPath</span><span class="p">(),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&#39;Sqlite DB File (*.db)&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leKeywordCachePath</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

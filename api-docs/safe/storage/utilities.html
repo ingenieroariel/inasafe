@@ -1,0 +1,583 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.storage.utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.storage" href="../storage.html" />
+    <link rel="next" title="Module: safe.storage.test_clipping" href="test_clipping.html" />
+    <link rel="prev" title="Module: safe.storage.interpolation" href="interpolation.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_clipping.html" title="Module: safe.storage.test_clipping"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation.html" title="Module: safe.storage.interpolation"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" accesskey="U">Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.storage.utilities">
+<span id="module-safe-storage-utilities"></span><h1>Module:  safe.storage.utilities<a class="headerlink" href="#module-safe.storage.utilities" title="Permalink to this headline">¶</a></h1>
+<p>Utilities for storage module</p>
+<dl class="function">
+<dt id="safe.storage.utilities.array2wkt">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">array2wkt</tt><big>(</big><em>A</em>, <em>geom_type='POLYGON'</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#array2wkt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.array2wkt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert coordinates to wkt format</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>A: Nx2 Array of coordinates representing either a polygon or a line.</dt>
+<dd>A can be either a numpy array or a list of coordinates.</dd>
+</dl>
+<p class="last">geom_type: Determines output keyword &#8216;POLYGON&#8217; or &#8216;LINESTRING&#8217;</p>
+</dd>
+<dt>Output</dt>
+<dd><p class="first">wkt: geometry in the format known to ogr: Examples</p>
+<p class="last">POLYGON((1020 1030,1020 1045,1050 1045,1050 1030,1020 1030))
+LINESTRING(1000 1000, 1100 1050)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.bbox_intersection">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">bbox_intersection</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#bbox_intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.bbox_intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute intersection between two or more bounding boxes</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>args: two or more bounding boxes.</dt>
+<dd>Each is assumed to be a list or a tuple with
+four coordinates (W, S, E, N)</dd>
+</dl>
+</dd>
+<dt>Output</dt>
+<dd>result: The minimal common bounding box</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.buffered_bounding_box">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">buffered_bounding_box</tt><big>(</big><em>bbox</em>, <em>resolution</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#buffered_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.buffered_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow bounding box with one unit of resolution in each direction</p>
+<p>This will ensure there is enough pixels to robustly provide
+interpolated values without having to painstakingly deal with
+all corner cases such as 1 x 1, 1 x 2 and 2 x 1 arrays.</p>
+<p>The border will also make sure that points that would otherwise fall
+outside the domain (as defined by a tight bounding box) get assigned
+values.</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">bbox: Bounding box with format [W, S, E, N]
+resolution: (resx, resy) - Raster resolution in each direction.</p>
+<blockquote class="last">
+<div>res - Raster resolution in either direction
+If resolution is None bbox is returned unchanged.</div></blockquote>
+</dd>
+<dt>Ouput</dt>
+<dd>Adjusted bounding box</dd>
+<dt>Case in point: Interpolation point O would fall outside this domain</dt>
+<dd>even though there are enough grid points to support it</dd>
+</dl>
+<div class="line-block">
+<div class="line-block">
+<div class="line"><a href="#id1"><span class="problematic" id="id2">|</span></a></div>
+</div>
+<div class="line">*     *  | *    *</div>
+<div class="line-block">
+<div class="line">O|</div>
+<div class="line-block">
+<div class="line"><a href="#id3"><span class="problematic" id="id4">|</span></a></div>
+</div>
+</div>
+<div class="line">*     *  | *    *</div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.calculate_polygon_area">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">calculate_polygon_area</tt><big>(</big><em>polygon</em>, <em>signed=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#calculate_polygon_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.calculate_polygon_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the signed area of non-self-intersecting polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>polygon: Numeric array of points (longitude, latitude). It is assumed</dt>
+<dd>to be closed, i.e. first and last points are identical</dd>
+<dt>signed: Optional flag deciding whether returned area retains its sign:</dt>
+<dd>If points are ordered counter clockwise, the signed area
+will be positive.
+If points are ordered clockwise, it will be negative
+Default is False which means that the area is always positive.</dd>
+</dl>
+</dd>
+<dt>Output</dt>
+<dd>area: Area of polygon (subject to the value of argument signed)</dd>
+<dt>Sources</dt>
+<dd><a class="reference external" href="http://paulbourke.net/geometry/polyarea/">http://paulbourke.net/geometry/polyarea/</a>
+<a class="reference external" href="http://en.wikipedia.org/wiki/Centroid">http://en.wikipedia.org/wiki/Centroid</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.calculate_polygon_centroid">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">calculate_polygon_centroid</tt><big>(</big><em>polygon</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#calculate_polygon_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.calculate_polygon_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the centroid of non-self-intersecting polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>polygon: Numeric array of points (longitude, latitude). It is assumed</dt>
+<dd>to be closed, i.e. first and last points are identical</dd>
+</dl>
+</dd>
+<dt>Sources</dt>
+<dd><a class="reference external" href="http://paulbourke.net/geometry/polyarea/">http://paulbourke.net/geometry/polyarea/</a>
+<a class="reference external" href="http://en.wikipedia.org/wiki/Centroid">http://en.wikipedia.org/wiki/Centroid</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.geometrytype2string">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">geometrytype2string</tt><big>(</big><em>g_type</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#geometrytype2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.geometrytype2string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides string representation of numeric geometry types</p>
+<p>FIXME (Ole): I can&#8217;t find anything like this in ORG. Why?</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.geotransform2bbox">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">geotransform2bbox</tt><big>(</big><em>geotransform</em>, <em>columns</em>, <em>rows</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#geotransform2bbox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.geotransform2bbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert geotransform to bounding box</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>geotransform: GDAL geotransform (6-tuple).</dt>
+<dd>(top left x, w-e pixel resolution, rotation,
+top left y, rotation, n-s pixel resolution).
+See e.g. <a class="reference external" href="http://www.gdal.org/gdal_tutorial.html">http://www.gdal.org/gdal_tutorial.html</a></dd>
+</dl>
+<p class="last">columns: Number of columns in grid
+rows: Number of rows in grid</p>
+</dd>
+<dt>Output</dt>
+<dd><dl class="first last docutils">
+<dt>bbox: Bounding box as a list of geographic coordinates</dt>
+<dd>[west, south, east, north]</dd>
+</dl>
+</dd>
+</dl>
+<p>Rows and columns are needed to determine eastern and northern bounds.
+FIXME: Not sure if the pixel vs gridline registration issue is observed
+correctly here. Need to check against gdal &gt; v1.7</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.geotransform2resolution">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">geotransform2resolution</tt><big>(</big><em>geotransform</em>, <em>isotropic=False</em>, <em>rtol=1e-06</em>, <em>atol=1e-08</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#geotransform2resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.geotransform2resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert geotransform to resolution</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>geotransform: GDAL geotransform (6-tuple).</dt>
+<dd>(top left x, w-e pixel resolution, rotation,
+top left y, rotation, n-s pixel resolution).
+See e.g. <a class="reference external" href="http://www.gdal.org/gdal_tutorial.html">http://www.gdal.org/gdal_tutorial.html</a></dd>
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>isotropic: If True, verify that dx == dy and return dx</dt>
+<dd>If False (default) return 2-tuple (dx, dy)</dd>
+<dt>rtol, atol: Used to control how close dx and dy must be</dt>
+<dd>to quality for isotropic. These are passed on to
+numpy.allclose for comparison.</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>Output</dt>
+<dd><dl class="first last docutils">
+<dt>resolution: grid spacing (resx, resy) in (positive) decimal</dt>
+<dd>degrees ordered as longitude first, then latitude.
+or resx (if isotropic is True)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.get_geometry_type">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">get_geometry_type</tt><big>(</big><em>geometry</em>, <em>geometry_type</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#get_geometry_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.get_geometry_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine geometry type based on data</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>geometry: A list of either point coordinates [lon, lat] or polygons</dt>
+<dd>which are assumed to be numpy arrays of coordinates</dd>
+</dl>
+<p class="last">geometry_type: Optional type - &#8216;point&#8217;, &#8216;line&#8217;, &#8216;polygon&#8217; or None</p>
+</dd>
+<dt>Output</dt>
+<dd>geometry_type: Either ogr.wkbPoint, ogr.wkbLineString or ogr.wkbPolygon</dd>
+</dl>
+<p>If geometry type cannot be determined an Exception is raised.</p>
+<p>Note, there is no consistency check across all entries of the
+geometry list, only the first element is used in this determination.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.is_sequence">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">is_sequence</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#is_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.is_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if x behaves like a true sequence but not a string</p>
+<p>This will for example return True for lists, tuples and numpy arrays
+but False for strings and dictionaries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.minimal_bounding_box">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">minimal_bounding_box</tt><big>(</big><em>bbox</em>, <em>min_res</em>, <em>eps=1e-06</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#minimal_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.minimal_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow bounding box to exceed specified resolution if needed</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>bbox: Bounding box with format [W, S, E, N]
+min_res: Minimal acceptable resolution to exceed
+eps: Optional tolerance that will be applied to &#8216;buffer&#8217; result</dd>
+<dt>Ouput</dt>
+<dd>Adjusted bounding box guaranteed to exceed specified resolution</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.points_along_line">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">points_along_line</tt><big>(</big><em>line</em>, <em>delta</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#points_along_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.points_along_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a list of points along a line with a given delta</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>line: Numeric array of points (longitude, latitude).
+delta: Decimal number to be used as step</dd>
+<dt>Output</dt>
+<dd>V: Numeric array of points (longitude, latitude).</dd>
+<dt>Sources</dt>
+<dd><a class="reference external" href="http://paulbourke.net/geometry/polyarea/">http://paulbourke.net/geometry/polyarea/</a>
+<a class="reference external" href="http://en.wikipedia.org/wiki/Centroid">http://en.wikipedia.org/wiki/Centroid</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.points_between_points">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">points_between_points</tt><big>(</big><em>point1</em>, <em>point2</em>, <em>delta</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#points_between_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.points_between_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an array of points between two points given a delta</p>
+<p>u = (x1-x0, y1-y0)/L, where
+L=sqrt( (x1-x0)^2 + (y1-y0)^2).
+If r is the resolution, then the
+points will be given by
+(x0, y0) + u * n * r for n = 1, 2, ....
+while len(n*u*r) &lt; L</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.raster_geometry2geotransform">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">raster_geometry2geotransform</tt><big>(</big><em>longitudes</em>, <em>latitudes</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#raster_geometry2geotransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.raster_geometry2geotransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert vectors of longitudes and latitudes to geotransform</p>
+<p>This is the inverse operation of Raster.get_geometry().</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>longitudes, latitudes: Vectors of geographic coordinates</dd>
+<dt>Output</dt>
+<dd><dl class="first last docutils">
+<dt>geotransform: 6-tuple (top left x, w-e pixel resolution, rotation,</dt>
+<dd>top left y, rotation, n-s pixel resolution)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.read_keywords">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">read_keywords</tt><big>(</big><em>filename</em>, <em>sublayer=None</em>, <em>all_blocks=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#read_keywords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.read_keywords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read keywords dictionary from file</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>filename: Name of keywords file. Extension expected to be .keywords</dt>
+<dd><p class="first last">The format of one line is expected to be either
+string: string or string</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>sublayer: str Optional sublayer applicable only to multilayer formats</dt>
+<dd><p class="first last">such as sqlite or netcdf which can potentially hold more than
+one layer. The string should map to the layer group as per the
+example below. If the keywords file contains sublayer definitions
+but no sublayer was defined, the first layer group will be
+returned.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>all_blocks: bool Optional, defaults to False. If True will return</dt>
+<dd><p class="first last">a dict of dicts, where the top level dict entries each represent
+a sublayer, and the values of that dict will be dicts of keyword
+entries.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>keywords: Dictionary of keyword, value pairs</dd>
+</dl>
+<p>Raises: None</p>
+<p>A keyword layer with sublayers may look like this:</p>
+<blockquote>
+<div><p>[osm_buildings]
+datatype: osm
+category: exposure
+subcategory: building
+purpose: dki
+title: buildings_osm_4326</p>
+<p>[osm_flood]
+datatype: flood
+category: hazard
+subcategory: building
+title: flood_osm_4326</p>
+</div></blockquote>
+<p>Wheras a simple keywords file would look like this</p>
+<blockquote>
+<div>datatype: flood
+category: hazard
+subcategory: building
+title: flood_osm_4326</div></blockquote>
+<p>If filename does not exist, an empty dictionary is returned
+Blank lines are ignored
+Surrounding whitespace is removed from values, but keys are unmodified
+If there are no &#8216;:&#8217;, then the keyword is treated as a key with no value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.temp_dir">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">temp_dir</tt><big>(</big><em>sub_dir='work'</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#temp_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.temp_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain the temporary working directory for the operating system.</p>
+<p>An inasafe subdirectory will automatically be created under this and
+if specified, a user subdirectory under that.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>You can use this together with unique_filename to create
+a file in a temporary directory under the inasafe workspace. e.g.</p>
+<p class="last">tmpdir = temp_dir(&#8216;testing&#8217;)
+tmpfile = unique_filename(dir=tmpdir)
+print tmpfile
+/tmp/inasafe/23-08-2012/timlinux/work/testing/tmpMRpF_C</p>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>sub_dir str - optional argument which will cause an additional</dt>
+<dd>subirectory to be created e.g. /tmp/inasafe/foo/</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>Path to the output clipped layer (placed in the system temp dir).</dd>
+<dt>Raises:</dt>
+<dd>Any errors from the underlying system calls.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.unique_filename">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">unique_filename</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#unique_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.unique_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new filename guaranteed not to exist previously</p>
+<p>Use mkstemp to create the file, then remove it and return the name</p>
+<p>If dir is specified, the tempfile will be created in the path specified
+otherwise the file will be created in a directory following this scheme:</p>
+<p>:file:<a href="#id5"><span class="problematic" id="id6">`</span></a>/tmp/inasafe/&lt;dd-mm-yyyy&gt;/&lt;user&gt;/impacts&#8217;</p>
+<p>See <a class="reference external" href="http://docs.python.org/library/tempfile.html">http://docs.python.org/library/tempfile.html</a> for details.</p>
+<p>Example usage:</p>
+<p>tempdir = temp_dir(sub_dir=&#8217;test&#8217;)
+filename = unique_filename(suffix=&#8217;.keywords&#8217;, dir=tempdir)
+print filename
+/tmp/inasafe/23-08-2012/timlinux/test/tmpyeO5VR.keywords</p>
+<p>Or with no preferred subdir, a default subdir of &#8216;impacts&#8217; is used:</p>
+<p>filename = unique_filename(suffix=&#8217;.shp&#8217;)
+print filename
+/tmp/inasafe/23-08-2012/timlinux/impacts/tmpoOAmOi.shp</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.utilities.write_keywords">
+<tt class="descclassname">safe.storage.utilities.</tt><tt class="descname">write_keywords</tt><big>(</big><em>keywords</em>, <em>filename</em>, <em>sublayer=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/utilities.html#write_keywords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.utilities.write_keywords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write keywords dictonary to file</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>keywords: Dictionary of keyword, value pairs</dt>
+<dd><p class="first last">filename: Name of keywords file. Extension expected to be
+.keywords</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>sublayer: str Optional sublayer applicable only to multilayer formats</dt>
+<dd><p class="first last">such as sqlite or netcdf which can potentially hold more than
+one layer. The string should map to the layer group as per the
+example below. <strong>If the keywords file contains sublayer definitions
+but no sublayer was defined, keywords file content will be removed
+and replaced with only the keywords provided here.</strong></p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Returns: None</p>
+<p>Raises: None</p>
+<p>A keyword file with sublayers may look like this:</p>
+<blockquote>
+<div><p>[osm_buildings]
+datatype: osm
+category: exposure
+subcategory: building
+purpose: dki
+title: buildings_osm_4326</p>
+<p>[osm_flood]
+datatype: flood
+category: hazard
+subcategory: building
+title: flood_osm_4326</p>
+</div></blockquote>
+<p>Keys must be strings not containing the &#8221;:&#8221; character
+Values can be anything that can be converted to a string (using
+Python&#8217;s str function)</p>
+<p>Surrounding whitespace is removed from values, but keys are unmodified
+The reason being that keys must always be valid for the dictionary they
+came from. For values we have decided to be flexible and treat entries like
+&#8216;unit:m&#8217; the same as &#8216;unit: m&#8217;, or indeed &#8216;unit: m &#8216;.
+Otherwise, unintentional whitespace in values would lead to surprising
+errors in the application.</p>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interpolation.html"
+                        title="previous chapter">Module:  safe.storage.interpolation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_clipping.html"
+                        title="next chapter">Module:  safe.storage.test_clipping</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/storage/utilities.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_clipping.html" title="Module: safe.storage.test_clipping"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation.html" title="Module: safe.storage.interpolation"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" >Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

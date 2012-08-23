@@ -1,0 +1,338 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.storage.raster &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.storage" href="../storage.html" />
+    <link rel="next" title="Module: safe.storage.layer" href="layer.html" />
+    <link rel="prev" title="Module: safe.storage.utilities_test" href="utilities_test.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="layer.html" title="Module: safe.storage.layer"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="utilities_test.html" title="Module: safe.storage.utilities_test"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" accesskey="U">Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.storage.raster">
+<span id="module-safe-storage-raster"></span><h1>Module:  safe.storage.raster<a class="headerlink" href="#module-safe.storage.raster" title="Permalink to this headline">¶</a></h1>
+<p>Class Raster</p>
+<dl class="class">
+<dt id="safe.storage.raster.Raster">
+<em class="property">class </em><tt class="descclassname">safe.storage.raster.</tt><tt class="descname">Raster</tt><big>(</big><em>data=None</em>, <em>projection=None</em>, <em>geotransform=None</em>, <em>name=''</em>, <em>keywords=None</em>, <em>style_info=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal representation of raster data</p>
+<dl class="method">
+<dt id="safe.storage.raster.Raster.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return copy of raster layer</p>
+<p>This copy will be equal to self in the sense defined by __eq__</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_bins">
+<tt class="descname">get_bins</tt><big>(</big><em>N=10</em>, <em>quantiles=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get N values between the min and the max occurred in this dataset.</p>
+<p>Return sorted list of length N+1 where the first element is min and
+the last is max. Intermediate values depend on the keyword quantiles:
+If quantiles is True, they represent boundaries between quantiles.
+If quantiles is False, they represent equidistant interval boundaries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_bounding_box">
+<tt class="descname">get_bounding_box</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bounding box coordinates for raster layer</p>
+<p>Format is [West, South, East, North]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_data">
+<tt class="descname">get_data</tt><big>(</big><em>nan=True</em>, <em>scaling=None</em>, <em>copy=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get raster data as numeric array</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>nan: Optional flag controlling handling of missing values.</dt>
+<dd>If nan is True (default), nodata values will be replaced
+with numpy.nan
+If keyword nan has a numeric value, nodata values will
+be replaced by that value. E.g. to set missing values to 0,
+do get_data(nan=0.0)</dd>
+<dt>scaling: Optional flag controlling if data is to be scaled</dt>
+<dd><p class="first">if it has been resampled. Admissible values are
+False: data is retrieved without modification.
+True: Data is rescaled based on the squared ratio between</p>
+<blockquote>
+<div>its current and native resolution. This is typically
+required if raster data represents a density
+such as population per km^2</div></blockquote>
+<dl class="last docutils">
+<dt>None: The behaviour will depend on the keyword</dt>
+<dd>&#8220;population&#8221; associated with the layer. If
+it is &#8220;density&#8221;, scaling will be applied
+otherwise not. This is the default.</dd>
+<dt>scalar value: If scaling takes a numerical scalar value,</dt>
+<dd>that will be use to scale the data</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>copy (optional): If present and True return copy</p>
+<p>NOTE: Scaling does not currently work with projected layers.
+See issue #123</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_extrema">
+<tt class="descname">get_extrema</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_extrema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_extrema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get min and max from raster
+If raster has a nominated no_data value, this is ignored.</p>
+<p>Return min, max</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_geometry">
+<tt class="descname">get_geometry</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return longitudes and latitudes (the axes) for grid.</p>
+<p>Return two vectors (longitudes and latitudes) corresponding to
+grid. The values are offset by half a pixel size to correspond to
+pixel registration.</p>
+<p>I.e. If the grid origin (top left corner) is (105, 10) and the
+resolution is 1 degrees in each direction, then the vectors will
+take the form</p>
+<p>longitudes = [100.5, 101.5, ..., 109.5]
+latitudes = [0.5, 1.5, ..., 9.5]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_geotransform">
+<tt class="descname">get_geotransform</tt><big>(</big><em>copy=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_geotransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_geotransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return geotransform for this raster layer</p>
+<p>Output
+geotransform: 6 digit vector</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>(top left x, w-e pixel resolution, rotation,</dt>
+<dd><p class="first">top left y, rotation, n-s pixel resolution).</p>
+<p class="last">See e.g. <a class="reference external" href="http://www.gdal.org/gdal_tutorial.html">http://www.gdal.org/gdal_tutorial.html</a></p>
+</dd>
+</dl>
+</div></blockquote>
+<p>copy (optional): If present and True return copy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_nodata_value">
+<tt class="descname">get_nodata_value</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_nodata_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_nodata_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the internal representation of NODATA</p>
+<p>If the internal value is None, the standard -9999 is assumed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.get_resolution">
+<tt class="descname">get_resolution</tt><big>(</big><em>isotropic=False</em>, <em>native=False</em>, <em>rtol=0.0001</em>, <em>atol=1e-08</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.get_resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.get_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get raster resolution as a 2-tuple (resx, resy)</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>isotropic: If True, verify that dx == dy and return dx</dt>
+<dd>If False return 2-tuple (dx, dy)</dd>
+<dt>native: Optional flag. If True, return native resolution if</dt>
+<dd>available. Otherwise return actual.</dd>
+<dt>rtol, atol: Tolerances as to how much difference is accepted</dt>
+<dd>between dx and dy if isotropic is True.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.interpolate">
+<tt class="descname">interpolate</tt><big>(</big><em>X</em>, <em>attribute_name=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate values of this raster layer to other layer</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">X: Layer object defining target
+attribute_name: Optional name of interpolated layer.</p>
+<blockquote class="last">
+<div>If attribute_name is None,
+the name of self is used.</div></blockquote>
+</dd>
+<dt>Output</dt>
+<dd><dl class="first last docutils">
+<dt>Y: Layer object with values of this raster layer interpolated to</dt>
+<dd>geometry of input layer X</dd>
+</dl>
+</dd>
+</dl>
+<p>Note: If target geometry is polygon, data will be interpolated to
+its centroids and the output is a point data set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.read_from_file">
+<tt class="descname">read_from_file</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.read_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.read_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and unpack raster data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.to_vector_layer">
+<tt class="descname">to_vector_layer</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.to_vector_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.to_vector_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert raster grid to vector point data</p>
+<p>Return a vector layer object with data points corresponding to
+grid points. The order is row-major which means that the
+x (longitude) direction is varying the fastest.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.to_vector_points">
+<tt class="descname">to_vector_points</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.to_vector_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.to_vector_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert raster grid to vector point data</p>
+<dl class="docutils">
+<dt>Output</dt>
+<dd>coordinates: Nx2 array of x, y (lon, lat) coordinates
+values: N array of corresponding grid values</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.raster.Raster.write_to_file">
+<tt class="descname">write_to_file</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/raster.html#Raster.write_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.raster.Raster.write_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save raster data to file</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>filename: filename with extension .tif</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="utilities_test.html"
+                        title="previous chapter">Module:  safe.storage.utilities_test</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="layer.html"
+                        title="next chapter">Module:  safe.storage.layer</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/storage/raster.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="layer.html" title="Module: safe.storage.layer"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="utilities_test.html" title="Module: safe.storage.utilities_test"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" >Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

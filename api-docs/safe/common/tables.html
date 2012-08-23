@@ -1,0 +1,270 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.common.tables &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.common" href="../common.html" />
+    <link rel="next" title="Module: safe.common.test_interpolate" href="test_interpolate.html" />
+    <link rel="prev" title="Module: safe.common.numerics" href="numerics.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_interpolate.html" title="Module: safe.common.test_interpolate"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="numerics.html" title="Module: safe.common.numerics"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" accesskey="U">Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.common.tables">
+<span id="module-safe-common-tables"></span><h1>Module:  safe.common.tables<a class="headerlink" href="#module-safe.common.tables" title="Permalink to this headline">¶</a></h1>
+<p>tables.py - v0.04 2009-07-28 Philippe Lagadec</p>
+<p>This module provides a few classes to easily generate HTML code such as tables
+and lists.</p>
+<p>Project website: <a class="reference external" href="http://www.decalage.info/python/html">http://www.decalage.info/python/html</a></p>
+<dl class="docutils">
+<dt>License: CeCILL (open-source GPL compatible), see source code for details.</dt>
+<dd><a class="reference external" href="http://www.cecill.info">http://www.cecill.info</a></dd>
+</dl>
+<dl class="class">
+<dt id="safe.common.tables.List">
+<em class="property">class </em><tt class="descclassname">safe.common.tables.</tt><tt class="descname">List</tt><big>(</big><em>lines=None</em>, <em>ordered=False</em>, <em>start=None</em>, <em>attribs=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#List"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>a List object is used to create an ordered or unordered list in HTML.
+(UL/OL tag)</p>
+<p>Attributes:
+- lines: list, tuple or any iterable, containing one string for each line
+- ordered: bool, choice between an ordered (OL) or unordered list (UL)
+- attribs: dict, additional attributes for the OL/UL tag</p>
+<p>Reference: <a class="reference external" href="http://www.w3.org/tr/html4/struct/lists.html">http://www.w3.org/tr/html4/struct/lists.html</a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="safe.common.tables.Table">
+<em class="property">class </em><tt class="descclassname">safe.common.tables.</tt><tt class="descname">Table</tt><big>(</big><em>rows=None</em>, <em>border=None</em>, <em>style=None</em>, <em>width=None</em>, <em>cellspacing=None</em>, <em>cellpadding=None</em>, <em>attribs=None</em>, <em>header_row=None</em>, <em>table_class=None</em>, <em>col_width=None</em>, <em>col_align=None</em>, <em>col_valign=None</em>, <em>col_char=None</em>, <em>col_charoff=None</em>, <em>col_styles=None</em>, <em>caption=None</em>, <em>caption_at_bottom=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#Table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>a Table object is used to create a HTML table. (table tag)</p>
+<p>Attributes:
+- rows: list, tuple or any iterable, containing one iterable or TableRow</p>
+<blockquote>
+<div>object for each row</div></blockquote>
+<ul class="simple">
+<li>header_row: list, tuple or any iterable, containing the
+header row (optional)</li>
+<li>class: str, CSS class to use. Defaults to DEFAULT_TABLE_CLASS</li>
+<li>caption: str, caption for the table</li>
+<li>border: str or int, border width</li>
+<li>style: str, table style in CSS syntax (thin black borders by default)</li>
+<li>width: str, width of the table on the page</li>
+<li>attribs: dict, additional attributes for the table tag</li>
+<li>col_width: list or tuple defining width for each column</li>
+<li>col_align: list or tuple defining horizontal alignment for each column</li>
+<li>col_char: list or tuple defining alignment character for each column</li>
+<li>col_charoff: list or tuple defining charoff attribute for each column</li>
+<li>col_valign: list or tuple defining vertical alignment for each column</li>
+<li>col_styles: list or tuple of HTML styles for each column</li>
+</ul>
+<p>Reference: <a class="reference external" href="http://www.w3.org/tr/html4/struct/tables.html#h-11.2.1">http://www.w3.org/tr/html4/struct/tables.html#h-11.2.1</a></p>
+<dl class="method">
+<dt id="safe.common.tables.Table.toNewlineFreeString">
+<tt class="descname">toNewlineFreeString</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#Table.toNewlineFreeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.Table.toNewlineFreeString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representation of the table which contains no
+newlines.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">any preformatted &lt;pre&gt; blocks will be adversely affected by
+this.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="safe.common.tables.TableCell">
+<em class="property">class </em><tt class="descclassname">safe.common.tables.</tt><tt class="descname">TableCell</tt><big>(</big><em>text=''</em>, <em>bgcolor=None</em>, <em>header=False</em>, <em>width=None</em>, <em>align=None</em>, <em>char=None</em>, <em>charoff=None</em>, <em>valign=None</em>, <em>style=''</em>, <em>attribs=None</em>, <em>cell_class=None</em>, <em>row_span=None</em>, <em>col_span=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#TableCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.TableCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>a TableCell object is used to create a cell in a HTML table. (td or th)</p>
+<p>Attributes:
+- text: text in the cell (may contain HTML tags). May be any object which</p>
+<blockquote>
+<div>can be converted to a string using str().</div></blockquote>
+<ul class="simple">
+<li>header: bool, false for a normal data cell (td), true for a header cell
+(th)</li>
+<li>bgcolor: str, background color</li>
+<li>width: str, width</li>
+<li>align: str, horizontal alignement (left, center, right, justify or char)</li>
+<li>char: str, alignment character, decimal point if not specified</li>
+<li>charoff: str, see HTML specs</li>
+<li>valign: str, vertical alignment (top|middle|bottom|baseline)</li>
+<li>style: str, CSS style</li>
+<li>attribs: dict, additional attributes for the td/th tag</li>
+</ul>
+<p>Reference: <a class="reference external" href="http://www.w3.org/tr/html4/struct/tables.html#h-11.2.6">http://www.w3.org/tr/html4/struct/tables.html#h-11.2.6</a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="safe.common.tables.TableRow">
+<em class="property">class </em><tt class="descclassname">safe.common.tables.</tt><tt class="descname">TableRow</tt><big>(</big><em>cells=None</em>, <em>bgcolor=None</em>, <em>header=False</em>, <em>attribs=None</em>, <em>col_align=None</em>, <em>col_valign=None</em>, <em>col_char=None</em>, <em>col_charoff=None</em>, <em>col_styles=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#TableRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.TableRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>a TableRow object is used to create a row in a HTML table. (tr tag)</p>
+<p>Attributes:
+- cells: list, tuple or any iterable, containing one string or TableCell</p>
+<blockquote>
+<div>object for each cell</div></blockquote>
+<ul class="simple">
+<li>header: bool, true for a header row (th),
+false for a normal data row (td)</li>
+<li>bgcolor: str, background color</li>
+<li>col_align, col_valign, col_char, col_charoff, col_styles: see Table class</li>
+<li>attribs: dict, additional attributes for the tr tag</li>
+</ul>
+<p>Reference: <a class="reference external" href="http://www.w3.org/tr/html4/struct/tables.html#h-11.2.5">http://www.w3.org/tr/html4/struct/tables.html#h-11.2.5</a></p>
+<dl class="method">
+<dt id="safe.common.tables.TableRow.apply_properties">
+<tt class="descname">apply_properties</tt><big>(</big><em>cell</em>, <em>col</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#TableRow.apply_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.TableRow.apply_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply properties to the row</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.common.tables.TableRow.column_count">
+<tt class="descname">column_count</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#TableRow.column_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.TableRow.column_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of columns in this row</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.tables.htmllist">
+<tt class="descclassname">safe.common.tables.</tt><tt class="descname">htmllist</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#htmllist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.htmllist" title="Permalink to this definition">¶</a></dt>
+<dd><p>return HTML code for a list as a string. See List class for parameters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.tables.table">
+<tt class="descclassname">safe.common.tables.</tt><tt class="descname">table</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/tables.html#table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.tables.table" title="Permalink to this definition">¶</a></dt>
+<dd><p>return HTML code for a table as a string. See Table class for parameters.</p>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="numerics.html"
+                        title="previous chapter">Module:  safe.common.numerics</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_interpolate.html"
+                        title="next chapter">Module:  safe.common.test_interpolate</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/common/tables.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_interpolate.html" title="Module: safe.common.test_interpolate"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="numerics.html" title="Module: safe.common.numerics"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" >Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

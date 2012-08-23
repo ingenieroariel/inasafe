@@ -1,0 +1,260 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.storage.core &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.storage" href="../storage.html" />
+    <link rel="next" title="Module: safe.storage.clipping" href="clipping.html" />
+    <link rel="prev" title="Module: safe.storage.vector" href="vector.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="clipping.html" title="Module: safe.storage.clipping"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="vector.html" title="Module: safe.storage.vector"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" accesskey="U">Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.storage.core">
+<span id="module-safe-storage-core"></span><h1>Module:  safe.storage.core<a class="headerlink" href="#module-safe.storage.core" title="Permalink to this headline">¶</a></h1>
+<p>IO module for reading and writing of files</p>
+<p>This module provides functionality to read and write
+raster and vector layers from numerical data.</p>
+<dl class="function">
+<dt id="safe.storage.core.bboxlist2string">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">bboxlist2string</tt><big>(</big><em>bbox</em>, <em>decimals=6</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#bboxlist2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.bboxlist2string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert bounding box list to comma separated string</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>bbox: List of coordinates of the form [W, S, E, N]</dd>
+<dt>Output</dt>
+<dd>bbox_string: Format &#8216;W,S,E,N&#8217; - each will have 6 decimal points</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.bboxstring2list">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">bboxstring2list</tt><big>(</big><em>bbox_string</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#bboxstring2list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.bboxstring2list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert bounding box string to list</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>bbox_string: String of bounding box coordinates of the form &#8216;W,S,E,N&#8217;</dd>
+<dt>Output</dt>
+<dd>bbox: List of floating point numbers with format [W, S, E, N]</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.check_bbox_string">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">check_bbox_string</tt><big>(</big><em>bbox_string</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#check_bbox_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.check_bbox_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that bbox string is valid</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.get_bounding_box">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">get_bounding_box</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#get_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.get_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bounding box for specified raster or vector file</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>filename</dd>
+<dt>Output:</dt>
+<dd>bounding box as python list of numbers [West, South, East, North]</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.get_bounding_box_string">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">get_bounding_box_string</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#get_bounding_box_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.get_bounding_box_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bounding box for specified raster or vector file</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>filename</dd>
+<dt>Output:</dt>
+<dd>bounding box as python string &#8216;West, South, East, North&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.read_layer">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">read_layer</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#read_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.read_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read spatial layer from file.
+This can be either raster or vector data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.write_raster_data">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">write_raster_data</tt><big>(</big><em>data</em>, <em>projection</em>, <em>geotransform</em>, <em>filename</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#write_raster_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.write_raster_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write array to raster file with specified metadata and one data layer</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd><p class="first">data: Numpy array containing grid data
+projection: WKT projection information
+geotransform: 6 digit vector</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>(top left x, w-e pixel resolution, rotation,</dt>
+<dd>top left y, rotation, n-s pixel resolution).
+See e.g. <a class="reference external" href="http://www.gdal.org/gdal_tutorial.html">http://www.gdal.org/gdal_tutorial.html</a></dd>
+</dl>
+</div></blockquote>
+<p class="last">filename: Output filename
+keywords: Optional dictionary</p>
+</dd>
+</dl>
+<p>Note: The only format implemented is GTiff and the extension must be .tif</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.core.write_vector_data">
+<tt class="descclassname">safe.storage.core.</tt><tt class="descname">write_vector_data</tt><big>(</big><em>data</em>, <em>projection</em>, <em>geometry</em>, <em>filename</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/core.html#write_vector_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.core.write_vector_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write point data and any associated attributes to vector file</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd><dl class="first docutils">
+<dt>data: List of N dictionaries each with M fields where</dt>
+<dd>M is the number of attributes.
+A value of None is acceptable.</dd>
+</dl>
+<p class="last">projection: WKT projection information
+geometry: List of points or polygons.
+filename: Output filename
+keywords: Optional dictionary</p>
+</dd>
+</dl>
+<p>Note: The only format implemented is GML and SHP so the extension
+must be either .gml or .shp</p>
+<p># FIXME (Ole): When the GML driver is used,
+#              the spatial reference is not stored.
+#              I suspect this is a bug in OGR.</p>
+<p>Background:
+* <a class="reference external" href="http://www.gdal.org/ogr/ogr_apitut.html">http://www.gdal.org/ogr/ogr_apitut.html</a> (last example)
+* <a class="reference external" href="http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html">http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html</a></p>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vector.html"
+                        title="previous chapter">Module:  safe.storage.vector</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="clipping.html"
+                        title="next chapter">Module:  safe.storage.clipping</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/storage/core.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="clipping.html" title="Module: safe.storage.clipping"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="vector.html" title="Module: safe.storage.vector"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" >Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

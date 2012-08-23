@@ -1,0 +1,262 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.generic.categorised_hazard_population &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.generic.categorised_hazard_population</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_question</span><span class="p">,</span> <span class="n">get_function_title</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.styles</span> <span class="kn">import</span> <span class="n">flood_population_style</span> <span class="k">as</span> <span class="n">style_info</span>
+<span class="kn">from</span> <span class="nn">safe.storage.raster</span> <span class="kn">import</span> <span class="n">Raster</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.tables</span> <span class="kn">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">TableRow</span>
+
+
+<div class="viewcode-block" id="CatergorisedHazardPopulationImpactFunction"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/generic/categorised_hazard_population.html#safe.impact_functions.generic.categorised_hazard_population.CatergorisedHazardPopulationImpactFunction">[docs]</a><span class="k">class</span> <span class="nc">CatergorisedHazardPopulationImpactFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plugin for impact of population as derived by catergorised hazard</span>
+
+<span class="sd">    :author AIFDR</span>
+<span class="sd">    :rating 2</span>
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory==&#39;normalised&#39; and \</span>
+<span class="sd">                    layertype==&#39;raster&#39;</span>
+
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory==&#39;population&#39; and \</span>
+<span class="sd">                    layertype==&#39;raster&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;be impacted&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CatergorisedHazardPopulationImpactFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/generic/categorised_hazard_population.html#safe.impact_functions.generic.categorised_hazard_population.CatergorisedHazardPopulationImpactFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plugin for impact of population as derived by catergorised hazard</span>
+
+<span class="sd">        Input</span>
+<span class="sd">          layers: List of layers expected to contain</span>
+<span class="sd">              H: Raster layer of catergorised hazard</span>
+<span class="sd">              P: Raster layer of population data</span>
+
+<span class="sd">        Counts number of people exposed to each caterogry of the hazard</span>
+
+<span class="sd">        Return</span>
+<span class="sd">          Map of population exposed to high catergory</span>
+<span class="sd">          Table with number of people in each catergory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># The 3 catergory</span>
+        <span class="n">high_t</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">medium_t</span> <span class="o">=</span> <span class="mf">0.66</span>
+        <span class="n">low_t</span> <span class="o">=</span> <span class="mf">0.34</span>
+
+        <span class="c"># Identify hazard and exposure layers</span>
+        <span class="n">inundation</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Categorised Hazard</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Population Raster</span>
+
+        <span class="n">question</span> <span class="o">=</span> <span class="n">get_question</span><span class="p">(</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="n">population</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Extract data as numeric arrays</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">inundation</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c"># Catergory</span>
+
+        <span class="c"># Calculate impact as population exposed to each catergory</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">C</span> <span class="o">==</span> <span class="n">high_t</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">C</span> <span class="o">&gt;</span> <span class="n">medium_t</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">C</span> <span class="o">&lt;</span> <span class="n">low_t</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Count totals</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">H</span><span class="p">))</span>
+        <span class="n">medium</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">M</span><span class="p">))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">H</span><span class="p">))</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">L</span><span class="p">))</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">M</span><span class="p">))</span>
+        <span class="n">total_impact</span> <span class="o">=</span> <span class="n">high</span> <span class="o">+</span> <span class="n">medium</span> <span class="o">+</span> <span class="n">low</span>
+
+        <span class="c"># Don&#39;t show digits less than a 1000</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">total_impact</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">total_impact</span> <span class="o">=</span> <span class="n">total_impact</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="n">high</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">medium</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">medium</span> <span class="o">=</span> <span class="n">medium</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">low</span> <span class="o">=</span> <span class="n">low</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="c"># Calculate estimated needs based on BNPB Perka 7/2008 minimum bantuan</span>
+<span class="c">##        rice = evacuated * 2.8</span>
+<span class="c">##        drinking_water = evacuated * 17.5</span>
+<span class="c">##        water = evacuated * 67</span>
+<span class="c">##        family_kits = evacuated / 5</span>
+<span class="c">##        toilets = evacuated / 20</span>
+
+        <span class="c"># Generate impact report for the pdf map</span>
+        <span class="n">table_body</span> <span class="o">=</span> <span class="p">[</span><span class="n">question</span><span class="p">,</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;People impacted &#39;</span><span class="p">),</span>
+                                <span class="s">&#39;</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">total_impact</span><span class="p">],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;People in high hazard area &#39;</span><span class="p">),</span>
+                                <span class="s">&#39;</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">high</span><span class="p">],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;People in medium hazard area &#39;</span><span class="p">),</span>
+                                <span class="s">&#39;</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">medium</span><span class="p">],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;People in low hazard area&#39;</span><span class="p">),</span>
+                                <span class="s">&#39;</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">low</span><span class="p">],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">)]</span>
+
+<span class="c">##                    TableRow([_(&#39;Needs per week&#39;), _(&#39;Total&#39;)],</span>
+<span class="c">##                               header=True),</span>
+<span class="c">##                      [_(&#39;Rice [kg]&#39;), int(rice)],</span>
+<span class="c">##                      [_(&#39;Drinking Water [l]&#39;), int(drinking_water)],</span>
+<span class="c">##                      [_(&#39;Clean Water [l]&#39;), int(water)],</span>
+<span class="c">##                      [_(&#39;Family Kits&#39;), int(family_kits)],</span>
+<span class="c">##                      [_(&#39;Toilets&#39;), int(toilets)]]</span>
+        <span class="n">impact_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+
+        <span class="c"># Extend impact report for on-screen display</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Notes:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;Map shows population density in high or medium &#39;</span>
+                             <span class="s">&#39;hazard area&#39;</span><span class="p">),</span>
+                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;Total population: </span><span class="si">%i</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">total</span><span class="p">])</span>
+<span class="c">##                           _(&#39;Minimum needs are defined in BNPB &#39;</span>
+<span class="c">##                             &#39;regulation 7/2008&#39;)])</span>
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">map_title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;People in high hazard areas&#39;</span><span class="p">)</span>
+
+        <span class="c"># Generare 8 equidistant classes across the range of flooded population</span>
+        <span class="c"># 8 is the number of classes in the predefined flood population style</span>
+        <span class="c"># as imported</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]),</span>
+                                 <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]),</span> <span class="mi">8</span><span class="p">)</span>
+
+        <span class="c"># Modify labels in existing flood style to show quantities</span>
+        <span class="n">style_classes</span> <span class="o">=</span> <span class="n">style_info</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span>
+
+        <span class="n">style_classes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Low [</span><span class="si">%i</span><span class="s"> people/cell]&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">style_classes</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium [</span><span class="si">%i</span><span class="s"> people/cell]&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">style_classes</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;High [</span><span class="si">%i</span><span class="s"> people/cell]&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+        <span class="n">style_info</span><span class="p">[</span><span class="s">&#39;legend_title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Population Density&#39;</span><span class="p">)</span>
+
+        <span class="c"># Create raster object and return</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">Raster</span><span class="p">(</span><span class="n">M</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geotransform</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Population which </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">get_function_title</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">,</span>
+                             <span class="s">&#39;impact_table&#39;</span><span class="p">:</span> <span class="n">impact_table</span><span class="p">,</span>
+                             <span class="s">&#39;map_title&#39;</span><span class="p">:</span> <span class="n">map_title</span><span class="p">},</span>
+                   <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">R</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

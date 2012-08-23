@@ -1,0 +1,279 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.engine.impact_functions_for_testing.NEXIS_building_impact_model &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.engine.impact_functions_for_testing.NEXIS_building_impact_model</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+
+<span class="kn">from</span> <span class="nn">safe.impact_functions.utilities</span> <span class="kn">import</span> <span class="n">Damage_curve</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+<span class="c"># A maximum floating point number for this package</span>
+<span class="n">MAXFLOAT</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">maxint</span><span class="p">)</span>
+
+<span class="c">#------------------------------------------------------------</span>
+<span class="c"># Define damage curves for tsunami structural building damage</span>
+<span class="c">#------------------------------------------------------------</span>
+<span class="n">struct_damage_curve</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Double brick&#39;</span><span class="p">:</span> <span class="n">Damage_curve</span><span class="p">([[</span><span class="o">-</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.150</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.425</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.449</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.572</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.582</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.587</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">0.647</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">64.7</span><span class="p">]]),</span>
+                       <span class="s">&#39;Brick veneer&#39;</span><span class="p">:</span> <span class="n">Damage_curve</span><span class="p">([[</span><span class="o">-</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.169</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.445</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.472</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.618</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.629</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.633</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">0.694</span><span class="p">],</span>
+                                                     <span class="p">[</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">69.4</span><span class="p">]]),</span>
+                       <span class="s">&#39;Timber&#39;</span><span class="p">:</span> <span class="n">Damage_curve</span><span class="p">([[</span><span class="o">-</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                               <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.016</span><span class="p">],</span>
+                                               <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.645</span><span class="p">],</span>
+                                               <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.818</span><span class="p">],</span>
+                                               <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.955</span><span class="p">],</span>
+                                               <span class="p">[</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">99.4</span><span class="p">]])}</span>
+
+<span class="n">contents_damage_curve</span> <span class="o">=</span> <span class="n">Damage_curve</span><span class="p">([[</span><span class="o">-</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.013</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.102</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.381</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.500</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.970</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.976</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.986</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="n">MAXFLOAT</span><span class="p">,</span> <span class="mf">98.6</span><span class="p">]])</span>
+
+
+<div class="viewcode-block" id="TsunamiBuildingLossFunction"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/NEXIS_building_impact_model.html#safe.engine.impact_functions_for_testing.NEXIS_building_impact_model.TsunamiBuildingLossFunction">[docs]</a><span class="k">class</span> <span class="nc">TsunamiBuildingLossFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for earthquake damage based on empirical results</span>
+
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;tsunami&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39;</span>
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;building&#39;) and \</span>
+<span class="sd">                    layertype==&#39;vector&#39; and \</span>
+<span class="sd">                    nothing==&#39;never&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">target_value</span><span class="p">():</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="s">&#39;STRUCT_DAMAGE_fraction&#39;</span>
+        <span class="k">return</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TsunamiBuildingLossFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/NEXIS_building_impact_model.html#safe.engine.impact_functions_for_testing.NEXIS_building_impact_model.TsunamiBuildingLossFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for tsunami building damage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Extract data</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Ground shaking</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Building locations</span>
+
+        <span class="c"># Interpolate hazard level to building locations</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;depth&#39;</span><span class="p">)</span>
+
+        <span class="c"># Extract relevant numerical data</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">inundation</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="c"># Calculate</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="n">impact</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+
+            <span class="c">#-------------------</span>
+            <span class="c"># Extract parameters</span>
+            <span class="c">#-------------------</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">inundation</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;depth&#39;</span><span class="p">])</span>
+            <span class="c">#shore_distance = E.get_data(&#39;SHORE_DIST&#39;, i)</span>
+
+            <span class="c"># FIXME: Get rid of the type casting when</span>
+            <span class="c">#        issue #66 is done</span>
+            <span class="n">number_of_people_in_building</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;NEXIS_PEOP&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">wall_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;WALL_TYPE&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">contents_value</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;CONT_VALUE&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">structure_value</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;STR_VALUE&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="c">#------------------------</span>
+            <span class="c"># Compute people affected</span>
+            <span class="c">#------------------------</span>
+            <span class="k">if</span> <span class="mf">0.01</span> <span class="o">&lt;</span> <span class="n">depth</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">people_affected</span> <span class="o">=</span> <span class="n">number_of_people_in_building</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">people_affected</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">people_severely_affected</span> <span class="o">=</span> <span class="n">number_of_people_in_building</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">people_severely_affected</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c">#----------------------------------------</span>
+            <span class="c"># Compute impact on buldings and contents</span>
+            <span class="c">#----------------------------------------</span>
+            <span class="n">depth_floor</span> <span class="o">=</span> <span class="n">depth</span> <span class="o">-</span> <span class="mf">0.3</span>  <span class="c"># Adjust for floor height</span>
+
+            <span class="k">if</span> <span class="n">depth_floor</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">buildings_inundated</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buildings_inundated</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">depth_floor</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">structural_damage</span> <span class="o">=</span> <span class="n">contents_damage</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Water is deep enough to cause damage</span>
+                <span class="k">if</span> <span class="n">wall_type</span> <span class="ow">in</span> <span class="n">struct_damage_curve</span><span class="p">:</span>
+                    <span class="n">curve</span> <span class="o">=</span> <span class="n">struct_damage_curve</span><span class="p">[</span><span class="n">wall_type</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Establish default for unknown wall type</span>
+                    <span class="n">curve</span> <span class="o">=</span> <span class="n">struct_damage_curve</span><span class="p">[</span><span class="s">&#39;Brick veneer&#39;</span><span class="p">]</span>
+
+                <span class="n">structural_damage</span> <span class="o">=</span> <span class="n">curve</span><span class="p">(</span><span class="n">depth_floor</span><span class="p">)</span>
+                <span class="n">contents_damage</span> <span class="o">=</span> <span class="n">contents_damage_curve</span><span class="p">(</span><span class="n">depth_floor</span><span class="p">)</span>
+
+            <span class="c">#---------------</span>
+            <span class="c"># Compute losses</span>
+            <span class="c">#---------------</span>
+            <span class="n">structural_loss</span> <span class="o">=</span> <span class="n">structural_damage</span> <span class="o">*</span> <span class="n">structure_value</span>
+            <span class="n">contents_loss</span> <span class="o">=</span> <span class="n">contents_damage</span> <span class="o">*</span> <span class="n">contents_value</span>
+
+            <span class="c">#-------</span>
+            <span class="c"># Return</span>
+            <span class="c">#-------</span>
+            <span class="n">impact</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;NEXIS_PEOP&#39;</span><span class="p">:</span> <span class="n">number_of_people_in_building</span><span class="p">,</span>
+                           <span class="s">&#39;PEOPLE_AFFECTED&#39;</span><span class="p">:</span> <span class="n">people_affected</span><span class="p">,</span>
+                           <span class="s">&#39;PEOPLE_SEV_AFFECTED&#39;</span><span class="p">:</span> <span class="n">people_severely_affected</span><span class="p">,</span>
+                           <span class="s">&#39;STRUCT_INUNDATED&#39;</span><span class="p">:</span> <span class="n">buildings_inundated</span><span class="p">,</span>
+                           <span class="s">&#39;STRUCT_DAMAGE_fraction&#39;</span><span class="p">:</span> <span class="n">structural_damage</span><span class="p">,</span>
+                           <span class="s">&#39;CONTENTS_DAMAGE_fraction&#39;</span><span class="p">:</span> <span class="n">contents_damage</span><span class="p">,</span>
+                           <span class="s">&#39;STRUCT_LOSS_AUD&#39;</span><span class="p">:</span> <span class="n">structural_loss</span><span class="p">,</span>
+                           <span class="s">&#39;CONTENTS_LOSS_AUD&#39;</span><span class="p">:</span> <span class="n">contents_loss</span><span class="p">,</span>
+                           <span class="s">&#39;DEPTH&#39;</span><span class="p">:</span> <span class="n">depth</span><span class="p">})</span>
+
+        <span class="c"># FIXME (Ole): Need helper to generate new layer using</span>
+        <span class="c">#              correct spatial reference</span>
+        <span class="c">#              (i.e. sensibly wrap the following lines)</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">impact</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">coordinates</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;Estimated tsunami impact&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

@@ -130,7 +130,7 @@ the riab.py setupI18n method):</p>
 
 <span class="sd">Args:</span>
 <span class="sd">   thePreferredLocale - optional parameter which if set</span>
-<span class="sd">   will override any other way of determining locale.</span>
+<span class="sd">       will override any other way of determining locale.</span>
 <span class="sd">Returns:</span>
 <span class="sd">   None.</span>
 <span class="sd">Raises:</span>
@@ -166,14 +166,13 @@ the top level directory in the source tree.</li>
 existing API documentation files and replace the python module paths therein.</p>
 </div>
 <p>An example of the contents of a module&#8217;s API .rst if provided below:</p>
-<div class="highlight-python"><pre>Module: riab
-============
-This page contains the documentation for the  InaSAFE code **riab**
-module.
+<div class="highlight-python"><pre>Module:  safe.common.polygon
+============================
 
-.. automodule:: gui.riab
-   :members:</pre>
+.. automodule:: safe.common.polygon
+      :members:</pre>
 </div>
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
 <p>A couple of things should be noted here:</p>
 <ul class="simple">
 <li>Sphinx provides automodule and autoclass directives. We have opted to use
@@ -206,6 +205,46 @@ should be opened when the help button is clicked. The general style and
 approach used in existing documentation should inform your documentation
 process so that all the documentation is constent.</p>
 </div>
+<div class="section" id="publishing-the-documentation-to-github-pages">
+<h3>Publishing the documentation to GitHub Pages<a class="headerlink" href="#publishing-the-documentation-to-github-pages" title="Permalink to this headline">¶</a></h3>
+<p>Initially we have used <a class="reference external" href="http://readthedocs.org">http://readthedocs.org</a> to host our site (and the pages
+you are reading now). However they don&#8217;t support internationalisation and
+there are various other issues with it, so we opted to move our content into
+gh-pages. To use this, the site is stored in a special branch.</p>
+</div>
+</div>
+<div class="section" id="initial-gh-pages-setup">
+<h2>Initial gh-pages setup<a class="headerlink" href="#initial-gh-pages-setup" title="Permalink to this headline">¶</a></h2>
+<p>Enable gh-pages in th gh project
+<a class="reference external" href="https://github.com/AIFDR/inasafe/admin">admin page</a>. On your local system
+do something like this:</p>
+<div class="highlight-python"><pre>git clone file:///home/timlinux/dev/python/inasafe-dev \
+    inasafe-github-pages
+cd inasafe-github-pages
+cp ../inasafe-dev/.git/config .git/config
+git pull
+git symbolic-ref HEAD refs/heads/gh-pages
+rm .git/index
+git clean -fdx
+cp -r ../inasafe-dev/docs/build/html .
+cd html/
+touch .nojekyll
+git add .
+git commit -a -m "First commit of docs"
+git push origin gh-pages</pre>
+</div>
+<p>Now wait ten minutes or so and the pages should be visble here at
+<a class="reference external" href="http://aifdr.github.com/inasafe/">http://aifdr.github.com/inasafe/</a></p>
+<p>Deployment of the site requires the following steps:</p>
+<ul class="simple">
+<li>Regenerate the docs using make docs in the root dir of a master branch
+checkout of InaSAFE.</li>
+<li>Copy all files from <tt class="file docutils literal"><span class="pre">docs/build/html</span></tt> into a separate local repo
+checked out in the gh-pages branch</li>
+<li>Commit those changes and push</li>
+<li>Wait approximately 10 minutes</li>
+</ul>
+<p>After this the changes should be visible here <a class="reference external" href="http://aifdr.github.com/inasafe/">http://aifdr.github.com/inasafe/</a></p>
 </div>
 </div>
 
@@ -224,8 +263,10 @@ process so that all the documentation is constent.</p>
 <li><a class="reference internal" href="#common-tags">Common tags</a><ul>
 <li><a class="reference internal" href="#creating-api-documentation">Creating API Documentation</a></li>
 <li><a class="reference internal" href="#documenting-new-features">Documenting new features</a></li>
+<li><a class="reference internal" href="#publishing-the-documentation-to-github-pages">Publishing the documentation to GitHub Pages</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#initial-gh-pages-setup">Initial gh-pages setup</a></li>
 </ul>
 </li>
 </ul>

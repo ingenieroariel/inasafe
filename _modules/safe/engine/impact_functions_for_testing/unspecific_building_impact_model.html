@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.engine.impact_functions_for_testing.unspecific_building_impact_model &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.engine.impact_functions_for_testing.unspecific_building_impact_model</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+
+<div class="viewcode-block" id="EarthquakeBuildingDamageFunction"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/unspecific_building_impact_model.html#safe.engine.impact_functions_for_testing.unspecific_building_impact_model.EarthquakeBuildingDamageFunction">[docs]</a><span class="k">class</span> <span class="nc">EarthquakeBuildingDamageFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for earthquake damage to buildings</span>
+
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;earthquake&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39;</span>
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;building&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugin_name</span> <span class="o">=</span> <span class="s">&#39;Earthquake Building Damage Function&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="EarthquakeBuildingDamageFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/unspecific_building_impact_model.html#safe.engine.impact_functions_for_testing.unspecific_building_impact_model.EarthquakeBuildingDamageFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for earthquake school damage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Extract data</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Ground shaking</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Building locations</span>
+
+        <span class="c"># Interpolate hazard level to building locations</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;MMI&#39;</span><span class="p">)</span>
+
+        <span class="c"># Extract relevant numerical data</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">shaking</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="c"># Calculate building damage</span>
+        <span class="n">building_damage</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shaking</span><span class="p">)):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">shaking</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;MMI&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mf">6.0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">x</span><span class="p">):</span>  <span class="c"># x != x -&gt; check for nan pre python 2.6</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.692</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-</span>
+                         <span class="mf">15.82</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span>
+                         <span class="mf">135.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span>
+                         <span class="mf">509.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">714.4</span><span class="p">)</span>
+
+            <span class="n">building_damage</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;DAMAGE&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s">&#39;MMI&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">})</span>
+
+        <span class="c"># Create new layer and return</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">building_damage</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

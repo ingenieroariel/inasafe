@@ -1,0 +1,259 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.impact_calculator_thread &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.map" href="map.html" />
+    <link rel="prev" title="Module: safe_qgis.qgis_interface" href="qgis_interface.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="qgis_interface.html" title="Module: safe_qgis.qgis_interface"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe_qgis.impact_calculator_thread">
+<span id="module-safe-qgis-impact-calculator-thread"></span><h1>Module:  safe_qgis.impact_calculator_thread<a class="headerlink" href="#module-safe_qgis.impact_calculator_thread" title="Permalink to this headline">¶</a></h1>
+<p>InaSAFE Disaster risk assessment tool developed by AusAid -
+<strong>ISImpactCalculatorThread.</strong></p>
+<p>The module provides a high level interface for running SAFE scenarios.</p>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="class">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread">
+<em class="property">class </em><tt class="descclassname">safe_qgis.impact_calculator_thread.</tt><tt class="descname">ImpactCalculatorThread</tt><big>(</big><em>theHazardLayer</em>, <em>theExposureLayer</em>, <em>theFunction</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>A threaded class to compute an impact scenario. Under
+python a thread can only be run once, so the instances
+based on this class are designed to be short lived.
+We inherit from QObject so that we can use Qt translation self.tr
+calls and emit signals.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">implement this class using QThread as a base class since it
+supports thread termination which python threading doesnt seem to do.
+Also see the techbase article below for emitting signals across
+threads using Qt.QueuedConnection.
+<a class="reference external" href="http://techbase.kde.org/Development/Tutorials/">http://techbase.kde.org/Development/Tutorials/</a>
+Python_introduction_to_signals_and_slots</p>
+</div>
+<p>Users of this of this class can listen for signals indicating
+when processing is done. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">is_impact_calculator_thread</span> <span class="kn">import</span> <span class="n">ImpactCalculatorThread</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">ImpactCalculatorThread</span><span class="p">()</span>
+<span class="n">n</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">showMessage</span><span class="p">)</span>
+<span class="n">n</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Prints &#8216;hello&#8217; to the console</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p><a class="reference external" href="http://techbase.kde.org/Development/Tutorials/">http://techbase.kde.org/Development/Tutorials/</a>
+Python_introduction_to_signals_and_slots</p>
+<p class="last">for an alternative (maybe nicer?) approach.</p>
+</div>
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.impactLayer">
+<tt class="descname">impactLayer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.impactLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.impactLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the InaSAFE layer instance which is the output from the
+last run.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.lastException">
+<tt class="descname">lastException</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.lastException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.lastException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return any exception that may have been raised while running</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.lastTraceback">
+<tt class="descname">lastTraceback</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.lastTraceback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.lastTraceback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the strack trace for any exception that may of occurred
+while running.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.result">
+<tt class="descname">result</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the result of the last run.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function for hazard impact calculation thread.
+Requires three properties to be set before execution
+can take place:</p>
+<ul class="simple">
+<li>Hazard layer - a path to a raster,</li>
+<li>Exposure layer - a path to a vector points layer.</li>
+<li>Function - a function that defines how the Hazard assessment
+will be computed.</li>
+</ul>
+<p>After the thread is complete, you can use the filename and
+result accessors to determine what the result of the analysis was:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">calculator</span> <span class="o">=</span> <span class="n">ImpactCalculator</span><span class="p">()</span>
+<span class="n">rasterPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;xxx.asc&#39;</span><span class="p">)</span>
+<span class="n">vectorPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TESTDATA</span><span class="p">,</span> <span class="s">&#39;xxx.shp&#39;</span><span class="p">)</span>
+<span class="n">calculator</span><span class="o">.</span><span class="n">setHazardLayer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rasterPath</span><span class="p">)</span>
+<span class="n">calculator</span><span class="o">.</span><span class="n">setExposureLayer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vectorPath</span><span class="p">)</span>
+<span class="n">calculator</span><span class="o">.</span><span class="n">setFunction</span><span class="p">(</span><span class="s">&#39;Flood Building Impact Function&#39;</span><span class="p">)</span>
+<span class="n">myRunner</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">getRunner</span><span class="p">()</span>
+<span class="c">#wait till completion</span>
+<span class="n">myRunner</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="n">myResult</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="n">myFilename</span> <span class="o">=</span> <span class="n">myRunner</span><span class="o">.</span><span class="n">filename</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>None.</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Raises:</dt>
+<dd>None
+set.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.impact_calculator_thread.ImpactCalculatorThread.showMessage">
+<tt class="descname">showMessage</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/impact_calculator_thread.html#ImpactCalculatorThread.showMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.impact_calculator_thread.ImpactCalculatorThread.showMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>For testing only</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="qgis_interface.html"
+                        title="previous chapter">Module:  safe_qgis.qgis_interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="map.html"
+                        title="next chapter">Module:  safe_qgis.map</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/impact_calculator_thread.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="map.html" title="Module: safe_qgis.map"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="qgis_interface.html" title="Module: safe_qgis.qgis_interface"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

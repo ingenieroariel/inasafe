@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.storage.core &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.storage.core</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;IO module for reading and writing of files</span>
+
+<span class="sd">   This module provides functionality to read and write</span>
+<span class="sd">   raster and vector layers from numerical data.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">raster</span> <span class="kn">import</span> <span class="n">Raster</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span><span class="p">,</span> <span class="n">VerificationError</span>
+<span class="kn">from</span> <span class="nn">safe.common.exceptions</span> <span class="kn">import</span> <span class="n">BoundingBoxError</span><span class="p">,</span> <span class="n">ReadLayerError</span>
+
+<span class="c"># FIXME (Ole): make logging work again</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;inasafe&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_layer"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.read_layer">[docs]</a><span class="k">def</span> <span class="nf">read_layer</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read spatial layer from file.</span>
+<span class="sd">    This can be either raster or vector data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.asc&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">Raster</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.shp&#39;</span><span class="p">,</span> <span class="s">&#39;.gml&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Could not read </span><span class="si">%s</span><span class="s">. &#39;</span>
+               <span class="s">&#39;Extension &quot;</span><span class="si">%s</span><span class="s">&quot; has not been implemented&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ext</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">ReadLayerError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="write_raster_data"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.write_raster_data">[docs]</a><span class="k">def</span> <span class="nf">write_raster_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="n">geotransform</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write array to raster file with specified metadata and one data layer</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">        data: Numpy array containing grid data</span>
+<span class="sd">        projection: WKT projection information</span>
+<span class="sd">        geotransform: 6 digit vector</span>
+<span class="sd">                      (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                       top left y, rotation, n-s pixel resolution).</span>
+<span class="sd">                       See e.g. http://www.gdal.org/gdal_tutorial.html</span>
+<span class="sd">        filename: Output filename</span>
+<span class="sd">        keywords: Optional dictionary</span>
+
+<span class="sd">    Note: The only format implemented is GTiff and the extension must be .tif</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Raster</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="n">geotransform</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
+    <span class="n">R</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="write_vector_data"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.write_vector_data">[docs]</a><span class="k">def</span> <span class="nf">write_vector_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write point data and any associated attributes to vector file</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">        data: List of N dictionaries each with M fields where</span>
+<span class="sd">              M is the number of attributes.</span>
+<span class="sd">              A value of None is acceptable.</span>
+<span class="sd">        projection: WKT projection information</span>
+<span class="sd">        geometry: List of points or polygons.</span>
+<span class="sd">        filename: Output filename</span>
+<span class="sd">        keywords: Optional dictionary</span>
+
+<span class="sd">    Note: The only format implemented is GML and SHP so the extension</span>
+<span class="sd">    must be either .gml or .shp</span>
+
+<span class="sd">    # FIXME (Ole): When the GML driver is used,</span>
+<span class="sd">    #              the spatial reference is not stored.</span>
+<span class="sd">    #              I suspect this is a bug in OGR.</span>
+
+<span class="sd">    Background:</span>
+<span class="sd">    * http://www.gdal.org/ogr/ogr_apitut.html (last example)</span>
+<span class="sd">    * http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">projection</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
+    <span class="n">V</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_bounding_box"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.get_bounding_box">[docs]</a><span class="k">def</span> <span class="nf">get_bounding_box</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get bounding box for specified raster or vector file</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">        filename</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        bounding box as python list of numbers [West, South, East, North]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">layer</span><span class="o">.</span><span class="n">get_bounding_box</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="bboxlist2string"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.bboxlist2string">[docs]</a><span class="k">def</span> <span class="nf">bboxlist2string</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert bounding box list to comma separated string</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        bbox: List of coordinates of the form [W, S, E, N]</span>
+<span class="sd">    Output</span>
+<span class="sd">        bbox_string: Format &#39;W,S,E,N&#39; - each will have 6 decimal points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Got string </span><span class="si">%s</span><span class="s">, but expected bounding box as a list&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not coerce bbox </span><span class="si">%s</span><span class="s"> into a list&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">BoundingBoxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box must have 4 coordinates [W, S, E, N]. &#39;</span>
+           <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bbox</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">VerificationError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BoundingBoxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bbox</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box </span><span class="si">%s</span><span class="s"> contained non-numeric entry </span><span class="si">%s</span><span class="s">, &#39;</span>
+                   <span class="s">&#39;original error was &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">BoundingBoxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Make template of the form &#39;%.5f,%.5f,%.5f,%.5f&#39;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;</span><span class="si">%%</span><span class="s">.</span><span class="si">%i</span><span class="s">f,&#39;</span> <span class="o">%</span> <span class="n">decimals</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c"># Assign numbers and return</span>
+    <span class="k">return</span> <span class="n">template</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bboxstring2list"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.bboxstring2list">[docs]</a><span class="k">def</span> <span class="nf">bboxstring2list</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert bounding box string to list</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        bbox_string: String of bounding box coordinates of the form &#39;W,S,E,N&#39;</span>
+<span class="sd">    Output</span>
+<span class="sd">        bbox: List of floating point numbers with format [W, S, E, N]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box must be a string with coordinates following the &#39;</span>
+           <span class="s">&#39;format 105.592,-7.809,110.159,-5.647</span><span class="se">\n</span><span class="s">&#39;</span>
+           <span class="s">&#39;Instead I got </span><span class="si">%s</span><span class="s"> of type </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">),</span>
+                                             <span class="nb">type</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">)))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">bbox_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box string must have 4 coordinates in the form &#39;</span>
+           <span class="s">&#39;&quot;W,S,E,N&quot;. I got bbox == &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">bbox_string</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">VerificationError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BoundingBoxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Bounding box </span><span class="si">%s</span><span class="s"> contained non-numeric entry </span><span class="si">%s</span><span class="s">, &#39;</span>
+                   <span class="s">&#39;original error was &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bbox_string</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">BoundingBoxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="get_bounding_box_string"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.get_bounding_box_string">[docs]</a><span class="k">def</span> <span class="nf">get_bounding_box_string</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get bounding box for specified raster or vector file</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">        filename</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        bounding box as python string &#39;West, South, East, North&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">bboxlist2string</span><span class="p">(</span><span class="n">get_bounding_box</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="check_bbox_string"><a class="viewcode-back" href="../../../api-docs/safe/storage/core.html#safe.storage.core.check_bbox_string">[docs]</a><span class="k">def</span> <span class="nf">check_bbox_string</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check that bbox string is valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Expected bbox as a string with format &quot;W,S,E,N&quot;&#39;</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Use checks from string to list conversion</span>
+    <span class="c"># FIXME (Ole): Would be better to separate the checks from the conversion</span>
+    <span class="c"># and use those checks directly.</span>
+    <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">bboxstring2list</span><span class="p">(</span><span class="n">bbox_string</span><span class="p">)</span>
+
+    <span class="c"># Check semantic integrity</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Western border </span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s"> was out of range &#39;</span>
+           <span class="s">&#39;for longitudes ([-180:180])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span> <span class="o">&lt;=</span> <span class="n">minx</span> <span class="o">&lt;=</span> <span class="mi">180</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Eastern border </span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s"> was out of range &#39;</span>
+           <span class="s">&#39;for longitudes ([-180:180])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span> <span class="o">&lt;=</span> <span class="n">maxx</span> <span class="o">&lt;=</span> <span class="mi">180</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Southern border </span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s"> was out of range &#39;</span>
+           <span class="s">&#39;for latitudes ([-90:90])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span> <span class="o">&lt;=</span> <span class="n">miny</span> <span class="o">&lt;=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Northern border </span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s"> was out of range &#39;</span>
+           <span class="s">&#39;for latitudes ([-90:90])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">maxy</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span> <span class="o">&lt;=</span> <span class="n">maxy</span> <span class="o">&lt;=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Western border </span><span class="si">%.5f</span><span class="s"> was greater than or equal to eastern border &#39;</span>
+           <span class="s">&#39;</span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">minx</span> <span class="o">&lt;</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Southern border </span><span class="si">%.5f</span><span class="s"> was greater than or equal to northern border &#39;</span>
+           <span class="s">&#39;</span><span class="si">%.5f</span><span class="s"> of bounding box </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">bbox_string</span><span class="p">))</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">miny</span> <span class="o">&lt;</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

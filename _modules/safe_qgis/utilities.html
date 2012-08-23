@@ -1,0 +1,490 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.utilities</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
+<span class="sd">  **IS Utilitles implementation.**</span>
+
+<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
+
+<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
+<span class="sd">     it under the terms of the GNU General Public License as published by</span>
+<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
+<span class="sd">     (at your option) any later version.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;29/01/2011&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QCoreApplication</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QGis</span><span class="p">,</span>
+                       <span class="n">QgsRasterLayer</span><span class="p">,</span>
+                       <span class="n">QgsMapLayer</span><span class="p">,</span>
+                       <span class="n">QgsCoordinateReferenceSystem</span><span class="p">,</span>
+                       <span class="n">QgsCoordinateTransform</span><span class="p">,</span>
+                       <span class="n">QgsGraduatedSymbolRendererV2</span><span class="p">,</span>
+                       <span class="n">QgsSymbolV2</span><span class="p">,</span>
+                       <span class="n">QgsRendererRangeV2</span><span class="p">,</span>
+                       <span class="n">QgsSymbolLayerV2Registry</span><span class="p">,</span>
+                       <span class="n">QgsColorRampShader</span><span class="p">,</span>
+                       <span class="n">QgsRasterTransparency</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">StyleError</span>
+<span class="c">#do not remove this even if it is marked as unused by your IDE</span>
+<span class="c">#resources are used by htmlfooter and header the comment will mark it unused</span>
+<span class="c">#for pylint</span>
+<span class="kn">import</span> <span class="nn">safe_qgis.resources</span>  <span class="c"># pylint: disable=W0611</span>
+
+
+<div class="viewcode-block" id="setVectorStyle"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.setVectorStyle">[docs]</a><span class="k">def</span> <span class="nf">setVectorStyle</span><span class="p">(</span><span class="n">theQgisVectorLayer</span><span class="p">,</span> <span class="n">theStyle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set QGIS vector style based on InaSAFE style dictionary</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        theQgisVectorLayer: Qgis layer</span>
+<span class="sd">        theStyle: Dictionary of the form as in the example below</span>
+
+<span class="sd">        {&#39;target_field&#39;: &#39;DMGLEVEL&#39;,</span>
+<span class="sd">        &#39;style_classes&#39;:</span>
+<span class="sd">        [{&#39;opacity&#39;: 1, &#39;max&#39;: 1.5, &#39;colour&#39;: &#39;#fecc5c&#39;,</span>
+<span class="sd">          &#39;min&#39;: 0.5, &#39;label&#39;: &#39;Low damage&#39;, &#39;size&#39; : 1},</span>
+<span class="sd">        {&#39;opacity&#39;: 1, &#39;max&#39;: 2.5, &#39;colour&#39;: &#39;#fd8d3c&#39;,</span>
+<span class="sd">         &#39;min&#39;: 1.5, &#39;label&#39;: &#39;Medium damage&#39;, &#39;size&#39; : 1},</span>
+<span class="sd">        {&#39;opacity&#39;: 1, &#39;max&#39;: 3.5, &#39;colour&#39;: &#39;#f31a1c&#39;,</span>
+<span class="sd">         &#39;min&#39;: 2.5, &#39;label&#39;: &#39;High damage&#39;, &#39;size&#39; : 1}]}</span>
+
+<span class="sd">        .. note:: The transparency and size keys are optional. Size applies</span>
+<span class="sd">           to points only.</span>
+<span class="sd">    Output</span>
+<span class="sd">        Sets and saves style for theQgisVectorLayer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myTargetField</span> <span class="o">=</span> <span class="n">theStyle</span><span class="p">[</span><span class="s">&#39;target_field&#39;</span><span class="p">]</span>
+    <span class="n">myClasses</span> <span class="o">=</span> <span class="n">theStyle</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span>
+    <span class="n">myGeometryType</span> <span class="o">=</span> <span class="n">theQgisVectorLayer</span><span class="o">.</span><span class="n">geometryType</span><span class="p">()</span>
+
+    <span class="n">myRangeList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">myClass</span> <span class="ow">in</span> <span class="n">myClasses</span><span class="p">:</span>
+        <span class="c"># Transparency 100: transparent</span>
+        <span class="c"># Transparency 0: opaque</span>
+        <span class="n">mySize</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c"># mm</span>
+        <span class="k">if</span> <span class="s">&#39;size&#39;</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="n">mySize</span> <span class="o">=</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;size&#39;</span><span class="p">]</span>
+        <span class="n">myTransparencyPercent</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s">&#39;transparency&#39;</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="n">myTransparencyPercent</span> <span class="o">=</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;transparency&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;min&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StyleError</span><span class="p">(</span><span class="s">&#39;Style info should provide a &quot;min&quot; entry&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;max&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StyleError</span><span class="p">(</span><span class="s">&#39;Style info should provide a &quot;max&quot; entry&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myMin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">myClass</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StyleError</span><span class="p">(</span><span class="s">&#39;Class break lower bound should be a number.&#39;</span>
+                <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">])</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myMax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">myClass</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StyleError</span><span class="p">(</span><span class="s">&#39;Class break upper bound should be a number.&#39;</span>
+                             <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">])</span>
+
+        <span class="n">myColour</span> <span class="o">=</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;colour&#39;</span><span class="p">]</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span>
+        <span class="n">myColour</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">myColour</span><span class="p">)</span>
+        <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">QgsSymbolV2</span><span class="o">.</span><span class="n">defaultSymbol</span><span class="p">(</span><span class="n">myGeometryType</span><span class="p">)</span>
+        <span class="n">myColourString</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                         <span class="n">myColour</span><span class="o">.</span><span class="n">red</span><span class="p">(),</span>
+                         <span class="n">myColour</span><span class="o">.</span><span class="n">green</span><span class="p">(),</span>
+                         <span class="n">myColour</span><span class="o">.</span><span class="n">blue</span><span class="p">())</span>
+        <span class="c"># Work around for the fact that QgsSimpleMarkerSymbolLayerV2</span>
+        <span class="c"># python bindings are missing from the QGIS api.</span>
+        <span class="c"># .. see:: http://hub.qgis.org/issues/4848</span>
+        <span class="c"># We need to create a custom symbol layer as</span>
+        <span class="c"># the border colour of a symbol can not be set otherwise</span>
+        <span class="n">myRegistry</span> <span class="o">=</span> <span class="n">QgsSymbolLayerV2Registry</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">myGeometryType</span> <span class="o">==</span> <span class="n">QGis</span><span class="o">.</span><span class="n">Point</span><span class="p">:</span>
+            <span class="n">myMetadata</span> <span class="o">=</span> <span class="n">myRegistry</span><span class="o">.</span><span class="n">symbolLayerMetadata</span><span class="p">(</span><span class="s">&#39;SimpleMarker&#39;</span><span class="p">)</span>
+            <span class="c"># note that you can get a list of available layer properties</span>
+            <span class="c"># that you can set by doing e.g.</span>
+            <span class="c"># QgsSimpleMarkerSymbolLayerV2.properties()</span>
+            <span class="n">mySymbolLayer</span> <span class="o">=</span> <span class="n">myMetadata</span><span class="o">.</span><span class="n">createSymbolLayer</span><span class="p">({</span><span class="s">&#39;color_border&#39;</span><span class="p">:</span>
+                                                          <span class="n">myColourString</span><span class="p">})</span>
+            <span class="n">mySymbolLayer</span><span class="o">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">mySize</span><span class="p">)</span>
+            <span class="n">mySymbol</span><span class="o">.</span><span class="n">changeSymbolLayer</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mySymbolLayer</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">myGeometryType</span> <span class="o">==</span> <span class="n">QGis</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
+            <span class="n">myMetadata</span> <span class="o">=</span> <span class="n">myRegistry</span><span class="o">.</span><span class="n">symbolLayerMetadata</span><span class="p">(</span><span class="s">&#39;SimpleFill&#39;</span><span class="p">)</span>
+            <span class="n">mySymbolLayer</span> <span class="o">=</span> <span class="n">myMetadata</span><span class="o">.</span><span class="n">createSymbolLayer</span><span class="p">({</span><span class="s">&#39;color_border&#39;</span><span class="p">:</span>
+                                                          <span class="n">myColourString</span><span class="p">})</span>
+            <span class="n">mySymbol</span><span class="o">.</span><span class="n">changeSymbolLayer</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mySymbolLayer</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># for lines we do nothing special as the property setting</span>
+            <span class="c"># below should give us what we require.</span>
+            <span class="k">pass</span>
+
+        <span class="n">mySymbol</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">myColour</span><span class="p">)</span>
+        <span class="c"># .. todo:: Check that vectors use alpha as % otherwise scale TS</span>
+        <span class="c"># Convert transparency % to opacity</span>
+        <span class="c"># alpha = 0: transparent</span>
+        <span class="c"># alpha = 1: opaque</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">myTransparencyPercent</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="n">mySymbol</span><span class="o">.</span><span class="n">setAlpha</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">myRange</span> <span class="o">=</span> <span class="n">QgsRendererRangeV2</span><span class="p">(</span><span class="n">myMin</span><span class="p">,</span>
+                                     <span class="n">myMax</span><span class="p">,</span>
+                                     <span class="n">mySymbol</span><span class="p">,</span>
+                                     <span class="n">myLabel</span><span class="p">)</span>
+        <span class="n">myRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myRange</span><span class="p">)</span>
+
+    <span class="n">myRenderer</span> <span class="o">=</span> <span class="n">QgsGraduatedSymbolRendererV2</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">myRangeList</span><span class="p">)</span>
+    <span class="n">myRenderer</span><span class="o">.</span><span class="n">setMode</span><span class="p">(</span><span class="n">QgsGraduatedSymbolRendererV2</span><span class="o">.</span><span class="n">EqualInterval</span><span class="p">)</span>
+    <span class="n">myRenderer</span><span class="o">.</span><span class="n">setClassAttribute</span><span class="p">(</span><span class="n">myTargetField</span><span class="p">)</span>
+    <span class="n">theQgisVectorLayer</span><span class="o">.</span><span class="n">setRendererV2</span><span class="p">(</span><span class="n">myRenderer</span><span class="p">)</span>
+    <span class="n">theQgisVectorLayer</span><span class="o">.</span><span class="n">saveDefaultStyle</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="setRasterStyle"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.setRasterStyle">[docs]</a><span class="k">def</span> <span class="nf">setRasterStyle</span><span class="p">(</span><span class="n">theQgsRasterLayer</span><span class="p">,</span> <span class="n">theStyle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set QGIS raster style based on InaSAFE style dictionary.</span>
+
+<span class="sd">    This function will set both the colour map and the transparency</span>
+<span class="sd">    for the passed in layer.</span>
+
+<span class="sd">    .. note:: There is currently a limitation in QGIS in that</span>
+<span class="sd">       pixel transparency values can not be specified in ranges and</span>
+<span class="sd">       consequently the opacity is of limited value and seems to</span>
+<span class="sd">       only work effectively with integer values.</span>
+
+<span class="sd">    .. todo:: Get Tim to implement range based transparency in</span>
+<span class="sd">       the core QGIS library.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        theQgsRasterLayer: Qgis layer</span>
+<span class="sd">        style: Dictionary of the form as in the example below</span>
+<span class="sd">        style_classes = [dict(colour=&#39;#38A800&#39;, quantity=2, transparency=0),</span>
+<span class="sd">                         dict(colour=&#39;#38A800&#39;, quantity=5, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#79C900&#39;, quantity=10, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#CEED00&#39;, quantity=20, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#FFCC00&#39;, quantity=50, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#FF6600&#39;, quantity=100, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#FF0000&#39;, quantity=200, transparency=1),</span>
+<span class="sd">                         dict(colour=&#39;#7A0000&#39;, quantity=300, transparency=1)]</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        Sets and saves style for theQgsRasterLayer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theQgsRasterLayer</span><span class="o">.</span><span class="n">setDrawingStyle</span><span class="p">(</span><span class="n">QgsRasterLayer</span><span class="o">.</span><span class="n">PalettedColor</span><span class="p">)</span>
+    <span class="n">myClasses</span> <span class="o">=</span> <span class="n">theStyle</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span>
+    <span class="n">myRangeList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">myTransparencyList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">myLastValue</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">myClass</span> <span class="ow">in</span> <span class="n">myClasses</span><span class="p">:</span>
+        <span class="n">myMax</span> <span class="o">=</span> <span class="n">myClass</span><span class="p">[</span><span class="s">&#39;quantity&#39;</span><span class="p">]</span>
+        <span class="n">myColour</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">myClass</span><span class="p">[</span><span class="s">&#39;colour&#39;</span><span class="p">])</span>
+        <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;label&#39;</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="n">myLabel</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">(</span><span class="n">myClass</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">])</span>
+        <span class="n">myShader</span> <span class="o">=</span> <span class="n">QgsColorRampShader</span><span class="o">.</span><span class="n">ColorRampItem</span><span class="p">(</span><span class="n">myMax</span><span class="p">,</span> <span class="n">myColour</span><span class="p">,</span> <span class="n">myLabel</span><span class="p">)</span>
+        <span class="n">myRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myShader</span><span class="p">)</span>
+        <span class="c"># Create opacity entries for this range</span>
+        <span class="n">myTransparencyPercent</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s">&#39;transparency&#39;</span> <span class="ow">in</span> <span class="n">myClass</span><span class="p">:</span>
+            <span class="n">myTransparencyPercent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">myClass</span><span class="p">[</span><span class="s">&#39;transparency&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">myTransparencyPercent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># Check if range extrema are integers so we know if we can</span>
+            <span class="c"># use them to calculate a value range</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">myLastValue</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">myLastValue</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">myMax</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">myMax</span><span class="p">))):</span>
+                <span class="c"># Ensure that they are integers</span>
+                <span class="c"># (e.g 2.0 must become 2, see issue #126)</span>
+                <span class="n">myLastValue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">myLastValue</span><span class="p">)</span>
+                <span class="n">myMax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">myMax</span><span class="p">)</span>
+
+                <span class="c"># Set transparencies</span>
+                <span class="n">myRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">myLastValue</span><span class="p">,</span> <span class="n">myMax</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">myValue</span> <span class="ow">in</span> <span class="n">myRange</span><span class="p">:</span>
+                    <span class="n">myPixel</span> <span class="o">=</span> \
+                         <span class="n">QgsRasterTransparency</span><span class="o">.</span><span class="n">TransparentSingleValuePixel</span><span class="p">()</span>
+                    <span class="n">myPixel</span><span class="o">.</span><span class="n">pixelValue</span> <span class="o">=</span> <span class="n">myValue</span>
+                    <span class="n">myPixel</span><span class="o">.</span><span class="n">percentTransparent</span> <span class="o">=</span> <span class="n">myTransparencyPercent</span>
+                    <span class="n">myTransparencyList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myPixel</span><span class="p">)</span>
+        <span class="c">#myLabel = myClass[&#39;label&#39;]</span>
+
+    <span class="c"># Apply the shading algorithm and design their ramp</span>
+    <span class="n">theQgsRasterLayer</span><span class="o">.</span><span class="n">setColorShadingAlgorithm</span><span class="p">(</span><span class="n">QgsRasterLayer</span><span class="o">.</span><span class="n">ColorRampShader</span><span class="p">)</span>
+    <span class="n">myFunction</span> <span class="o">=</span> <span class="n">theQgsRasterLayer</span><span class="o">.</span><span class="n">rasterShader</span><span class="p">()</span><span class="o">.</span><span class="n">rasterShaderFunction</span><span class="p">()</span>
+    <span class="c"># Discrete will shade any cell between maxima of this break</span>
+    <span class="c"># and mamima of previous break to the colour of this break</span>
+    <span class="n">myFunction</span><span class="o">.</span><span class="n">setColorRampType</span><span class="p">(</span><span class="n">QgsColorRampShader</span><span class="o">.</span><span class="n">DISCRETE</span><span class="p">)</span>
+    <span class="n">myFunction</span><span class="o">.</span><span class="n">setColorRampItemList</span><span class="p">(</span><span class="n">myRangeList</span><span class="p">)</span>
+
+    <span class="c"># Now set the raster transparency</span>
+    <span class="n">theQgsRasterLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span><span class="n">setTransparentSingleValuePixelList</span><span class="p">(</span>
+                                                <span class="n">myTransparencyList</span><span class="p">)</span>
+    <span class="n">theQgsRasterLayer</span><span class="o">.</span><span class="n">saveDefaultStyle</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">myRangeList</span><span class="p">,</span> <span class="n">myTransparencyList</span>
+
+</div>
+<div class="viewcode-block" id="tr"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.tr">[docs]</a><span class="k">def</span> <span class="nf">tr</span><span class="p">(</span><span class="n">theText</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;We define a tr() alias here since the utilities implementation below</span>
+<span class="sd">    is not a class and does not inherit from QObject.</span>
+<span class="sd">    .. note:: see http://tinyurl.com/pyqt-differences</span>
+<span class="sd">    Args:</span>
+<span class="sd">       theText - string to be translated</span>
+<span class="sd">    Returns:</span>
+<span class="sd">       Translated version of the given string if available, otherwise</span>
+<span class="sd">       the original string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myContext</span> <span class="o">=</span> <span class="s">&quot;Utilities&quot;</span>
+    <span class="k">return</span> <span class="n">QCoreApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">myContext</span><span class="p">,</span> <span class="n">theText</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="getExceptionWithStacktrace"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.getExceptionWithStacktrace">[docs]</a><span class="k">def</span> <span class="nf">getExceptionWithStacktrace</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert exception into a string and and stack trace</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        e: Exception object</span>
+<span class="sd">        html: Optional flat if output is to wrapped as html</span>
+<span class="sd">        context: Optional context message</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        Exception with stack trace info suitable for display</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">myTraceback</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_tb</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">html</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">myErrorMessage</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span>
+                              <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No details provided&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myErrorMessage</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myErrorMessage</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">myTraceback</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">myErrorMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&lt;b&gt;&#39;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;&lt;/b&gt; : &#39;</span> <span class="o">+</span>
+                              <span class="n">tr</span><span class="p">(</span><span class="s">&#39;No details provided&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myErrorMessage</span> <span class="o">=</span> <span class="s">&#39;&lt;b&gt;&#39;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;&lt;/b&gt; : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="n">myTraceback</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&lt;pre id=&quot;traceback&quot; class=&quot;prettyprint&quot;&#39;</span>
+              <span class="s">&#39; style=&quot;display: none;&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">myTraceback</span> <span class="o">+</span> <span class="s">&#39;&lt;/pre&gt;&#39;</span><span class="p">)</span>
+
+        <span class="c"># Wrap string in html</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;&lt;table class=&quot;condensed&quot;&gt;&#39;</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">context</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;&lt;tr&gt;&lt;th class=&quot;warning button-cell&quot;&gt;&#39;</span>
+                  <span class="o">+</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Error:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;&lt;/th&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
+                  <span class="s">&#39;&lt;tr&gt;&lt;td&gt;&#39;</span> <span class="o">+</span> <span class="n">context</span> <span class="o">+</span> <span class="s">&#39;&lt;/td&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="c"># now the string from the error itself</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;&lt;tr&gt;&lt;th class=&quot;problem button-cell&quot;&gt;&#39;</span>
+              <span class="o">+</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Problem:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;&lt;/th&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="s">&#39;&lt;tr&gt;&lt;td&gt;&#39;</span> <span class="o">+</span> <span class="n">myErrorMessage</span> <span class="o">+</span> <span class="s">&#39;&lt;/td&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="c"># now the traceback heading</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;&lt;tr&gt;&lt;th class=&quot;info button-cell&quot; style=&quot;cursor:pointer;&quot;&#39;</span>
+              <span class="s">&#39; onclick=&quot;$(</span><span class="se">\&#39;</span><span class="s">#traceback</span><span class="se">\&#39;</span><span class="s">).toggle();&quot;&gt;&#39;</span>
+              <span class="o">+</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Click for Diagnostic Information:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;&lt;/th&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
+              <span class="s">&#39;&lt;tr&gt;&lt;td&gt;&#39;</span> <span class="o">+</span> <span class="n">myTraceback</span> <span class="o">+</span> <span class="s">&#39;&lt;/td&gt;&lt;/tr&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&#39;&lt;/table&gt;&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+</div>
+<div class="viewcode-block" id="getWGS84resolution"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.getWGS84resolution">[docs]</a><span class="k">def</span> <span class="nf">getWGS84resolution</span><span class="p">(</span><span class="n">theLayer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return resolution of raster layer in EPSG:4326</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        theLayer: Raster layer</span>
+<span class="sd">    Output</span>
+<span class="sd">        resolution.</span>
+
+<span class="sd">    If input layer is already in EPSG:4326, simply return the resolution</span>
+<span class="sd">    If not, work it out based on EPSG:4326 representations of its extent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">tr</span><span class="p">(</span><span class="s">&#39;Input layer to getWGS84resolution must be a raster layer. &#39;</span>
+           <span class="s">&#39;I got: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">())[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QgsMapLayer</span><span class="o">.</span><span class="n">RasterLayer</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">crs</span><span class="p">()</span><span class="o">.</span><span class="n">authid</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;EPSG:4326&#39;</span><span class="p">:</span>
+        <span class="c"># If it is already in EPSG:4326, simply use the native resolution</span>
+        <span class="n">myCellSize</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">rasterUnitsPerPixel</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Otherwise, work it out based on EPSG:4326 representations of</span>
+        <span class="c"># its extent</span>
+
+        <span class="c"># Reproject extent to EPSG:4326</span>
+        <span class="n">myGeoCrs</span> <span class="o">=</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="p">()</span>
+        <span class="n">myGeoCrs</span><span class="o">.</span><span class="n">createFromId</span><span class="p">(</span><span class="mi">4326</span><span class="p">,</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="o">.</span><span class="n">EpsgCrsId</span><span class="p">)</span>
+        <span class="n">myXForm</span> <span class="o">=</span> <span class="n">QgsCoordinateTransform</span><span class="p">(</span><span class="n">myGeoCrs</span><span class="p">,</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">crs</span><span class="p">())</span>
+        <span class="n">myExtent</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">extent</span><span class="p">()</span>
+        <span class="n">myProjectedExtent</span> <span class="o">=</span> <span class="n">myXForm</span><span class="o">.</span><span class="n">transformBoundingBox</span><span class="p">(</span><span class="n">myExtent</span><span class="p">)</span>
+
+        <span class="c"># Estimate cellsize</span>
+        <span class="n">myColumns</span> <span class="o">=</span> <span class="n">theLayer</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">myGeoWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">myProjectedExtent</span><span class="o">.</span><span class="n">xMaximum</span><span class="p">()</span> <span class="o">-</span>
+                         <span class="n">myProjectedExtent</span><span class="o">.</span><span class="n">xMinimum</span><span class="p">())</span>
+        <span class="n">myCellSize</span> <span class="o">=</span> <span class="n">myGeoWidth</span> <span class="o">/</span> <span class="n">myColumns</span>
+
+    <span class="k">return</span> <span class="n">myCellSize</span>
+
+</div>
+<div class="viewcode-block" id="htmlHeader"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.htmlHeader">[docs]</a><span class="k">def</span> <span class="nf">htmlHeader</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get a standard html header for wrapping content in.&quot;&quot;&quot;</span>
+    <span class="n">myFile</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFile</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/header.html&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">myFile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;----&#39;</span>
+    <span class="n">myStream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTextStream</span><span class="p">(</span><span class="n">myFile</span><span class="p">)</span>
+    <span class="n">myHeader</span> <span class="o">=</span> <span class="n">myStream</span><span class="o">.</span><span class="n">readAll</span><span class="p">()</span>
+    <span class="n">myFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">myHeader</span>
+
+</div>
+<div class="viewcode-block" id="htmlFooter"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.htmlFooter">[docs]</a><span class="k">def</span> <span class="nf">htmlFooter</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get a standard html footer for wrapping content in.&quot;&quot;&quot;</span>
+    <span class="n">myFile</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFile</span><span class="p">(</span><span class="s">&#39;:/plugins/inasafe/footer.html&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">myFile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;----&#39;</span>
+    <span class="n">myStream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTextStream</span><span class="p">(</span><span class="n">myFile</span><span class="p">)</span>
+    <span class="n">myFooter</span> <span class="o">=</span> <span class="n">myStream</span><span class="o">.</span><span class="n">readAll</span><span class="p">()</span>
+    <span class="n">myFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">myFooter</span>
+
+</div>
+<div class="viewcode-block" id="qgisVersion"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities.html#safe_qgis.utilities.qgisVersion">[docs]</a><span class="k">def</span> <span class="nf">qgisVersion</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get the version of QGIS</span>
+<span class="sd">   Args:</span>
+<span class="sd">       None</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        QGIS Version where 10700 represents QGIS 1.7 etc.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">       None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myVersion</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">myVersion</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">QGis</span><span class="o">.</span><span class="n">QGIS_VERSION_INT</span><span class="p">)</span>  <span class="c"># pylint: disable=E1101</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">myVersion</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">QGis</span><span class="o">.</span><span class="n">qgisVersion</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># pylint: disable=E1101</span>
+    <span class="n">myVersion</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">myVersion</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">myVersion</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

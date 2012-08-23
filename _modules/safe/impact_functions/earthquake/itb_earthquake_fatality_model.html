@@ -1,0 +1,377 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.earthquake.itb_earthquake_fatality_model &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.earthquake.itb_earthquake_fatality_model</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_question</span>
+<span class="kn">from</span> <span class="nn">safe.storage.raster</span> <span class="kn">import</span> <span class="n">Raster</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.tables</span> <span class="kn">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">TableRow</span>
+<span class="kn">from</span> <span class="nn">safe.common.numerics</span> <span class="kn">import</span> <span class="n">normal_cdf</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+
+<div class="viewcode-block" id="ITBFatalityFunction"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/earthquake/itb_earthquake_fatality_model.html#safe.impact_functions.earthquake.itb_earthquake_fatality_model.ITBFatalityFunction">[docs]</a><span class="k">class</span> <span class="nc">ITBFatalityFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indonesian Earthquake Fatality Model</span>
+
+<span class="sd">    This model was developed by Institut Tecknologi Bandung (ITB) and</span>
+<span class="sd">    implemented by Dr Hadi Ghasemi, Geoscience Australia</span>
+
+
+<span class="sd">    Reference:</span>
+
+<span class="sd">    Indonesian Earthquake Building-Damage and Fatality Models and</span>
+<span class="sd">    Post Disaster Survey Guidelines Development,</span>
+<span class="sd">    Bali, 27-28 February 2012, 54pp.</span>
+
+
+<span class="sd">    Algorithm:</span>
+
+<span class="sd">    In this study, the same functional form as Allen (2009) is adopted</span>
+<span class="sd">    to express fatality rate as a function of intensity (see Eq. 10 in the</span>
+<span class="sd">    report). The Matlab built-in function (fminsearch) for  Nelder-Mead</span>
+<span class="sd">    algorithm is used to estimate the model parameters. The objective</span>
+<span class="sd">    function (L2G norm) that is minimised during the optimisation is the</span>
+<span class="sd">    same as the one used by Jaiswal et al. (2010).</span>
+
+<span class="sd">    The coefficients used in the indonesian model are</span>
+<span class="sd">    x=0.62275231, y=8.03314466, zeta=2.15</span>
+
+<span class="sd">    Allen, T. I., Wald, D. J., Earle, P. S., Marano, K. D., Hotovec, A. J.,</span>
+<span class="sd">    Lin, K., and Hearne, M., 2009. An Atlas of ShakeMaps and population</span>
+<span class="sd">    exposure catalog for earthquake loss modeling, Bull. Earthq. Eng. 7,</span>
+<span class="sd">    701-718.</span>
+
+<span class="sd">    Jaiswal, K., and Wald, D., 2010. An empirical model for global earthquake</span>
+<span class="sd">    fatality estimation, Earthq. Spectra 26, 1017-1037.</span>
+
+
+<span class="sd">    Caveats and limitations:</span>
+
+<span class="sd">    The current model is the result of the above mentioned workshop and</span>
+<span class="sd">    reflects the best available information. However, the current model</span>
+<span class="sd">    has a number of issues listed below and is expected to evolve further</span>
+<span class="sd">    over time.</span>
+
+<span class="sd">    1 - The model is based on limited number of observed fatality</span>
+<span class="sd">        rates during 4 past fatal events.</span>
+<span class="sd">    2 - The model clearly over-predicts the fatality rates at</span>
+<span class="sd">        intensities higher than VIII.</span>
+<span class="sd">    3 - The model only estimates the expected fatality rate for a given</span>
+<span class="sd">        intensity level; however the associated uncertainty for the proposed</span>
+<span class="sd">        model is not addressed.</span>
+<span class="sd">    4 - There are few known mistakes in developing the current model:</span>
+<span class="sd">        - rounding MMI values to the nearest 0.5,</span>
+<span class="sd">        - Implementing Finite-Fault models of candidate events, and</span>
+<span class="sd">        - consistency between selected GMPEs with those in use by BMKG.</span>
+<span class="sd">          These issues will be addressed by ITB team in the final report.</span>
+
+
+<span class="sd">    :author Hadi Ghasemi</span>
+<span class="sd">    :rating 3</span>
+
+<span class="sd">    :param requires category == &#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory == &#39;earthquake&#39; and \</span>
+<span class="sd">                    layertype == &#39;raster&#39; and \</span>
+<span class="sd">                    unit == &#39;MMI&#39;</span>
+
+<span class="sd">    :param requires category == &#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory == &#39;population&#39; and \</span>
+<span class="sd">                    layertype == &#39;raster&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Die&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ITBFatalityFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/earthquake/itb_earthquake_fatality_model.html#safe.impact_functions.earthquake.itb_earthquake_fatality_model.ITBFatalityFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="mf">0.62275231</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">8.03314466</span><span class="p">,</span> <span class="n">zeta</span><span class="o">=</span><span class="mf">2.15</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Indonesian Earthquake Fatality Model</span>
+
+<span class="sd">        Input</span>
+<span class="sd">          layers: List of layers expected to contain</span>
+<span class="sd">              H: Raster layer of MMI ground shaking</span>
+<span class="sd">              P: Raster layer of population density</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Define percentages of people being displaced at each mmi level</span>
+        <span class="n">displacement_rate</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="mi">7</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+
+        <span class="c"># Extract input layers</span>
+        <span class="n">intensity</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+
+        <span class="n">question</span> <span class="o">=</span> <span class="n">get_question</span><span class="p">(</span><span class="n">intensity</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="n">population</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Extract data grids</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">intensity</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>   <span class="c"># Ground Shaking</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>  <span class="c"># Population Density</span>
+
+        <span class="c"># Calculate population affected by each MMI level</span>
+        <span class="c"># FIXME (Ole): this range is 2-9. Should 10 be included?</span>
+        <span class="n">mmi_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">number_of_exposed</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">number_of_displaced</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">number_of_fatalities</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># Calculate fatality rates for observed Intensity values (H</span>
+        <span class="c"># based on ITB power model</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mmi</span> <span class="ow">in</span> <span class="n">mmi_range</span><span class="p">:</span>
+
+            <span class="c"># Identify cells where MMI is in class i</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">H</span> <span class="o">&gt;</span> <span class="n">mmi</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">H</span> <span class="o">&lt;=</span> <span class="n">mmi</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+
+            <span class="c"># Count population affected by this shake level</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="c"># Calculate expected number of fatalities per level</span>
+            <span class="n">fatality_rate</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">x</span> <span class="o">*</span> <span class="n">mmi</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">fatality_rate</span> <span class="o">*</span> <span class="n">I</span>
+
+            <span class="c"># Calculate expected number of displaced people per level</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">D</span> <span class="o">=</span> <span class="n">displacement_rate</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span> <span class="o">*</span> <span class="n">I</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;mmi = </span><span class="si">%i</span><span class="s">, I = </span><span class="si">%s</span><span class="s">, Error msg: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mmi</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">I</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;C:</span><span class="se">\\</span><span class="s">error_message.txt&#39;</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c"># Sum up numbers for map</span>
+            <span class="n">R</span> <span class="o">+=</span> <span class="n">F</span>   <span class="c"># Fatalities</span>
+            <span class="c">#R += D   # Displaced</span>
+
+            <span class="c"># Generate text with result for this study</span>
+            <span class="c"># This is what is used in the real time system exposure table</span>
+            <span class="n">number_of_exposed</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+            <span class="n">number_of_displaced</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+            <span class="n">number_of_fatalities</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+
+        <span class="c"># Set resulting layer to NaN when less than a threshold. This is to</span>
+        <span class="c"># achieve transparency (see issue #126).</span>
+        <span class="n">R</span><span class="p">[</span><span class="n">R</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="c"># Total statistics</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+
+        <span class="c"># Compute number of fatalities</span>
+        <span class="n">fatalities</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">number_of_fatalities</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                               <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="c"># Compute number of people displaced due to building collapse</span>
+        <span class="n">displaced</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">number_of_displaced</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                              <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="c"># Compute test number of people displaced</span>
+        <span class="c"># FIXME (Ole): Just a temporary measure to check...</span>
+        <span class="n">displaced_test</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">mmi</span> <span class="ow">in</span> <span class="n">mmi_range</span><span class="p">:</span>
+            <span class="n">displaced_test</span> <span class="o">+=</span> <span class="n">displacement_rate</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_exposed</span><span class="p">[</span><span class="n">mmi</span><span class="p">]</span>
+        <span class="n">displaced_test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">displaced_test</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Displaced = </span><span class="si">%i</span><span class="s">, test = </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">displaced</span><span class="p">,</span> <span class="n">displaced_test</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">displaced</span> <span class="o">!=</span> <span class="n">displaced_test</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Generate impact report</span>
+        <span class="n">table_body</span> <span class="o">=</span> <span class="p">[</span><span class="n">question</span><span class="p">]</span>
+                      <span class="c">#TableRow([_(&#39;Groundshaking (MMI)&#39;),</span>
+                      <span class="c">#          _(&#39;# people impacted&#39;)],</span>
+                      <span class="c">#          header=True)]</span>
+
+        <span class="c"># Table of people exposed to each shake level</span>
+        <span class="c"># NOTE (Ole): I have commented this out for the time being.</span>
+        <span class="c"># as not needed. However, had to modify unit test.</span>
+        <span class="c">#for mmi in mmi_range:</span>
+        <span class="c">#    s = str(int(number_of_exposed[mmi])).rjust(10)</span>
+        <span class="c">#    #print s, len(s)</span>
+        <span class="c">#    row = TableRow([mmi, s],</span>
+        <span class="c">#                   col_align=[&#39;right&#39;, &#39;right&#39;])</span>
+        <span class="c">#</span>
+        <span class="c">#    # FIXME (Ole): Weirdly enough, the row object</span>
+        <span class="c">#    # has align=&quot;right&quot; in it, but it doesn&#39;t work</span>
+        <span class="c">#    #print row</span>
+        <span class="c">#    table_body.append(row)</span>
+
+        <span class="c"># Add total fatality estimate</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">fatalities</span><span class="p">))</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Number of fatalities&#39;</span><span class="p">),</span> <span class="n">s</span><span class="p">],</span>
+                                   <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+        <span class="c"># Add total estimate of people displaced</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">displaced</span><span class="p">))</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Number of people displaced&#39;</span><span class="p">),</span> <span class="n">s</span><span class="p">],</span>
+                                   <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+        <span class="c"># Add estimate of total population in area</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">total</span><span class="p">))</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Total number of people&#39;</span><span class="p">),</span> <span class="n">s</span><span class="p">],</span>
+                                   <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Action Checklist:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">fatalities</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Are there enough victim identification units &#39;</span>
+                                <span class="s">&#39;available for </span><span class="si">%i</span><span class="s"> people?&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">fatalities</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">displaced</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Are there enough shelters available for </span><span class="si">%i</span><span class="s"> &#39;</span>
+                                <span class="s">&#39;people?&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">displaced</span><span class="p">)</span>
+
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Notes:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Fatality model is from &#39;</span>
+                            <span class="s">&#39;Institute of Teknologi Bandung 2012.&#39;</span><span class="p">))</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Population numbers rounded to nearest 1000.&#39;</span><span class="p">))</span>
+
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">impact_table</span> <span class="o">=</span> <span class="n">impact_summary</span>
+        <span class="n">map_title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Earthquake impact to population&#39;</span><span class="p">)</span>
+
+        <span class="c"># Create style info dynamically</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]),</span>
+                                 <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]),</span> <span class="mi">5</span><span class="p">)</span>
+
+        <span class="n">style_classes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#EEFFEE&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                              <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.2f</span><span class="s"> people/cell&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#FFFF7F&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#E15500&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                              <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.2f</span><span class="s"> people/cell&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#E4001B&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#730000&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="n">classes</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                              <span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%.2f</span><span class="s"> people/cell&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">classes</span><span class="p">[</span><span class="mi">4</span><span class="p">])]</span>
+        <span class="n">style_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">style_classes</span><span class="o">=</span><span class="n">style_classes</span><span class="p">)</span>
+
+        <span class="c"># Create new layer and return</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">Raster</span><span class="p">(</span><span class="n">R</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geotransform</span><span class="o">=</span><span class="n">population</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">(),</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">,</span>
+                             <span class="s">&#39;total_population&#39;</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span>
+                             <span class="s">&#39;total_fatalities&#39;</span><span class="p">:</span> <span class="n">fatalities</span><span class="p">,</span>
+                             <span class="s">&#39;impact_table&#39;</span><span class="p">:</span> <span class="n">impact_table</span><span class="p">,</span>
+                             <span class="s">&#39;map_title&#39;</span><span class="p">:</span> <span class="n">map_title</span><span class="p">},</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Estimated fatalities&#39;</span><span class="p">),</span>
+                   <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+
+        <span class="c"># Maybe return a shape file with contours instead</span>
+        <span class="k">return</span> <span class="n">L</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

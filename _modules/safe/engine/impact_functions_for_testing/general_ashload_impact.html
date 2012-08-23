@@ -1,0 +1,251 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.engine.impact_functions_for_testing.general_ashload_impact &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.engine.impact_functions_for_testing.general_ashload_impact</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+
+<span class="c"># FIXME: Need style for this and allow the name to</span>
+<span class="c"># be different from Percen_da</span>
+
+<span class="c"># FIXME (Ole): I think this one can be deleted</span>
+
+
+<div class="viewcode-block" id="TephraBuildingImpactFunction"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/general_ashload_impact.html#safe.engine.impact_functions_for_testing.general_ashload_impact.TephraBuildingImpactFunction">[docs]</a><span class="k">class</span> <span class="nc">TephraBuildingImpactFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for tephra damage (FIXME: Origin?)</span>
+
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;tephra&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    unit==&#39;kg/m^2&#39;</span>
+
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;building&#39;) and \</span>
+<span class="sd">                    layertype==&#39;vector&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TephraBuildingImpactFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/general_ashload_impact.html#safe.engine.impact_functions_for_testing.general_ashload_impact.TephraBuildingImpactFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for tephra impact</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Extract data</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Ash load</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Building locations</span>
+
+        <span class="c"># Interpolate hazard level to building locations</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;load&#39;</span><span class="p">)</span>
+
+        <span class="c"># Calculate building damage</span>
+        <span class="n">count3</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)):</span>
+
+            <span class="c">#-------------------</span>
+            <span class="c"># Extract parameters</span>
+            <span class="c">#-------------------</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;load&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="c">#------------------------</span>
+            <span class="c"># Compute damage level</span>
+            <span class="c">#------------------------</span>
+
+            <span class="c"># FIXME: The thresholds have been greatly reduced</span>
+            <span class="c"># for the purpose of demonstration. Any real analyis</span>
+            <span class="c"># should bring them back to 0, 90, 150, 300</span>
+            <span class="k">if</span> <span class="mf">0.01</span> <span class="o">&lt;=</span> <span class="n">load</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="c"># Loss of crops and livestock</span>
+                <span class="n">impact</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">count0</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="mf">0.5</span> <span class="o">&lt;=</span> <span class="n">load</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
+                <span class="c"># Cosmetic damage</span>
+                <span class="n">impact</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">count1</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="mf">2.0</span> <span class="o">&lt;=</span> <span class="n">load</span> <span class="o">&lt;</span> <span class="mf">10.0</span><span class="p">:</span>
+                <span class="c"># Partial building collapse</span>
+                <span class="n">impact</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="n">count2</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">load</span> <span class="o">&gt;=</span> <span class="mf">10.0</span><span class="p">:</span>
+                <span class="c"># Complete building collapse</span>
+                <span class="n">impact</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="n">count3</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">impact</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">count0</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;DAMAGE&#39;</span><span class="p">:</span> <span class="n">impact</span><span class="p">,</span> <span class="s">&#39;ASHLOAD&#39;</span><span class="p">:</span> <span class="n">load</span><span class="p">})</span>
+
+        <span class="c"># Create report</span>
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&lt;font size=&quot;3&quot;&gt; &lt;table border=&quot;0&quot; width=&quot;320px&quot;&gt;&#39;</span>
+                   <span class="s">&#39;   &lt;tr&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;th&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s">&lt;/b&gt;&lt;/th&gt;&lt;/th&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s">&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s">&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s">&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;   &lt;tr&gt;&lt;td&gt;</span><span class="si">%s</span><span class="s">&amp;#58;&lt;/td&gt;&lt;td&gt;</span><span class="si">%i</span><span class="s">&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                    <span class="s">&#39;&lt;/table&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Beban abu&#39;</span><span class="p">,</span> <span class="s">&#39;Gedung dampak&#39;</span><span class="p">,</span>
+                                         <span class="s">&#39;&lt; 0.5 kg/m2&#39;</span><span class="p">,</span> <span class="n">count0</span><span class="p">,</span>
+                                         <span class="s">&#39;0.5 - 2 kg/m2&#39;</span><span class="p">,</span> <span class="n">count1</span><span class="p">,</span>
+                                         <span class="s">&#39;2 - 10 kg/m2&#39;</span><span class="p">,</span> <span class="n">count2</span><span class="p">,</span>
+                                         <span class="s">&#39;&gt; 10 kg/m2&#39;</span><span class="p">,</span> <span class="n">count3</span><span class="p">))</span>
+                    <span class="c">#&#39;&lt;/table&gt;&#39; %</span>
+                    <span class="c"># (&#39;Beban abu&#39;, &#39;Gedung dampak&#39;,</span>
+                    <span class="c"># &#39;Gangguan (&lt; 90 kg/m2)&#39;, count0,</span>
+                    <span class="c"># &#39;Kerusakan kosmetik (90 - 150 kg/m2&#39;, count1,</span>
+                    <span class="c"># &#39;parsial runtuhnya (150 - 300 kg/m2&#39;, count2,</span>
+                    <span class="c"># &#39;runtuhnya lengkap (&gt; 300 kg/m2&#39;, count3))</span>
+
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;Estimated ashload damage&#39;</span><span class="p">,</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">V</span>
+</div>
+<div class="viewcode-block" id="TephraBuildingImpactFunction.generate_style"><a class="viewcode-back" href="../../../../api-docs/safe/engine/impact_functions_for_testing/general_ashload_impact.html#safe.engine.impact_functions_for_testing.general_ashload_impact.TephraBuildingImpactFunction.generate_style">[docs]</a>    <span class="k">def</span> <span class="nf">generate_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates and SLD file based on the data values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">DEFAULT_SYMBOL</span> <span class="o">=</span> <span class="s">&#39;square&#39;</span>
+
+        <span class="n">symbol_field</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">symbol_keys</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">]</span>
+        <span class="n">symbol_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">DEFAULT_SYMBOL</span><span class="p">,</span> <span class="n">DEFAULT_SYMBOL</span><span class="p">]</span>
+
+        <span class="c"># Zoom levels (large number means close up)</span>
+        <span class="n">scale_keys</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50000000000</span><span class="p">,</span> <span class="mi">10000000000</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="mi">5000000</span><span class="p">,</span>
+                      <span class="mi">1000000</span><span class="p">,</span> <span class="mi">500000</span><span class="p">,</span> <span class="mi">250000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">]</span>
+        <span class="n">scale_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c"># Predefined colour classes</span>
+        <span class="n">class_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&lt; 90 kg/m2&#39;</span><span class="p">,</span> <span class="s">&#39;90 - 150 kg/m2&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;150 - 300 kg/m2&#39;</span><span class="p">,</span> <span class="s">&#39;&gt; 300 kg/m2&#39;</span><span class="p">]</span>
+        <span class="n">class_values</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+                         <span class="s">&#39;color&#39;</span><span class="p">:</span> <span class="s">&#39;#cccccc&#39;</span><span class="p">,</span> <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">},</span>
+                        <span class="p">{</span><span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
+                         <span class="s">&#39;color&#39;</span><span class="p">:</span> <span class="s">&#39;#0EEC6C&#39;</span><span class="p">,</span> <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">},</span>
+                        <span class="p">{</span><span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span>
+                         <span class="s">&#39;color&#39;</span><span class="p">:</span> <span class="s">&#39;#FD8D3C&#39;</span><span class="p">,</span> <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">},</span>
+                        <span class="p">{</span><span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">3.5</span><span class="p">,</span>
+                         <span class="s">&#39;color&#39;</span><span class="p">:</span> <span class="s">&#39;#F31A1C&#39;</span><span class="p">,</span> <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">}]</span>
+
+        <span class="n">_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                       <span class="n">damage_field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">,</span>
+                       <span class="n">symbol_field</span><span class="o">=</span><span class="n">symbol_field</span><span class="p">,</span>
+                       <span class="n">symbols</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">symbol_keys</span><span class="p">,</span> <span class="n">symbol_values</span><span class="p">)),</span>
+                       <span class="n">scales</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">scale_keys</span><span class="p">,</span> <span class="n">scale_values</span><span class="p">)),</span>
+                       <span class="n">classifications</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">class_keys</span><span class="p">,</span> <span class="n">class_values</span><span class="p">)))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

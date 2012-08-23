@@ -1,0 +1,360 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.test_utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.test_utilities</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c"># Add parent directory to path to make test aware of other modules</span>
+<span class="c"># We should be able to remove this now that we use env vars. TS</span>
+<span class="n">pardir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pardir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">safe.api</span> <span class="kn">import</span> <span class="n">bbox_intersection</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities</span> <span class="kn">import</span> <span class="p">(</span><span class="n">getExceptionWithStacktrace</span><span class="p">,</span>
+                              <span class="n">setVectorStyle</span><span class="p">,</span>
+                              <span class="n">setRasterStyle</span><span class="p">,</span>
+                              <span class="n">qgisVersion</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="n">unitTestDataPath</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.utilities_test</span> <span class="kn">import</span> <span class="p">(</span><span class="n">loadLayer</span><span class="p">,</span> <span class="n">getQgisTestApp</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.exceptions</span> <span class="kn">import</span> <span class="n">StyleError</span>
+
+<span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span> <span class="o">=</span> <span class="n">getQgisTestApp</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="UtilitiesTest"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest">[docs]</a><span class="k">class</span> <span class="nc">UtilitiesTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests for reading and writing of raster and vector data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="UtilitiesTest.test_stacktrace_html"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_stacktrace_html">[docs]</a>    <span class="k">def</span> <span class="nf">test_stacktrace_html</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stack traces can be caught and rendered as html</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bbox_intersection</span><span class="p">(</span><span class="s">&#39;aoeu&#39;</span><span class="p">,</span> <span class="s">&#39;oaeu&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c"># Display message and traceback</span>
+
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">getExceptionWithStacktrace</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="c">#print myMessage</span>
+            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="n">myMessage</span>
+            <span class="k">assert</span> <span class="s">&#39;line&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span>
+            <span class="k">assert</span> <span class="s">&#39;File&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span>
+
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">getExceptionWithStacktrace</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="n">myMessage</span>
+            <span class="k">assert</span> <span class="s">&#39;&lt;pre id=&quot;traceback&quot;&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span>
+            <span class="k">assert</span> <span class="s">&#39;line&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span>
+            <span class="k">assert</span> <span class="s">&#39;File&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="UtilitiesTest.test_issue126"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_issue126">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue126</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that non integer transparency ranges fail gracefully.</span>
+<span class="sd">        .. seealso:: https://github.com/AIFDR/inasafe/issues/126</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># This dataset has all cells with value 1.3</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;issue126.tif&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="c"># Note the float quantity values below</span>
+        <span class="n">myStyleInfo</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">myStyleInfo</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#79C900&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">10.1</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Setting style info with float based ranges should fail &#39;</span>
+                    <span class="s">&#39;gracefully.&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">setRasterStyle</span><span class="p">(</span><span class="n">myLayer</span><span class="p">,</span> <span class="n">myStyleInfo</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="c"># Now validate the transparency values were set to 255 because</span>
+        <span class="c"># they are floats and we cant specify pixel ranges to floats</span>
+        <span class="n">myValue1</span> <span class="o">=</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span><span class="n">alphaValue</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+        <span class="n">myValue2</span> <span class="o">=</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span><span class="n">alphaValue</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Transparency should be ignored when style class&#39;</span>
+                     <span class="s">&#39; quantities are floats&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">myValue1</span> <span class="o">==</span> <span class="n">myValue2</span> <span class="o">==</span> <span class="mi">255</span><span class="p">,</span> <span class="n">myMessage</span>
+
+        <span class="c"># Now run the same test again</span>
+        <span class="n">myStyleInfo</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#79C900&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Setting style info with generate valid transparent &#39;</span>
+                     <span class="s">&#39;pixel entries.&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">setRasterStyle</span><span class="p">(</span><span class="n">myLayer</span><span class="p">,</span> <span class="n">myStyleInfo</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="c"># Now validate the transparency values were set to 255 because</span>
+        <span class="c"># they are floats and we cant specify pixel ranges to floats</span>
+        <span class="n">myValue1</span> <span class="o">=</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span><span class="n">alphaValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">myValue2</span> <span class="o">=</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">rasterTransparency</span><span class="p">()</span><span class="o">.</span><span class="n">alphaValue</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">myMessage1</span> <span class="o">=</span> <span class="n">myMessage</span> <span class="o">+</span> <span class="s">&#39;Expected 0 got </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myValue1</span>
+        <span class="n">myMessage2</span> <span class="o">=</span> <span class="n">myMessage</span> <span class="o">+</span> <span class="s">&#39;Expected 255 got </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myValue2</span>
+        <span class="k">assert</span> <span class="n">myValue1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myMessage1</span>
+        <span class="k">assert</span> <span class="n">myValue2</span> <span class="o">==</span> <span class="mi">255</span><span class="p">,</span> <span class="n">myMessage2</span>
+
+        <span class="c"># Verify that setRasterStyle doesn&#39;t break when floats coincide with</span>
+        <span class="c"># integers</span>
+        <span class="c"># See https://github.com/AIFDR/inasafe/issues/126#issuecomment-5978416</span>
+        <span class="n">myStyleInfo</span><span class="p">[</span><span class="s">&#39;style_classes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="s">&#39;#79C900&#39;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Broken: Setting style info with generate valid &#39;</span>
+                     <span class="s">&#39;transparent &#39;</span>
+                     <span class="s">&#39;floating point pixel entries such as 2.0, 3.0&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">setRasterStyle</span><span class="p">(</span><span class="n">myLayer</span><span class="p">,</span> <span class="n">myStyleInfo</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="UtilitiesTest.test_issue121"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_issue121">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue121</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test that point symbol size can be set from style (issue 121).</span>
+<span class="sd">        .. seealso:: https://github.com/AIFDR/inasafe/issues/121</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;kecamatan_jakarta_osm_centroids.shp&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="c"># Note the float quantity values below</span>
+        <span class="n">myStyleInfo</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;target_field&#39;</span><span class="p">:</span> <span class="s">&#39;KEPADATAN&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;style_classes&#39;</span><span class="p">:</span>
+                           <span class="p">[{</span><span class="s">&#39;opacity&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#fecc5c&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Low&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+                            <span class="p">{</span><span class="s">&#39;opacity&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mi">350</span><span class="p">,</span> <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#fd8d3c&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mi">201</span><span class="p">,</span> <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Medium&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+                            <span class="p">{</span><span class="s">&#39;opacity&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mi">539</span><span class="p">,</span> <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#f31a1c&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mi">351</span><span class="p">,</span> <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;High&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}]}</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Setting style with point sizes should work.&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">setVectorStyle</span><span class="p">(</span><span class="n">myLayer</span><span class="p">,</span> <span class="n">myStyleInfo</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+        <span class="c"># Now validate the size values were set as expected</span>
+
+        <span class="k">if</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">isUsingRendererV2</span><span class="p">():</span>
+            <span class="c"># new symbology - subclass of QgsFeatureRendererV2 class</span>
+            <span class="n">myRenderer</span> <span class="o">=</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">rendererV2</span><span class="p">()</span>
+            <span class="n">myType</span> <span class="o">=</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">type</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">myType</span> <span class="o">==</span> <span class="s">&#39;graduatedSymbol&#39;</span>
+            <span class="n">mySize</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">myRange</span> <span class="ow">in</span> <span class="n">myRenderer</span><span class="o">.</span><span class="n">ranges</span><span class="p">():</span>
+                <span class="n">mySymbol</span> <span class="o">=</span> <span class="n">myRange</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+                <span class="n">mySymbolLayer</span> <span class="o">=</span> <span class="n">mySymbol</span><span class="o">.</span><span class="n">symbolLayer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">myActualSize</span> <span class="o">=</span> <span class="n">mySymbolLayer</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+                <span class="n">myMessage</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;Expected symbol layer 0 for range </span><span class="si">%s</span><span class="s"> to have&#39;</span>
+                             <span class="s">&#39; a size of </span><span class="si">%s</span><span class="s">, got </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">mySize</span><span class="p">,</span> <span class="n">mySize</span><span class="p">,</span> <span class="n">myActualSize</span><span class="p">))</span>
+                <span class="k">assert</span> <span class="n">mySize</span> <span class="o">==</span> <span class="n">myActualSize</span><span class="p">,</span> <span class="n">myMessage</span>
+                <span class="n">mySize</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="UtilitiesTest.test_issue157"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_issue157">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue157</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Verify that we get the error class name back - issue #157</span>
+<span class="sd">           .. seealso:: https://github.com/AIFDR/inasafe/issues/121</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bbox_intersection</span><span class="p">(</span><span class="s">&#39;aoeu&#39;</span><span class="p">,</span> <span class="s">&#39;oaeu&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">myMessage</span> <span class="o">=</span> <span class="n">getExceptionWithStacktrace</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s">&#39;VerificationError : Western&#39;</span> <span class="ow">in</span> <span class="n">myMessage</span><span class="p">,</span> <span class="n">myMessage</span>
+</div>
+<div class="viewcode-block" id="UtilitiesTest.test_issue230"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_issue230">[docs]</a>    <span class="k">def</span> <span class="nf">test_issue230</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Verify that we give informative errors when style is not correct</span>
+<span class="sd">           .. seealso:: https://github.com/AIFDR/inasafe/issues/230</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">unitTestDataPath</span><span class="p">(</span><span class="s">&#39;impact&#39;</span><span class="p">)</span>
+        <span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myType</span> <span class="o">=</span> <span class="n">loadLayer</span><span class="p">(</span><span class="s">&#39;polygons_for_styling.shp&#39;</span><span class="p">,</span> <span class="n">myPath</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">myType</span>
+        <span class="n">myStyle</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;legend_title&#39;</span><span class="p">:</span> <span class="s">u&#39;Population Count&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;target_field&#39;</span><span class="p">:</span> <span class="s">&#39;population&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;style_classes&#39;</span><span class="p">:</span> <span class="p">[{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c"># &lt;-- intentionally broken list not number!</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">139904.08186340332</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Nil&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">139904.08186340332</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">279808.16372680664</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#38A800&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Low&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">279808.16372680664</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">419712.24559020996</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#79C900&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Low&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">419712.24559020996</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">559616.32745361328</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#CEED00&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Low&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">559616.32745361328</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">699520.4093170166</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#FFCC00&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Medium&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">699520.4093170166</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">839424.49118041992</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#FF6600&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Medium&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">839424.49118041992</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">979328.57304382324</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#FF0000&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Medium&#39;</span><span class="p">},</span>
+                                     <span class="p">{</span>
+                       <span class="s">&#39;transparency&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mf">979328.57304382324</span><span class="p">,</span>
+                       <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mf">1119232.6549072266</span><span class="p">,</span>
+                       <span class="s">&#39;colour&#39;</span><span class="p">:</span> <span class="s">&#39;#7A0000&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;High&#39;</span><span class="p">}]}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">setVectorStyle</span><span class="p">(</span><span class="n">myVectorLayer</span><span class="p">,</span> <span class="n">myStyle</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StyleError</span><span class="p">:</span>
+            <span class="c"># Exactly what should have happened</span>
+            <span class="k">return</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;Incorrect handling of broken styles&#39;</span>
+</div>
+<div class="viewcode-block" id="UtilitiesTest.test_getQgisVersion"><a class="viewcode-back" href="../../api-docs/safe_qgis_tests/test_utilities.html#safe_qgis.test_utilities.UtilitiesTest.test_getQgisVersion">[docs]</a>    <span class="k">def</span> <span class="nf">test_getQgisVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test we can get the version of QGIS&quot;&quot;&quot;</span>
+        <span class="n">myVersion</span> <span class="o">=</span> <span class="n">qgisVersion</span><span class="p">()</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Got version </span><span class="si">%s</span><span class="s"> of QGIS, but at least 107000 is needed&#39;</span>
+        <span class="k">assert</span> <span class="n">myVersion</span> <span class="o">&gt;</span> <span class="mi">10700</span><span class="p">,</span> <span class="n">myMessage</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">ISUtilitiesTest</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

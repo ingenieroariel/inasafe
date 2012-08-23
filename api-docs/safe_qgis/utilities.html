@@ -1,0 +1,294 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
+    <link rel="next" title="Module: safe_qgis.keyword_io" href="keyword_io.html" />
+    <link rel="prev" title="Module: safe_qgis.impact_calculator" href="impact_calculator.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="impact_calculator.html" title="Module: safe_qgis.impact_calculator"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" accesskey="U">Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe_qgis.utilities">
+<span id="module-safe-qgis-utilities"></span><h1>Module:  safe_qgis.utilities<a class="headerlink" href="#module-safe_qgis.utilities" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
+<dd><strong>IS Utilitles implementation.</strong></dd>
+</dl>
+<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+</div>
+<dl class="function">
+<dt id="safe_qgis.utilities.getExceptionWithStacktrace">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">getExceptionWithStacktrace</tt><big>(</big><em>e</em>, <em>html=False</em>, <em>context=None</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#getExceptionWithStacktrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.getExceptionWithStacktrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert exception into a string and and stack trace</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>e: Exception object
+html: Optional flat if output is to wrapped as html
+context: Optional context message</dd>
+<dt>Output</dt>
+<dd>Exception with stack trace info suitable for display</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.getWGS84resolution">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">getWGS84resolution</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#getWGS84resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.getWGS84resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return resolution of raster layer in EPSG:4326</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>theLayer: Raster layer</dd>
+<dt>Output</dt>
+<dd>resolution.</dd>
+</dl>
+<p>If input layer is already in EPSG:4326, simply return the resolution
+If not, work it out based on EPSG:4326 representations of its extent</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.htmlFooter">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">htmlFooter</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#htmlFooter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.htmlFooter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html footer for wrapping content in.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.htmlHeader">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">htmlHeader</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#htmlHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.htmlHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a standard html header for wrapping content in.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.qgisVersion">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">qgisVersion</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#qgisVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.qgisVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the version of QGIS
+Args:</p>
+<blockquote>
+<div>None</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>QGIS Version where 10700 represents QGIS 1.7 etc.</dd>
+<dt>Raises:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.setRasterStyle">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">setRasterStyle</tt><big>(</big><em>theQgsRasterLayer</em>, <em>theStyle</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#setRasterStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.setRasterStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set QGIS raster style based on InaSAFE style dictionary.</p>
+<p>This function will set both the colour map and the transparency
+for the passed in layer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is currently a limitation in QGIS in that
+pixel transparency values can not be specified in ranges and
+consequently the opacity is of limited value and seems to
+only work effectively with integer values.</p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Get Tim to implement range based transparency in
+the core QGIS library.</p>
+</div>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">theQgsRasterLayer: Qgis layer
+style: Dictionary of the form as in the example below
+style_classes = [dict(colour=&#8217;#38A800&#8217;, quantity=2, transparency=0),</p>
+<blockquote class="last">
+<div>dict(colour=&#8217;#38A800&#8217;, quantity=5, transparency=1),
+dict(colour=&#8217;#79C900&#8217;, quantity=10, transparency=1),
+dict(colour=&#8217;#CEED00&#8217;, quantity=20, transparency=1),
+dict(colour=&#8217;#FFCC00&#8217;, quantity=50, transparency=1),
+dict(colour=&#8217;#FF6600&#8217;, quantity=100, transparency=1),
+dict(colour=&#8217;#FF0000&#8217;, quantity=200, transparency=1),
+dict(colour=&#8217;#7A0000&#8217;, quantity=300, transparency=1)]</div></blockquote>
+</dd>
+<dt>Output</dt>
+<dd>Sets and saves style for theQgsRasterLayer</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.setVectorStyle">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">setVectorStyle</tt><big>(</big><em>theQgisVectorLayer</em>, <em>theStyle</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#setVectorStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.setVectorStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set QGIS vector style based on InaSAFE style dictionary</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">theQgisVectorLayer: Qgis layer
+theStyle: Dictionary of the form as in the example below</p>
+<p>{&#8216;target_field&#8217;: &#8216;DMGLEVEL&#8217;,
+&#8216;style_classes&#8217;:
+[{&#8216;opacity&#8217;: 1, &#8216;max&#8217;: 1.5, &#8216;colour&#8217;: &#8216;#fecc5c&#8217;,</p>
+<blockquote>
+<div>&#8216;min&#8217;: 0.5, &#8216;label&#8217;: &#8216;Low damage&#8217;, &#8216;size&#8217; : 1},</div></blockquote>
+<dl class="docutils">
+<dt>{&#8216;opacity&#8217;: 1, &#8216;max&#8217;: 2.5, &#8216;colour&#8217;: &#8216;#fd8d3c&#8217;,</dt>
+<dd>&#8216;min&#8217;: 1.5, &#8216;label&#8217;: &#8216;Medium damage&#8217;, &#8216;size&#8217; : 1},</dd>
+<dt>{&#8216;opacity&#8217;: 1, &#8216;max&#8217;: 3.5, &#8216;colour&#8217;: &#8216;#f31a1c&#8217;,</dt>
+<dd>&#8216;min&#8217;: 2.5, &#8216;label&#8217;: &#8216;High damage&#8217;, &#8216;size&#8217; : 1}]}</dd>
+</dl>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The transparency and size keys are optional. Size applies
+to points only.</p>
+</div>
+</dd>
+<dt>Output</dt>
+<dd>Sets and saves style for theQgisVectorLayer</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe_qgis.utilities.tr">
+<tt class="descclassname">safe_qgis.utilities.</tt><tt class="descname">tr</tt><big>(</big><em>theText</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/utilities.html#tr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.utilities.tr" title="Permalink to this definition">¶</a></dt>
+<dd><p>We define a tr() alias here since the utilities implementation below
+is not a class and does not inherit from QObject.
+.. note:: see <a class="reference external" href="http://tinyurl.com/pyqt-differences">http://tinyurl.com/pyqt-differences</a>
+Args:</p>
+<blockquote>
+<div>theText - string to be translated</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>Translated version of the given string if available, otherwise
+the original string.</dd>
+</dl>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="impact_calculator.html"
+                        title="previous chapter">Module:  safe_qgis.impact_calculator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="keyword_io.html"
+                        title="next chapter">Module:  safe_qgis.keyword_io</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis/utilities.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="keyword_io.html" title="Module: safe_qgis.keyword_io"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="impact_calculator.html" title="Module: safe_qgis.impact_calculator"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis.html" >Package::safe_qgis</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

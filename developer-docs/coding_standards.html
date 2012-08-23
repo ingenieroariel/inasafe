@@ -100,7 +100,7 @@ for details.</p>
 <tt class="docutils literal"><span class="pre">make</span> <span class="pre">jenkins-lint</span></tt>. In some cases you may wish to override a line or
 group of lines so that they are not validated by lint. You can do this by
 adding either:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">foo</span>  <span class="c"># pylint: diable=W1203</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">foo</span>  <span class="c"># pylint: disable=W1203</span>
 </pre></div>
 </div>
 <p>or:</p>
@@ -111,30 +111,31 @@ adding either:</p>
 </pre></div>
 </div>
 <p>The relevant id (W1234) is provided on the output of the above mentioned lint
-command&#8217;s output.</p>
+command&#8217;s output. A complete list of codes is available at
+<a class="reference external" href="http://pylint-messages.wikidot.com/all-codes">http://pylint-messages.wikidot.com/all-codes</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can globally ignore messages by adding them to <tt class="file docutils literal"><span class="pre">pylintrc</span></tt>
+in the <tt class="samp docutils literal"><span class="pre">[MESSAGES</span> <span class="pre">CONTROL]</span></tt> section.</p>
+</div>
 </li>
 <li><p class="first">Each source file should include a standard header containing copyright,
 authorship and version metadata as shown in the exampled below.</p>
 </li>
 </ul>
 <p><strong>Example standard header</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">InaSAFE Disaster risk assessment tool developed by AusAid -</span>
-<span class="sd">  **QGIS plugin implementation.**</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;**One line description.**</span>
 
-<span class="sd">Contact : ole.moller.nielsen@gmail.com</span>
-
-<span class="sd">.. note:: This program is free software; you can redistribute it and/or modify</span>
-<span class="sd">     it under the terms of the GNU General Public License as published by</span>
-<span class="sd">     the Free Software Foundation; either version 2 of the License, or</span>
-<span class="sd">     (at your option) any later version.</span>
+<span class="sd">.. tip::</span>
+<span class="sd">   Detailed multi-paragraph description...</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tim@linfiniti.com&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.0.1&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Ole Nielsen &lt;ole.moller.nielsen@gmail.com&gt;&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
 <span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;10/01/2011&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;01/11/2010&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;GPL&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
 <span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
 </pre></div>
@@ -144,6 +145,31 @@ authorship and version metadata as shown in the exampled below.</p>
 <p class="last">Please see <a class="reference internal" href="faq.html#faq-revision-label"><em>How did you embed the git version SHA1 into each .py file?</em></a> for details on how the revision
 tag is replaced with the SHA1 for the file when the release packages are
 made.</p>
+</div>
+<div class="section" id="doc-strings">
+<h3>Doc strings<a class="headerlink" href="#doc-strings" title="Permalink to this headline">¶</a></h3>
+<p>All code should be self documenting. We used the following style for documenting
+functions and class methods:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">setKeywordDbPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thePath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the path for the keyword database (sqlite).</span>
+
+<span class="sd">    The file will be used to search for keywords for non local datasets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        * thePath: a valid path to a sqlite database. The database does</span>
+<span class="sd">              not need to exist already, but the user should be able to write</span>
+<span class="sd">              to the path provided.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">keywordDbPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">thePath</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Various other sphinx markup elements may be used in the docstrings too.
+For more information see also:
+<a class="reference external" href="http://thomas-cokelaer.info/tutorials/sphinx/docstring_python.html">http://thomas-cokelaer.info/tutorials/sphinx/docstring_python.html</a></p>
 </div>
 <div class="section" id="human-interface-guidelines">
 <span id="hig-label"></span><h3>Human Interface Guidelines<a class="headerlink" href="#human-interface-guidelines" title="Permalink to this headline">¶</a></h3>
@@ -179,8 +205,6 @@ widgets that are not visible.</li>
 <li>Try to avoid technical terms and rather use a laymans equivalent e.g. use
 the word &#8216;Transparency&#8217; rather than &#8216;Alpha Channel&#8217; (contrived example),
 &#8216;Text&#8217; instead of &#8216;String&#8217; and so on.</li>
-<li>Use consistent iconography. If you need an icon or icon elements, please
-contact Robert Szczepanek on the mailing list for assistance.</li>
 <li>Place long lists of widgets into scroll boxes. No dialog should exceed 580
 pixels in height and 1000 pixels in width.</li>
 <li>Separate advanced options from basic ones. Novice users should be able to
@@ -217,6 +241,7 @@ suffixed to the button text.</li>
   <ul>
 <li><a class="reference internal" href="#">Coding Standards</a><ul>
 <li><a class="reference internal" href="#code-style">Code Style</a><ul>
+<li><a class="reference internal" href="#doc-strings">Doc strings</a></li>
 <li><a class="reference internal" href="#human-interface-guidelines">Human Interface Guidelines</a></li>
 <li><a class="reference internal" href="#code-statistics">Code statistics</a></li>
 </ul>

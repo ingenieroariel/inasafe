@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe_qgis.test_utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Package::safe_qgis_tests" href="../safe_qgis_tests.html" />
+    <link rel="next" title="Module: safe_qgis.test_help" href="test_help.html" />
+    <link rel="prev" title="Module: safe_qgis.test_dock" href="test_dock.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_help.html" title="Module: safe_qgis.test_help"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_dock.html" title="Module: safe_qgis.test_dock"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis_tests.html" accesskey="U">Package::safe_qgis_tests</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe_qgis.test_utilities">
+<span id="module-safe-qgis-test-utilities"></span><h1>Module:  safe_qgis.test_utilities<a class="headerlink" href="#module-safe_qgis.test_utilities" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="safe_qgis.test_utilities.UtilitiesTest">
+<em class="property">class </em><tt class="descclassname">safe_qgis.test_utilities.</tt><tt class="descname">UtilitiesTest</tt><big>(</big><em>methodName='runTest'</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests for reading and writing of raster and vector data</p>
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_getQgisVersion">
+<tt class="descname">test_getQgisVersion</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_getQgisVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_getQgisVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test we can get the version of QGIS</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_issue121">
+<tt class="descname">test_issue121</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_issue121"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_issue121" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that point symbol size can be set from style (issue 121).
+.. seealso:: <a class="reference external" href="https://github.com/AIFDR/inasafe/issues/121">https://github.com/AIFDR/inasafe/issues/121</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_issue126">
+<tt class="descname">test_issue126</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_issue126"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_issue126" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that non integer transparency ranges fail gracefully.
+.. seealso:: <a class="reference external" href="https://github.com/AIFDR/inasafe/issues/126">https://github.com/AIFDR/inasafe/issues/126</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_issue157">
+<tt class="descname">test_issue157</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_issue157"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_issue157" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verify that we get the error class name back - issue #157
+.. seealso:: <a class="reference external" href="https://github.com/AIFDR/inasafe/issues/121">https://github.com/AIFDR/inasafe/issues/121</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_issue230">
+<tt class="descname">test_issue230</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_issue230"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_issue230" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verify that we give informative errors when style is not correct
+.. seealso:: <a class="reference external" href="https://github.com/AIFDR/inasafe/issues/230">https://github.com/AIFDR/inasafe/issues/230</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe_qgis.test_utilities.UtilitiesTest.test_stacktrace_html">
+<tt class="descname">test_stacktrace_html</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/test_utilities.html#UtilitiesTest.test_stacktrace_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.test_utilities.UtilitiesTest.test_stacktrace_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stack traces can be caught and rendered as html</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="test_dock.html"
+                        title="previous chapter">Module:  safe_qgis.test_dock</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_help.html"
+                        title="next chapter">Module:  safe_qgis.test_help</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api-docs/safe_qgis_tests/test_utilities.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_help.html" title="Module: safe_qgis.test_help"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_dock.html" title="Module: safe_qgis.test_dock"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../safe_qgis_tests.html" >Package::safe_qgis_tests</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

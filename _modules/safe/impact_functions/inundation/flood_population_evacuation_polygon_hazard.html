@@ -1,0 +1,300 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.inundation.flood_population_evacuation_polygon_hazard &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.inundation.flood_population_evacuation_polygon_hazard</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_question</span><span class="p">,</span> <span class="n">get_function_title</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">safe.storage.clipping</span> <span class="kn">import</span> <span class="n">clip_raster_by_polygons</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.tables</span> <span class="kn">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">TableRow</span>
+
+
+<div class="viewcode-block" id="FloodEvacuationFunctionVectorHazard"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/inundation/flood_population_evacuation_polygon_hazard.html#safe.impact_functions.inundation.flood_population_evacuation_polygon_hazard.FloodEvacuationFunctionVectorHazard">[docs]</a><span class="k">class</span> <span class="nc">FloodEvacuationFunctionVectorHazard</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for flood evacuation</span>
+
+<span class="sd">    :author AIFDR</span>
+<span class="sd">    :rating 4</span>
+<span class="sd">    :param requires category==&#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory in [&#39;flood&#39;, &#39;tsunami&#39;] and \</span>
+<span class="sd">                    layertype==&#39;vector&#39;</span>
+
+<span class="sd">    :param requires category==&#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory==&#39;population&#39; and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    datatype==&#39;density&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Need evacuation&#39;</span><span class="p">)</span>
+    <span class="n">target_field</span> <span class="o">=</span> <span class="s">&#39;population&#39;</span>
+
+<div class="viewcode-block" id="FloodEvacuationFunctionVectorHazard.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/inundation/flood_population_evacuation_polygon_hazard.html#safe.impact_functions.inundation.flood_population_evacuation_polygon_hazard.FloodEvacuationFunctionVectorHazard.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Risk plugin for flood population evacuation</span>
+
+<span class="sd">        Input</span>
+<span class="sd">          layers: List of layers expected to contain</span>
+<span class="sd">              H: Raster layer of flood depth</span>
+<span class="sd">              P: Raster layer of population data on the same grid as H</span>
+
+<span class="sd">        Counts number of people exposed to flood levels exceeding</span>
+<span class="sd">        specified threshold.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">          Map of population exposed to flood levels exceeding the threshold</span>
+<span class="sd">          Table with number of people evacuated and supplies required</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Depth above which people are regarded affected [m]</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c"># Threshold [m]</span>
+
+        <span class="c"># Identify hazard and exposure layers</span>
+        <span class="n">inundation</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Flood inundation</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+
+        <span class="n">question</span> <span class="o">=</span> <span class="n">get_question</span><span class="p">(</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="n">population</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Check that hazard is polygon type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inundation</span><span class="o">.</span><span class="n">is_vector</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input hazard </span><span class="si">%s</span><span class="s">  was not a vector layer as expected &#39;</span>
+                   <span class="o">%</span> <span class="n">inundation</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input hazard must be a polygon layer. I got </span><span class="si">%s</span><span class="s"> with layer &#39;</span>
+               <span class="s">&#39;type </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                            <span class="n">inundation</span><span class="o">.</span><span class="n">get_geometry_name</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inundation</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Extract data as numeric arrays</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">inundation</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>  <span class="c"># Flood footprints</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">inundation</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>    <span class="c"># Flood attributes</span>
+
+        <span class="c"># Separate population grid points by flood footprints</span>
+        <span class="k">print</span> <span class="s">&#39;Clip&#39;</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">clip_raster_by_polygons</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">inundation</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&#39;Sum&#39;</span>
+        <span class="c"># Sum up population affected by polygons</span>
+        <span class="n">evacuated</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">minpop</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="n">maxpop</span> <span class="o">=</span> <span class="o">-</span><span class="n">minpop</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">L</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;</span> <span class="n">minpop</span><span class="p">:</span>
+                <span class="n">minpop</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="n">maxpop</span><span class="p">:</span>
+                <span class="n">maxpop</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)})</span>
+            <span class="n">evacuated</span> <span class="o">+=</span> <span class="n">s</span>
+
+        <span class="k">print</span> <span class="s">&#39;minpop&#39;</span><span class="p">,</span> <span class="n">minpop</span>
+        <span class="k">print</span> <span class="s">&#39;maxpop&#39;</span><span class="p">,</span> <span class="n">maxpop</span>
+
+        <span class="c"># Count totals</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">population</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="bp">False</span><span class="p">)))</span>
+
+        <span class="c"># Don&#39;t show digits less than a 1000</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">evacuated</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">evacuated</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">//</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">print</span> <span class="s">&#39;Done&#39;</span>
+
+        <span class="c"># Calculate estimated needs based on BNPB Perka 7/2008 minimum bantuan</span>
+        <span class="n">rice</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">*</span> <span class="mf">2.8</span>
+        <span class="n">drinking_water</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">*</span> <span class="mf">17.5</span>
+        <span class="n">water</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">*</span> <span class="mi">67</span>
+        <span class="n">family_kits</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">/</span> <span class="mi">5</span>
+        <span class="n">toilets</span> <span class="o">=</span> <span class="n">evacuated</span> <span class="o">/</span> <span class="mi">20</span>
+
+        <span class="c"># Generate impact report for the pdf map</span>
+        <span class="n">table_body</span> <span class="o">=</span> <span class="p">[</span><span class="n">question</span><span class="p">,</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;People needing evacuation&#39;</span><span class="p">),</span>
+                                <span class="s">&#39;</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">evacuated</span><span class="p">],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Map shows population affected in each flood &#39;</span>
+                                 <span class="s">&#39;prone area &#39;</span><span class="p">)),</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Needs per week&#39;</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Total&#39;</span><span class="p">)],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="p">[</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Rice [kg]&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rice</span><span class="p">)],</span>
+                      <span class="p">[</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Drinking Water [l]&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">drinking_water</span><span class="p">)],</span>
+                      <span class="p">[</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Clean Water [l]&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">water</span><span class="p">)],</span>
+                      <span class="p">[</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Family Kits&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">family_kits</span><span class="p">)],</span>
+                      <span class="p">[</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Toilets&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">toilets</span><span class="p">)]]</span>
+        <span class="n">impact_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+
+        <span class="c"># Extend impact report for on-screen display</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Notes:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;Total population: </span><span class="si">%i</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">total</span><span class="p">,</span>
+                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;People need evacuation if in area identified &#39;</span>
+                             <span class="s">&#39;as &quot;Flood Prone&quot;&#39;</span><span class="p">),</span>
+                           <span class="n">_</span><span class="p">(</span><span class="s">&#39;Minimum needs are defined in BNPB &#39;</span>
+                             <span class="s">&#39;regulation 7/2008&#39;</span><span class="p">)])</span>
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">map_title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;People affected by flood prone areas&#39;</span><span class="p">)</span>
+
+        <span class="c"># Generare 8 intervals across the range of flooded population</span>
+        <span class="n">cls</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minpop</span><span class="p">,</span> <span class="n">maxpop</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;cls&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+        <span class="c"># Define style info for output polygons showing population counts</span>
+        <span class="n">style_classes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Nil&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#FFFFFF&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Low&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#38A800&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Low&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#79C900&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Low&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#CEED00&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#FFCC00&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#FF6600&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Medium&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#FF0000&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;High&#39;</span><span class="p">),</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#7A0000&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">cls</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                              <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+
+        <span class="c">#style_classes[1][&#39;label&#39;] = _(&#39;Low [%i people/area]&#39;) % classes[1]</span>
+        <span class="c">#style_classes[4][&#39;label&#39;] = _(&#39;Medium [%i people/area]&#39;) % classes[4]</span>
+        <span class="c">#style_classes[7][&#39;label&#39;] = _(&#39;High [%i people/area]&#39;) % classes[7]</span>
+
+        <span class="c"># Override style info with new classes and name</span>
+        <span class="n">style_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target_field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">,</span>
+                          <span class="n">style_classes</span><span class="o">=</span><span class="n">style_classes</span><span class="p">,</span>
+                          <span class="n">legend_title</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Population Count&#39;</span><span class="p">))</span>
+
+        <span class="c"># Create vector layer and return</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">inundation</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Population affected by flood prone areas&#39;</span><span class="p">),</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">,</span>
+                             <span class="s">&#39;impact_table&#39;</span><span class="p">:</span> <span class="n">impact_table</span><span class="p">,</span>
+                             <span class="s">&#39;map_title&#39;</span><span class="p">:</span> <span class="n">map_title</span><span class="p">},</span>
+                   <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

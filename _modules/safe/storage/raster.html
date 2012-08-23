@@ -1,0 +1,728 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.storage.raster &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.storage.raster</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Class Raster</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">copy</span> <span class="kn">as</span> <span class="nn">copy_module</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span>
+<span class="kn">from</span> <span class="nn">safe.common.numerics</span> <span class="kn">import</span> <span class="n">nanallclose</span><span class="p">,</span> <span class="n">geotransform2axes</span><span class="p">,</span> <span class="n">grid2points</span>
+<span class="kn">from</span> <span class="nn">safe.common.dynamic_translations</span> <span class="kn">import</span> <span class="n">names</span> <span class="k">as</span> <span class="n">internationalised_titles</span>
+
+<span class="kn">from</span> <span class="nn">layer</span> <span class="kn">import</span> <span class="n">Layer</span>
+<span class="kn">from</span> <span class="nn">vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">projection</span> <span class="kn">import</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">interpolation</span> <span class="kn">import</span> <span class="n">interpolate_raster_vector</span>
+
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">DRIVER_MAP</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">read_keywords</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">write_keywords</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">geotransform2bbox</span><span class="p">,</span> <span class="n">geotransform2resolution</span>
+
+
+<div class="viewcode-block" id="Raster"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster">[docs]</a><span class="k">class</span> <span class="nc">Raster</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Internal representation of raster data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">geotransform</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style_info</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise object with either data or filename</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            data: Can be either</span>
+<span class="sd">                * a filename of a raster file format known to GDAL</span>
+<span class="sd">                * an MxN array of raster data</span>
+<span class="sd">                * None (FIXME (Ole): Remove this option)</span>
+<span class="sd">            projection: Geospatial reference in WKT format.</span>
+<span class="sd">                        Only used if data is provide as a numeric array,</span>
+<span class="sd">                        if None, WGS84 geographic is assumed</span>
+<span class="sd">            geotransform: GDAL geotransform (6-tuple).</span>
+<span class="sd">                          (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                           top left y, rotation, n-s pixel resolution).</span>
+<span class="sd">                          See e.g. http://www.gdal.org/gdal_tutorial.html</span>
+<span class="sd">                          Only used if data is provide as a numeric array,</span>
+<span class="sd">            name: Optional name for layer.</span>
+<span class="sd">                  Only used if data is provide as a numeric array,</span>
+<span class="sd">            keywords: Optional dictionary with keywords that describe the</span>
+<span class="sd">                      layer. When the layer is stored, these keywords will</span>
+<span class="sd">                      be written into an associated file with extension</span>
+<span class="sd">                      .keywords.</span>
+
+<span class="sd">                      Keywords can for example be used to display text</span>
+<span class="sd">                      about the layer in a web application.</span>
+<span class="sd">            style_info: Dictionary with information about how this layer</span>
+<span class="sd">                        should be styled. See impact_functions/styles.py</span>
+<span class="sd">                        for examples.</span>
+
+<span class="sd">        Note that if data is a filename, all other arguments are ignored</span>
+<span class="sd">        as they will be inferred from the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Invoke common layer constructor</span>
+        <span class="n">Layer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                       <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+                       <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">,</span>
+                       <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+
+        <span class="c"># Input checks</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Instantiate empty object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span>
+
+        <span class="c"># Initialisation</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Assume that data is provided as an array</span>
+            <span class="c"># with extra keyword arguments supplying metadata</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span> <span class="o">=</span> <span class="n">geotransform</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_bands</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render as name and dimensions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;Raster data set: </span><span class="si">%s</span><span class="s"> [</span><span class="si">%i</span><span class="s"> x </span><span class="si">%i</span><span class="s">] &#39;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Size of data set defined as total number of grid points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Override &#39;==&#39; to allow comparison with other raster objecs</span>
+
+<span class="sd">        Input</span>
+<span class="sd">           other: Raster instance to compare to</span>
+<span class="sd">           rtol, atol: Relative and absolute tolerance.</span>
+<span class="sd">                       See numpy.allclose for details</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Raster</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Raster instance cannot be compared to </span><span class="si">%s</span><span class="s">&#39;</span>
+                   <span class="s">&#39; as its type is </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Check projection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check geotransform</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nanallclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span>
+                           <span class="n">other</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span>
+                           <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check keywords</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">keywords</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Raster layers are identical up to the specified tolerance</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="Raster.read_from_file"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.read_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read and unpack raster data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Open data file for reading</span>
+        <span class="c"># File must be kept open, otherwise GDAL methods segfault.</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fid</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_ReadOnly</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># As gdal doesn&#39;t return to us what the problem is we have to</span>
+            <span class="c"># figure it out ourselves. Maybe capture stderr?</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not find file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;File </span><span class="si">%s</span><span class="s"> exists, but could not be read. &#39;</span>
+                       <span class="s">&#39;Please check if the file can be opened with &#39;</span>
+                       <span class="s">&#39;e.g. qgis or gdalinfo&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Record raster metadata from file</span>
+        <span class="n">basename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c"># If file is ASCII, check that projection is around.</span>
+        <span class="c"># GDAL does not check this nicely, so it is worth an</span>
+        <span class="c"># error message</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.asc&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">open</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s">&#39;.prj&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Projection file not found for </span><span class="si">%s</span><span class="s">. You must supply &#39;</span>
+                       <span class="s">&#39;a projection file with extension .prj&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Look for any keywords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="n">read_keywords</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span><span class="p">)</span>
+
+        <span class="c"># Determine name</span>
+        <span class="k">if</span> <span class="s">&#39;title&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">]</span>
+
+            <span class="c"># Lookup internationalised title if available</span>
+            <span class="k">if</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">internationalised_titles</span><span class="p">:</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">internationalised_titles</span><span class="p">[</span><span class="n">title</span><span class="p">]</span>
+
+            <span class="n">rastername</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Use basename without leading directories as name</span>
+            <span class="n">rastername</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">basename</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">rastername</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">Projection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fid</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fid</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">RasterXSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">RasterYSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_bands</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">RasterCount</span>
+
+        <span class="c"># Assume that file contains all data in one band</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Only one raster band currently allowed&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_bands</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: Number of bands in </span><span class="si">%s</span><span class="s"> are </span><span class="si">%i</span><span class="s">. &#39;</span>
+                   <span class="s">&#39;Only the first band will currently be &#39;</span>
+                   <span class="s">&#39;used.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_bands</span><span class="p">))</span>
+            <span class="c"># FIXME(Ole): Let us use python warnings here</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Get first band.</span>
+        <span class="n">band</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">band</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not read raster band from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Raster.write_to_file"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.write_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save raster data to file</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            filename: filename with extension .tif</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check file format</span>
+        <span class="n">basename</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Invalid file type for file </span><span class="si">%s</span><span class="s">. Only extension &#39;</span>
+               <span class="s">&#39;tif allowed.&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">extension</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.tif&#39;</span><span class="p">,</span> <span class="s">&#39;.asc&#39;</span><span class="p">],</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="n">file_format</span> <span class="o">=</span> <span class="n">DRIVER_MAP</span><span class="p">[</span><span class="n">extension</span><span class="p">]</span>
+
+        <span class="c"># Get raster data</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="c"># Get Dimensions. Note numpy and Gdal swap order</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c"># Create empty file.</span>
+        <span class="c"># FIXME (Ole): It appears that this is created as single</span>
+        <span class="c">#              precision even though Float64 is specified</span>
+        <span class="c">#              - see issue #17</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="n">file_format</span><span class="p">)</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GDT_Float64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Gdal could not create filename </span><span class="si">%s</span><span class="s"> using &#39;</span>
+                   <span class="s">&#39;format </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_format</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Write metada</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">))</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">SetGeoTransform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span><span class="p">)</span>
+
+        <span class="c"># Write data</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">WriteArray</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+        <span class="c"># Write keywords if any</span>
+        <span class="n">write_keywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="n">basename</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Raster.interpolate"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.interpolate">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Interpolate values of this raster layer to other layer</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            X: Layer object defining target</span>
+<span class="sd">            attribute_name: Optional name of interpolated layer.</span>
+<span class="sd">                            If attribute_name is None,</span>
+<span class="sd">                            the name of self is used.</span>
+
+<span class="sd">        Output</span>
+<span class="sd">            Y: Layer object with values of this raster layer interpolated to</span>
+<span class="sd">               geometry of input layer X</span>
+
+<span class="sd">        Note: If target geometry is polygon, data will be interpolated to</span>
+<span class="sd">        its centroids and the output is a point data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">is_raster</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">()</span> <span class="o">!=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">():</span>
+                <span class="c"># Need interpolation between grids</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Intergrid interpolation not yet implemented&#39;</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Rasters are aligned, no need to interpolate</span>
+                <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Interpolate this raster layer to geometry of X</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Name must be either a string or None. I got </span><span class="si">%s</span><span class="s">&#39;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">attribute_name</span> <span class="ow">is</span> <span class="bp">None</span>
+                   <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">interpolate_raster_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span>
+                                             <span class="n">attribute_name</span><span class="o">=</span><span class="n">attribute_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Raster.get_data"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get raster data as numeric array</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            nan: Optional flag controlling handling of missing values.</span>
+<span class="sd">                 If nan is True (default), nodata values will be replaced</span>
+<span class="sd">                 with numpy.nan</span>
+<span class="sd">                 If keyword nan has a numeric value, nodata values will</span>
+<span class="sd">                 be replaced by that value. E.g. to set missing values to 0,</span>
+<span class="sd">                 do get_data(nan=0.0)</span>
+<span class="sd">            scaling: Optional flag controlling if data is to be scaled</span>
+<span class="sd">                     if it has been resampled. Admissible values are</span>
+<span class="sd">                     False: data is retrieved without modification.</span>
+<span class="sd">                     True: Data is rescaled based on the squared ratio between</span>
+<span class="sd">                           its current and native resolution. This is typically</span>
+<span class="sd">                           required if raster data represents a density</span>
+<span class="sd">                           such as population per km^2</span>
+<span class="sd">                     None: The behaviour will depend on the keyword</span>
+<span class="sd">                           &quot;population&quot; associated with the layer. If</span>
+<span class="sd">                           it is &quot;density&quot;, scaling will be applied</span>
+<span class="sd">                           otherwise not. This is the default.</span>
+<span class="sd">                     scalar value: If scaling takes a numerical scalar value,</span>
+<span class="sd">                                   that will be use to scale the data</span>
+<span class="sd">        copy (optional): If present and True return copy</span>
+
+<span class="sd">        NOTE: Scaling does not currently work with projected layers.</span>
+<span class="sd">        See issue #123</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">copy_module</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="ow">and</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Read from raster file</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
+
+            <span class="c"># Convert to double precision (issue #75)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="c"># Self check</span>
+            <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Dimensions of raster array do not match those of &#39;</span>
+                   <span class="s">&#39;raster file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">M</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">N</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Handle no data value</span>
+        <span class="k">if</span> <span class="n">nan</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nan</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">NAN</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">NAN</span> <span class="o">=</span> <span class="n">nan</span>
+
+            <span class="c"># Replace NODATA_VALUE with NaN</span>
+            <span class="n">nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nodata_value</span><span class="p">()</span>
+            <span class="n">NaN</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="n">NAN</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">==</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">NaN</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+
+        <span class="c"># Take care of possible scaling</span>
+        <span class="k">if</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Redefine scaling from density keyword if possible</span>
+            <span class="n">kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s">&#39;datatype&#39;</span> <span class="ow">in</span> <span class="n">kw</span> <span class="ow">and</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;density&#39;</span><span class="p">:</span>
+                <span class="n">scaling</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scaling</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="c"># No change</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># Calculate scaling based on resolution change</span>
+
+            <span class="n">actual_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">(</span><span class="n">isotropic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">native_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_resolution</span><span class="p">(</span><span class="n">isotropic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">native</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c">#print</span>
+            <span class="c">#print &#39;Actual res&#39;, actual_res</span>
+            <span class="c">#print &#39;Native res&#39;, native_res</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">actual_res</span> <span class="o">/</span> <span class="n">native_res</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="c">#print &#39;Scaling&#39;, sigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># See if scaling can work as a scalar value</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">scaling</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Keyword scaling &quot;</span><span class="si">%s</span><span class="s">&quot; could not be converted to a &#39;</span>
+                       <span class="s">&#39;number. It must be either True, False, None or a &#39;</span>
+                       <span class="s">&#39;number: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scaling</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Return possibly scaled data</span>
+        <span class="k">return</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">A</span>
+</div>
+<div class="viewcode-block" id="Raster.get_geotransform"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_geotransform">[docs]</a>    <span class="k">def</span> <span class="nf">get_geotransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return geotransform for this raster layer</span>
+
+<span class="sd">        Output</span>
+<span class="sd">        geotransform: 6 digit vector</span>
+<span class="sd">                      (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">                       top left y, rotation, n-s pixel resolution).</span>
+
+<span class="sd">                       See e.g. http://www.gdal.org/gdal_tutorial.html</span>
+<span class="sd">        copy (optional): If present and True return copy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">copy_module</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span>
+</div>
+<div class="viewcode-block" id="Raster.get_geometry"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return longitudes and latitudes (the axes) for grid.</span>
+
+<span class="sd">        Return two vectors (longitudes and latitudes) corresponding to</span>
+<span class="sd">        grid. The values are offset by half a pixel size to correspond to</span>
+<span class="sd">        pixel registration.</span>
+
+<span class="sd">        I.e. If the grid origin (top left corner) is (105, 10) and the</span>
+<span class="sd">        resolution is 1 degrees in each direction, then the vectors will</span>
+<span class="sd">        take the form</span>
+
+<span class="sd">        longitudes = [100.5, 101.5, ..., 109.5]</span>
+<span class="sd">        latitudes = [0.5, 1.5, ..., 9.5]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Get parameters for axes</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">()</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span>
+
+        <span class="c"># Compute x and y axes</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">geotransform2axes</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+
+        <span class="c"># Return them</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+</div>
+<div class="viewcode-block" id="Raster.copy"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return copy of raster layer</span>
+
+<span class="sd">        This copy will be equal to self in the sense defined by __eq__</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Raster</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">geotransform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_geotransform</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                      <span class="n">keywords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+</div>
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Raster.get_extrema"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_extrema">[docs]</a>    <span class="k">def</span> <span class="nf">get_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get min and max from raster</span>
+<span class="sd">        If raster has a nominated no_data value, this is ignored.</span>
+
+<span class="sd">        Return min, max</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">Amin</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">flat</span><span class="p">[:])</span>
+        <span class="n">Amax</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">flat</span><span class="p">[:])</span>
+
+        <span class="k">return</span> <span class="n">Amin</span><span class="p">,</span> <span class="n">Amax</span>
+</div>
+<div class="viewcode-block" id="Raster.get_nodata_value"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_nodata_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodata_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the internal representation of NODATA</span>
+
+<span class="sd">        If the internal value is None, the standard -9999 is assumed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;band&#39;</span><span class="p">):</span>
+            <span class="n">nodata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="o">.</span><span class="n">GetNoDataValue</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodata</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Use common default in case nodata was not registered in raster file</span>
+        <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nodata</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
+
+        <span class="k">return</span> <span class="n">nodata</span>
+</div>
+<div class="viewcode-block" id="Raster.get_bins"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_bins">[docs]</a>    <span class="k">def</span> <span class="nf">get_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">quantiles</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get N values between the min and the max occurred in this dataset.</span>
+
+<span class="sd">        Return sorted list of length N+1 where the first element is min and</span>
+<span class="sd">        the last is max. Intermediate values depend on the keyword quantiles:</span>
+<span class="sd">        If quantiles is True, they represent boundaries between quantiles.</span>
+<span class="sd">        If quantiles is False, they represent equidistant interval boundaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_extrema</span><span class="p">()</span>
+
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">quantiles</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="c"># Linear intervals</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmax</span> <span class="o">-</span> <span class="n">rmin</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rmin</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Quantiles</span>
+            <span class="c"># FIXME (Ole): Not 100% sure about this algorithm,</span>
+            <span class="c"># but it is close enough</span>
+
+            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">nan</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">flat</span><span class="p">[:]</span>
+
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>  <span class="c"># Omit NaN&#39;s</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+            <span class="n">A</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">d</span><span class="p">)])</span>
+
+        <span class="n">levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rmax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">levels</span>
+</div>
+<div class="viewcode-block" id="Raster.get_bounding_box"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get bounding box coordinates for raster layer</span>
+
+<span class="sd">        Format is [West, South, East, North]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">geotransform2bbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Raster.get_resolution"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.get_resolution">[docs]</a>    <span class="k">def</span> <span class="nf">get_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isotropic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">native</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                       <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get raster resolution as a 2-tuple (resx, resy)</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            isotropic: If True, verify that dx == dy and return dx</span>
+<span class="sd">                       If False return 2-tuple (dx, dy)</span>
+<span class="sd">            native: Optional flag. If True, return native resolution if</span>
+<span class="sd">                                   available. Otherwise return actual.</span>
+<span class="sd">            rtol, atol: Tolerances as to how much difference is accepted</span>
+<span class="sd">                        between dx and dy if isotropic is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Get actual resolution first</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">geotransform2resolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geotransform</span><span class="p">,</span>
+                                          <span class="n">isotropic</span><span class="o">=</span><span class="n">isotropic</span><span class="p">,</span>
+                                          <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resolution for layer </span><span class="si">%s</span><span class="s"> could not be obtained: </span><span class="si">%s</span><span class="s"> &#39;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">native</span><span class="p">:</span>
+            <span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s">&#39;resolution&#39;</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">:</span>
+
+                <span class="n">resolution</span> <span class="o">=</span> <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;resolution&#39;</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># FIXME (Ole): It seams float never</span>
+                    <span class="c"># raises an exception. I am sure it used to,</span>
+                    <span class="c"># this has to be rewritten more explicitly</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="c"># Assume resolution is a string of the form:</span>
+                    <span class="c"># (0.00045228819716044, 0.00045228819716044)</span>
+
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unknown format for resolution keyword: </span><span class="si">%s</span><span class="s">&#39;</span>
+                           <span class="o">%</span> <span class="n">resolution</span><span class="p">)</span>
+                    <span class="n">verify</span><span class="p">((</span><span class="n">resolution</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)</span> <span class="ow">and</span>
+                            <span class="n">resolution</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;)&#39;</span><span class="p">)),</span> <span class="n">msg</span><span class="p">)</span>
+
+                    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">isotropic</span><span class="p">:</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Resolution of layer &quot;</span><span class="si">%s</span><span class="s">&quot; was not isotropic: &#39;</span>
+                               <span class="s">&#39;[dx, dy] == </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span> <span class="n">res</span><span class="p">))</span>
+                        <span class="n">verify</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+                                              <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">dx</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">isotropic</span><span class="p">:</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+
+        <span class="c"># Return either 2-tuple or scale depending on isotropic</span>
+        <span class="k">return</span> <span class="n">res</span>
+</div>
+<div class="viewcode-block" id="Raster.to_vector_points"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.to_vector_points">[docs]</a>    <span class="k">def</span> <span class="nf">to_vector_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert raster grid to vector point data</span>
+
+<span class="sd">        Output</span>
+<span class="sd">           coordinates: Nx2 array of x, y (lon, lat) coordinates</span>
+<span class="sd">           values: N array of corresponding grid values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Convert grid data to point data</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">P</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">grid2points</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">P</span><span class="p">,</span> <span class="n">V</span>
+</div>
+<div class="viewcode-block" id="Raster.to_vector_layer"><a class="viewcode-back" href="../../../api-docs/safe/storage/raster.html#safe.storage.raster.Raster.to_vector_layer">[docs]</a>    <span class="k">def</span> <span class="nf">to_vector_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert raster grid to vector point data</span>
+
+<span class="sd">        Return a vector layer object with data points corresponding to</span>
+<span class="sd">        grid points. The order is row-major which means that the</span>
+<span class="sd">        x (longitude) direction is varying the fastest.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Get vector data</span>
+        <span class="n">coordinates</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_vector_points</span><span class="p">()</span>
+
+        <span class="c"># Create corresponding vector layer</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">}</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">coordinates</span><span class="p">,</span>
+                   <span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry_type</span><span class="o">=</span><span class="s">&#39;point&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

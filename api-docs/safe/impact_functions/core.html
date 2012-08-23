@@ -1,0 +1,382 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.impact_functions.core &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.impact_functions" href="../impact_functions.html" />
+    <link rel="next" title="Module: safe.impact_functions.styles" href="styles.html" />
+    <link rel="prev" title="Module: safe.impact_functions.test_plugins" href="test_plugins.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="styles.html" title="Module: safe.impact_functions.styles"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_plugins.html" title="Module: safe.impact_functions.test_plugins"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../impact_functions.html" accesskey="U">Package::safe.impact_functions</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.impact_functions.core">
+<span id="module-safe-impact-functions-core"></span><h1>Module:  safe.impact_functions.core<a class="headerlink" href="#module-safe.impact_functions.core" title="Permalink to this headline">¶</a></h1>
+<p>Function to manage self-registering plugins</p>
+<p>The design is based on <a class="reference external" href="http://effbot.org/zone/metaclass-plugins.htm">http://effbot.org/zone/metaclass-plugins.htm</a></p>
+<p>To register the plugin, the module must be imported by the Python process
+using it.</p>
+<dl class="class">
+<dt id="safe.impact_functions.core.FunctionProvider">
+<em class="property">class </em><tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">FunctionProvider</tt><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#FunctionProvider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.FunctionProvider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mount point for plugins which refer to actions that can be performed.</p>
+<p>Plugins implementing this reference should provide the following method:</p>
+<p>run(layers)</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="63%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>layers</td>
+<td>A list of layers</td>
+</tr>
+<tr class="row-even"><td>result</td>
+<td>A list of layers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.aggregate">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">aggregate</tt><big>(</big><em>data=None</em>, <em>boundaries=None</em>, <em>attribute_name=None</em>, <em>aggregation_function='count'</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip data to boundaries and aggregate their values for each.</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">data: Point or Raster dataset
+boundaries: Polygon dataset
+attribute_name: Name of attribute to aggrate over.</p>
+<blockquote>
+<div>This is only applicable for vector data</div></blockquote>
+<p class="last">aggregation_function: Function to apply (&#8216;count&#8217; or &#8216;sum&#8217;)</p>
+</dd>
+<dt>Output</dt>
+<dd>Dictionary of {boundary_name: aggregated value}</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.aggregate_point_data">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">aggregate_point_data</tt><big>(</big><em>data=None</em>, <em>boundaries=None</em>, <em>attribute_name=None</em>, <em>aggregation_function='count'</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#aggregate_point_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.aggregate_point_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip data to boundaries and aggregate their values for each.</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>data: Point dataset
+boundaries: Polygon dataset
+attribute_name: Name of attribute to aggrate over.
+aggregation_function: Function to apply (&#8216;count&#8217; or &#8216;sum&#8217;)</dd>
+<dt>Output</dt>
+<dd>List of aggregated values for each polygon.</dd>
+<dt>Note</dt>
+<dd><p class="first">Aggregated values depend on aggregation function:
+&#8216;sum&#8217;: Sum of values for attribute_name
+&#8216;count&#8217;: Dictionary with counts of occurences of each value</p>
+<blockquote class="last">
+<div>of attribute_name</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.compatible_layers">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">compatible_layers</tt><big>(</big><em>func</em>, <em>layer_descriptors</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#compatible_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.compatible_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches all the layers that match the plugin requirements.</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>func: ? (FIXME(Ole): Ted, can you fill in here?
+layer_descriptor: Layer names and meta data (keywords, type, etc)</dd>
+<dt>Output:</dt>
+<dd>Array of compatible layers, can be an empty list.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.extract_layers">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">extract_layers</tt><big>(</big><em>layers</em>, <em>keyword</em>, <em>value</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#extract_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.extract_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract layers with specified keyword/value pair</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_admissible_plugins">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_admissible_plugins</tt><big>(</big><em>keywords=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_admissible_plugins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_admissible_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plugins that match specified keywords</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>keywords: Either dictionary or list of dictionaries containing</dt>
+<dd><p class="first">layer keywords of the form
+{&#8216;category&#8217;: &#8216;hazard&#8217;, &#8216;subcategory&#8217;: &#8216;flood&#8217;, ...}</p>
+<p class="last">If None or empty all plugins are returned</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>#        name: Optional impact function name (or part of function name)
+#              used to further filter the result.
+#              If None all names are considered to match</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Output</dt>
+<dd>Dictionary of impact functions ({name: class})</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_exposure_layer">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_exposure_layer</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_exposure_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_exposure_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get exposure layer from list of layers</p>
+<p>If there are more than one, only the first is returned.
+Use get_hazard_layers if more are expected and needed</p>
+<p>If no layers fit the description None is returned</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_exposure_layers">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_exposure_layers</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_exposure_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_exposure_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of layers that have category==&#8217;exposure&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_function_title">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_function_title</tt><big>(</big><em>func</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_function_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_function_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get title for impact function</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>func: Impact function class</dd>
+<dt>Output</dt>
+<dd>it&#8217;s title if available as an attribute in the class description,
+otherwise what is returned by the function pretty_function_name.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_hazard_layer">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_hazard_layer</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_hazard_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_hazard_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get hazard layer from list of layers</p>
+<p>If there are more than one, only the first is returned.
+Use get_hazard_layers if more are expected and needed</p>
+<p>If no layers fit the description None is returned</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_hazard_layers">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_hazard_layers</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_hazard_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_hazard_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of layers that have category==&#8217;hazard&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_plugin">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_plugin</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plugin that matches given name</p>
+<p>This is just a wrapper around get_plugins to simplify</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_plugins">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_plugins</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_plugins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a list of plugins that match the name you pass</p>
+<p>Or all of them if no name is passed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_plugins_as_table">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_plugins_as_table</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_plugins_as_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_plugins_as_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a table listing all plugins and their requirements.</p>
+<p>Or just a single plugin if name is passed.</p>
+<p>Args: name str optional name of a specific plugin.</p>
+<p>Returns: table instance containing plugin descriptive data</p>
+<p>Raises: None</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.get_question">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">get_question</tt><big>(</big><em>hazard_title</em>, <em>exposure_title</em>, <em>func</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#get_question"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.get_question" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rephrase the question asked</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>hazard_title: string
+exposure_title: string
+func: impact function class</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.pretty_function_name">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">pretty_function_name</tt><big>(</big><em>func</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#pretty_function_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.pretty_function_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a human readable name for the function
+if the function has a func.plugin_name use this
+otherwise turn underscores to spaces and Caps to spaces</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.requirement_check">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">requirement_check</tt><big>(</big><em>params</em>, <em>require_str</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#requirement_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.requirement_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks a dictionary params against the requirements defined
+in require_str. Require_str must be a valid python expression
+and evaluate to True or False</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.requirements_collect">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">requirements_collect</tt><big>(</big><em>func</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#requirements_collect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.requirements_collect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect the requirements from the plugin function doc</p>
+<dl class="docutils">
+<dt>The requirements need to be specified using</dt>
+<dd>:param requires &lt;valid python expression&gt;</dd>
+</dl>
+<p>The layer keywords are put into the local name space
+each requires should be on a new line
+a &#8216;&#8217; at the end of a line will be a continuation</p>
+<p>returns a (possibly empty) list of Python expressions</p>
+<p>Example of valid requirements expression
+:param requires category==&#8217;hazard&#8217; and                     subcategory in [&#8216;flood&#8217;, &#8216;tsunami&#8217;] and                     layertype==&#8217;raster&#8217; and                     unit==&#8217;m&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.impact_functions.core.requirements_met">
+<tt class="descclassname">safe.impact_functions.core.</tt><tt class="descname">requirements_met</tt><big>(</big><em>requirements</em>, <em>params</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/impact_functions/core.html#requirements_met"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.impact_functions.core.requirements_met" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the plugin can run with a given layer.</p>
+<p>Based on the requirements specified in the doc string.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>True:  if there are no requirements or they are all met.
+False: if it has requirements and none of them are met.</dd>
+</dl>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="test_plugins.html"
+                        title="previous chapter">Module:  safe.impact_functions.test_plugins</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="styles.html"
+                        title="next chapter">Module:  safe.impact_functions.styles</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/impact_functions/core.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="styles.html" title="Module: safe.impact_functions.styles"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="test_plugins.html" title="Module: safe.impact_functions.test_plugins"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../impact_functions.html" >Package::safe.impact_functions</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

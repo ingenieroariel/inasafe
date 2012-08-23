@@ -1,0 +1,326 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.inundation.flood_OSM_building_impact &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.inundation.flood_OSM_building_impact</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_hazard_layer</span><span class="p">,</span> <span class="n">get_exposure_layer</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_question</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">safe.common.tables</span> <span class="kn">import</span> <span class="n">Table</span><span class="p">,</span> <span class="n">TableRow</span>
+<span class="kn">from</span> <span class="nn">safe.common.dynamic_translations</span> <span class="kn">import</span> <span class="n">names</span> <span class="k">as</span> <span class="n">internationalised_values</span>
+
+
+<div class="viewcode-block" id="FloodBuildingImpactFunction"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/inundation/flood_OSM_building_impact.html#safe.impact_functions.inundation.flood_OSM_building_impact.FloodBuildingImpactFunction">[docs]</a><span class="k">class</span> <span class="nc">FloodBuildingImpactFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inundation impact on building data</span>
+
+<span class="sd">    :param requires category == &#39;hazard&#39; and \</span>
+<span class="sd">                    subcategory in [&#39;flood&#39;, &#39;tsunami&#39;]</span>
+
+<span class="sd">    :param requires category == &#39;exposure&#39; and \</span>
+<span class="sd">                    subcategory in [&#39;building&#39;, &#39;structure&#39;] and \</span>
+<span class="sd">                    layertype == &#39;vector&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">target_field</span> <span class="o">=</span> <span class="s">&#39;INUNDATED&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Be temporarily closed&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FloodBuildingImpactFunction.run"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/inundation/flood_OSM_building_impact.html#safe.impact_functions.inundation.flood_OSM_building_impact.FloodBuildingImpactFunction.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flood impact to buildings (e.g. from Open Street Map)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">threshold</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c"># Flood threshold [m]</span>
+
+        <span class="c"># Extract data</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">get_hazard_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>    <span class="c"># Depth</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">get_exposure_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>  <span class="c"># Building locations</span>
+
+        <span class="n">question</span> <span class="o">=</span> <span class="n">get_question</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+                                <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Interpolate hazard level to building locations</span>
+        <span class="k">if</span> <span class="n">H</span><span class="o">.</span><span class="n">is_raster</span><span class="p">:</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;depth&#39;</span><span class="p">)</span>
+            <span class="n">hazard_type</span> <span class="o">=</span> <span class="s">&#39;depth&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+            <span class="n">hazard_type</span> <span class="o">=</span> <span class="s">&#39;floodprone&#39;</span>
+
+        <span class="c"># Extract relevant exposure data</span>
+        <span class="n">attribute_names</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+
+        <span class="c"># Calculate building impact</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">buildings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">affected_buildings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">hazard_type</span> <span class="o">==</span> <span class="s">&#39;depth&#39;</span><span class="p">:</span>
+                <span class="c"># Get the interpolated depth</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;depth&#39;</span><span class="p">])</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+            <span class="k">elif</span> <span class="n">hazard_type</span> <span class="o">==</span> <span class="s">&#39;floodprone&#39;</span><span class="p">:</span>
+                <span class="c"># Use interpolated polygon attribute</span>
+                <span class="n">atts</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="s">&#39;FLOODPRONE&#39;</span> <span class="ow">in</span> <span class="n">atts</span><span class="p">:</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="n">atts</span><span class="p">[</span><span class="s">&#39;FLOODPRONE&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;yes&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># If there isn&#39;t a flood prone attribute,</span>
+                    <span class="c"># assume that building is wet if inside polygon</span>
+                    <span class="c"># as flag by generic attribute AFFECTED</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="n">atts</span><span class="p">[</span><span class="s">&#39;Affected&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">res</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Unknown hazard type </span><span class="si">%s</span><span class="s">. &#39;</span>
+                         <span class="s">&#39;Must be either &quot;depth&quot; or &quot;floodprone&quot;&#39;</span><span class="p">)</span>
+                       <span class="o">%</span> <span class="n">hazard_type</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c"># Count affected buildings by usage type if available</span>
+            <span class="k">if</span> <span class="s">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">attribute_names</span><span class="p">:</span>
+                <span class="n">usage</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;type&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">usage</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="k">if</span> <span class="n">usage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">usage</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">usage</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;unknown&#39;</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
+                <span class="n">buildings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">affected_buildings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># Count all buildings by type</span>
+            <span class="n">buildings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="c"># Count affected buildings by type</span>
+                <span class="n">affected_buildings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c"># Count total affected buildings</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># Add calculated impact to existing attributes</span>
+            <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="c"># Lump small entries and &#39;unknown&#39; into &#39;other&#39; category</span>
+        <span class="k">for</span> <span class="n">usage</span> <span class="ow">in</span> <span class="n">buildings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">25</span> <span class="ow">or</span> <span class="n">usage</span> <span class="o">==</span> <span class="s">&#39;unknown&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;other&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
+                    <span class="n">buildings</span><span class="p">[</span><span class="s">&#39;other&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">affected_buildings</span><span class="p">[</span><span class="s">&#39;other&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">buildings</span><span class="p">[</span><span class="s">&#39;other&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x</span>
+                <span class="n">affected_buildings</span><span class="p">[</span><span class="s">&#39;other&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">affected_buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">affected_buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">]</span>
+
+        <span class="c"># Generate csv file of results</span>
+<span class="c">##        fid = open(&#39;C:\dki_table_%s.csv&#39; % H.get_name(), &#39;wb&#39;)</span>
+<span class="c">##        fid.write(&#39;%s, %s, %s\n&#39; % (_(&#39;Building type&#39;),</span>
+<span class="c">##                                    _(&#39;Temporarily closed&#39;),</span>
+<span class="c">##                                    _(&#39;Total&#39;)))</span>
+<span class="c">##        fid.write(&#39;%s, %i, %i\n&#39; % (_(&#39;All&#39;), count, N))</span>
+
+        <span class="c"># Generate simple impact report</span>
+        <span class="n">table_body</span> <span class="o">=</span> <span class="p">[</span><span class="n">question</span><span class="p">,</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Building type&#39;</span><span class="p">),</span>
+                                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Temporarily closed&#39;</span><span class="p">),</span>
+                                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Total&#39;</span><span class="p">)],</span>
+                               <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">TableRow</span><span class="p">([</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;All&#39;</span><span class="p">),</span> <span class="n">count</span><span class="p">,</span> <span class="n">N</span><span class="p">])]</span>
+
+<span class="c">##        fid.write(&#39;%s, %s, %s\n&#39; % (_(&#39;Building type&#39;),</span>
+<span class="c">##                                    _(&#39;Temporarily closed&#39;),</span>
+<span class="c">##                                    _(&#39;Total&#39;)))</span>
+
+        <span class="c"># Generate break down by building usage type is available</span>
+        <span class="k">if</span> <span class="s">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">attribute_names</span><span class="p">:</span>
+            <span class="c"># Make list of building types</span>
+            <span class="n">building_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">usage</span> <span class="ow">in</span> <span class="n">buildings</span><span class="p">:</span>
+
+                <span class="n">building_type</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+
+                <span class="c"># Lookup internationalised value if available</span>
+                <span class="k">if</span> <span class="n">building_type</span> <span class="ow">in</span> <span class="n">internationalised_values</span><span class="p">:</span>
+                    <span class="n">building_type</span> <span class="o">=</span> <span class="n">internationalised_values</span><span class="p">[</span><span class="n">building_type</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="p">(</span><span class="s">&#39;WARNING: </span><span class="si">%s</span><span class="s"> could not be translated&#39;</span>
+                           <span class="o">%</span> <span class="n">building_type</span><span class="p">)</span>
+
+                <span class="n">building_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">building_type</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span>
+                                      <span class="n">affected_buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">],</span>
+                                      <span class="n">buildings</span><span class="p">[</span><span class="n">usage</span><span class="p">]])</span>
+<span class="c">##                fid.write(&#39;%s, %i, %i\n&#39; % (building_type.capitalize(),</span>
+<span class="c">##                                            affected_buildings[usage],</span>
+<span class="c">##                                            buildings[usage]))</span>
+
+            <span class="c"># Sort alphabetically</span>
+            <span class="n">building_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="c">#table_body.append(TableRow([_(&#39;Building type&#39;),</span>
+            <span class="c">#                            _(&#39;Temporarily closed&#39;),</span>
+            <span class="c">#                            _(&#39;Total&#39;)], header=True))</span>
+            <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Breakdown by building type&#39;</span><span class="p">),</span>
+                                       <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">building_list</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">TableRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="c">##        fid.close()</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Action Checklist:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Are the critical facilities still &#39;</span>
+                                     <span class="s">&#39;open?&#39;</span><span class="p">)))</span>
+
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TableRow</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Notes:&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Buildings are said to be flooded when &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hazard_type</span> <span class="o">==</span> <span class="s">&#39;depth&#39;</span><span class="p">:</span>
+            <span class="n">assumption</span> <span class="o">+=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;flood levels exceed </span><span class="si">%.1f</span><span class="s"> m&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">threshold</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">assumption</span> <span class="o">+=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;in areas marked as flood prone&#39;</span><span class="p">)</span>
+        <span class="n">table_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span>
+
+        <span class="n">impact_summary</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">table_body</span><span class="p">)</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">impact_table</span> <span class="o">=</span> <span class="n">impact_summary</span>
+        <span class="n">map_title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Buildings inundated&#39;</span><span class="p">)</span>
+
+        <span class="c"># Create style</span>
+        <span class="n">style_classes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Not Flooded&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#1EFC7C&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="nb">dict</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Flooded&#39;</span><span class="p">),</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                              <span class="n">colour</span><span class="o">=</span><span class="s">&#39;#F31A1C&#39;</span><span class="p">,</span> <span class="n">transparency</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">style_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">target_field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_field</span><span class="p">,</span>
+                          <span class="n">style_classes</span><span class="o">=</span><span class="n">style_classes</span><span class="p">)</span>
+
+        <span class="c"># Create vector layer and return</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">I</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">I</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Estimated buildings affected&#39;</span><span class="p">),</span>
+                   <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;impact_summary&#39;</span><span class="p">:</span> <span class="n">impact_summary</span><span class="p">,</span>
+                             <span class="s">&#39;impact_table&#39;</span><span class="p">:</span> <span class="n">impact_table</span><span class="p">,</span>
+                             <span class="s">&#39;map_title&#39;</span><span class="p">:</span> <span class="n">map_title</span><span class="p">},</span>
+                   <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">V</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

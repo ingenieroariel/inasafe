@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.common.utilities &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.common.utilities</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Utilities for InaSAFE</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">gettext</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c"># FIXME (Ole): For some reason this module doesn&#39;t work without this</span>
+<span class="c"># pylint: disable=W0404</span>
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+<span class="c"># pylint: enable=W0404</span>
+
+
+<div class="viewcode-block" id="VerificationError"><a class="viewcode-back" href="../../../api-docs/safe/common/utilities.html#safe.common.utilities.VerificationError">[docs]</a><span class="k">class</span> <span class="nc">VerificationError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception thrown by verify()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="verify"><a class="viewcode-back" href="../../../api-docs/safe/common/utilities.html#safe.common.utilities.verify">[docs]</a><span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Verification of logical statement similar to assertions</span>
+<span class="sd">    Input</span>
+<span class="sd">        statement: expression</span>
+<span class="sd">        message: error message in case statement evaluates as False</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        None</span>
+<span class="sd">    Raises</span>
+<span class="sd">        VerificationError in case statement evaluates to False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">VerificationError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ugettext"><a class="viewcode-back" href="../../../api-docs/safe/common/utilities.html#safe.common.utilities.ugettext">[docs]</a><span class="k">def</span> <span class="nf">ugettext</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Translation support</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span>
+                                        <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;i18n&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="s">&#39;LANG&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="n">lang</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;LANG&#39;</span><span class="p">]</span>
+    <span class="n">filename_prefix</span> <span class="o">=</span> <span class="s">&#39;inasafe&#39;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">filename_prefix</span><span class="p">,</span>
+                            <span class="n">path</span><span class="p">,</span> <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">lang</span><span class="p">],</span> <span class="n">fallback</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">ugettext</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setupLogger"><a class="viewcode-back" href="../../../api-docs/safe/common/utilities.html#safe.common.utilities.setupLogger">[docs]</a><span class="k">def</span> <span class="nf">setupLogger</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Run once when the module is loaded and enable logging</span>
+<span class="sd">    Borrowed heavily from this:</span>
+<span class="sd">    http://docs.python.org/howto/logging-cookbook.html</span>
+
+<span class="sd">    Use this to first initialise the logger (see safe/__init__.py)::</span>
+
+<span class="sd">       from safe.common import utilities</span>
+<span class="sd">       utilities.setupLogger()</span>
+
+<span class="sd">    You would typically only need to do the above once ever as the</span>
+<span class="sd">    safe modle is initialised early and will set up the logger</span>
+<span class="sd">    globally so it is available to all packages / subpackages as</span>
+<span class="sd">    shown below.</span>
+
+<span class="sd">    In a module that wants to do logging then use this example as</span>
+<span class="sd">    a guide to get the initialised logger instance::</span>
+
+<span class="sd">       # The LOGGER is intialised in utilities.py by init</span>
+<span class="sd">       import logging</span>
+<span class="sd">       LOGGER = logging.getLogger(&#39;InaSAFE&#39;)</span>
+
+<span class="sd">    Now to log a message do::</span>
+
+<span class="sd">       LOGGER.debug(&#39;Some debug message&#39;)</span>
+
+<span class="sd">    Args: None</span>
+
+<span class="sd">    Returns: None</span>
+
+<span class="sd">    Raises: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">)</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="c"># create syslog handler which logs even debug messages</span>
+    <span class="c"># FIXME(ariel): Make this log to /var/log/safe.log instead of</span>
+    <span class="c">#               /var/log/syslog</span>
+    <span class="n">mySysHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">SysLogHandler</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="s">&#39;/dev/log&#39;</span><span class="p">)</span>
+    <span class="n">mySysHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="c"># create console handler with a higher log level</span>
+    <span class="n">myConsoleHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">myConsoleHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+    <span class="c"># Email handler for errors</span>
+    <span class="n">myEmailServer</span> <span class="o">=</span> <span class="s">&#39;localhost&#39;</span>
+    <span class="n">myEmailServerPort</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">mySenderAddress</span> <span class="o">=</span> <span class="s">&#39;logs@inasafe.org&#39;</span>
+    <span class="n">myRecipientAddresses</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;tim@linfiniti.com&#39;</span><span class="p">]</span>
+    <span class="n">mySubject</span> <span class="o">=</span> <span class="s">&#39;Error&#39;</span>
+    <span class="n">myEmailHandler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">SMTPHandler</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">myEmailServer</span><span class="p">,</span> <span class="n">myEmailServerPort</span><span class="p">),</span>
+        <span class="n">mySenderAddress</span><span class="p">,</span>
+        <span class="n">myRecipientAddresses</span><span class="p">,</span>
+        <span class="n">mySubject</span><span class="p">)</span>
+    <span class="n">myEmailHandler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+    <span class="c"># create formatter and add it to the handlers</span>
+    <span class="n">myFormatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">mySysHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">myFormatter</span><span class="p">)</span>
+    <span class="n">myConsoleHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">myFormatter</span><span class="p">)</span>
+    <span class="n">myEmailHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">myFormatter</span><span class="p">)</span>
+    <span class="c"># add the handlers to the logger</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">mySysHandler</span><span class="p">)</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">myConsoleHandler</span><span class="p">)</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Safe Logger Module Loaded&#39;</span><span class="p">)</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;----------------------&#39;</span><span class="p">)</span>
+    <span class="n">myLogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;CWD: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">curdir</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

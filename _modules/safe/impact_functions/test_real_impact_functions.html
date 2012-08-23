@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.test_real_impact_functions &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.test_real_impact_functions</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Works with real library impact functions rather than test examples</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_admissible_plugins</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">requirements_collect</span>
+
+
+<div class="viewcode-block" id="Test_real_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_real_impact_functions.html#safe.impact_functions.test_real_impact_functions.Test_real_plugins">[docs]</a><span class="k">class</span> <span class="nc">Test_real_plugins</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests of Risiko calculations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Test_real_plugins.test_filtering_of_impact_functions"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_real_impact_functions.html#safe.impact_functions.test_real_impact_functions.Test_real_plugins.test_filtering_of_impact_functions">[docs]</a>    <span class="k">def</span> <span class="nf">test_filtering_of_impact_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Impact functions are filtered correctly</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check empty call returns all</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([])</span>
+
+        <span class="c">#print</span>
+        <span class="c">#for p in P:</span>
+        <span class="c">#    print p, P[p]</span>
+
+        <span class="c"># List the known impact function names</span>
+        <span class="c"># based on their class names - not their titles</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Available impact functions are: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="c">#assert &#39;Earthquake Guidelines Function&#39; in P, msg</span>
+        <span class="k">assert</span> <span class="s">&#39;Padang Earthquake Building Damage Function&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="c"># Added by Tim to replace WB (see below)</span>
+        <span class="k">assert</span> <span class="s">&#39;Flood Building Impact Function&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="c"># Tim commented out W B Flood Evacuation Function - its in experimental</span>
+        <span class="c">#assert &#39;W B Flood Evacuation Function&#39; in P, msg</span>
+        <span class="c">#assert &#39;W B Flood Evacuation Function&#39; in P, msg</span>
+        <span class="c">#assert &#39;Tephra Building Impact Function&#39; in P, msg</span>
+        <span class="c">#assert &#39;Tephra Population Impact Function&#39; in P, msg</span>
+        <span class="c">#assert &#39;Flood Road Impact Function&#39; in P, msg</span>
+        <span class="k">assert</span> <span class="s">&#39;I T B Earthquake Building Damage Function&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s">&#39;Categorised Hazard Building Impact Function&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+
+        <span class="c"># This one should get 2 earthquake building impact functions</span>
+        <span class="n">D1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span> <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">}</span>
+        <span class="n">D2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span> <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;itb&#39;</span><span class="p">,</span>
+              <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+
+        <span class="c"># Add layertype</span>
+        <span class="n">D1</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;raster&#39;</span>
+        <span class="n">D2</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;vector&#39;</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([</span><span class="n">D1</span><span class="p">,</span> <span class="n">D2</span><span class="p">])</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Expected: len(P) &gt;= 2, Got: len(P) is </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span>  <span class="c"># Depending on other tests there could be more</span>
+        <span class="c">#assert &#39;Earthquake Guidelines Function&#39; in P</span>
+        <span class="k">assert</span> <span class="s">&#39;Padang Earthquake Building Damage Function&#39;</span> <span class="ow">in</span> <span class="n">P</span>
+
+        <span class="c"># This one should get 3 flood population impact functions</span>
+        <span class="n">D1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;flood&#39;</span><span class="p">,</span> <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;m&#39;</span><span class="p">}</span>
+        <span class="n">D2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span> <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;population&#39;</span><span class="p">,</span>
+              <span class="s">&#39;datatype&#39;</span><span class="p">:</span> <span class="s">&#39;density&#39;</span><span class="p">}</span>
+
+        <span class="c"># Add layertype</span>
+        <span class="n">D1</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;raster&#39;</span>
+        <span class="n">D2</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;raster&#39;</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([</span><span class="n">D1</span><span class="p">,</span> <span class="n">D2</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>  <span class="c"># Depending on other tests there could be more</span>
+        <span class="k">assert</span> <span class="s">&#39;W B Flood Evacuation Function&#39;</span> <span class="ow">in</span> <span class="n">P</span>
+
+        <span class="c"># Try form where only one dictionary is passed</span>
+        <span class="c"># This one gets all the flood related impact functions</span>
+
+        <span class="c"># Try to get general inundation building impact function</span>
+        <span class="n">f_name</span> <span class="o">=</span> <span class="s">&#39;Flood Building Impact Function&#39;</span>
+
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">(</span><span class="n">D1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+        <span class="k">assert</span> <span class="s">&#39;W B Flood Evacuation Function&#39;</span> <span class="ow">in</span> <span class="n">P</span>
+        <span class="k">assert</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">P</span>
+        <span class="c">#assert &#39;Flood Road Impact Function&#39; in P</span>
+
+        <span class="n">D1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span> <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;tsunami&#39;</span><span class="p">}</span>
+        <span class="n">D2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span> <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">}</span>
+
+        <span class="c"># Add layertype</span>
+        <span class="c">#D1[&#39;layertype&#39;] = &#39;raster&#39;  # Not required for flood building impact</span>
+        <span class="n">D2</span><span class="p">[</span><span class="s">&#39;layertype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;vector&#39;</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([</span><span class="n">D1</span><span class="p">,</span> <span class="n">D2</span><span class="p">])</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Expected name &quot;</span><span class="si">%s</span><span class="s">&quot; in P: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+
+        <span class="c"># Get requirements from expected function</span>
+        <span class="n">P_all</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">P</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span> <span class="o">==</span> <span class="n">P_all</span><span class="p">[</span><span class="n">f_name</span><span class="p">]</span>
+
+        <span class="n">requirelines</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">f_name</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">D</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">D1</span><span class="p">,</span> <span class="n">D2</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">D</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Key </span><span class="si">%s</span><span class="s"> was not found in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">requirelines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">requirelines</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">msg</span>
+
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Val </span><span class="si">%s</span><span class="s"> was not found in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">requirelines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">assert</span> <span class="n">D</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">in</span> <span class="n">requirelines</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">msg</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">Test_real_plugins</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

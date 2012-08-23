@@ -1,0 +1,336 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.storage.vector &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.storage" href="../storage.html" />
+    <link rel="next" title="Module: safe.storage.core" href="core.html" />
+    <link rel="prev" title="Module: safe.storage.projection" href="projection.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="core.html" title="Module: safe.storage.core"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="projection.html" title="Module: safe.storage.projection"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" accesskey="U">Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.storage.vector">
+<span id="module-safe-storage-vector"></span><h1>Module:  safe.storage.vector<a class="headerlink" href="#module-safe.storage.vector" title="Permalink to this headline">¶</a></h1>
+<p><strong>Vector Module</strong></p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Provides functionality for manipulation of vector data. The data can
+be in-memory or file based.</p>
+</div>
+<dl class="class">
+<dt id="safe.storage.vector.Vector">
+<em class="property">class </em><tt class="descclassname">safe.storage.vector.</tt><tt class="descname">Vector</tt><big>(</big><em>data=None</em>, <em>projection=None</em>, <em>geometry=None</em>, <em>geometry_type=None</em>, <em>name=''</em>, <em>keywords=None</em>, <em>style_info=None</em>, <em>sublayer=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for abstraction of vector data.</p>
+<dl class="method">
+<dt id="safe.storage.vector.Vector.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return copy of vector layer</p>
+<p>This copy will be equal to self in the sense defined by __eq__</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_attribute_names">
+<tt class="descname">get_attribute_names</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_attribute_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_attribute_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get available attribute names</p>
+<p>These are the ones that can be used with get_data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_bounding_box">
+<tt class="descname">get_bounding_box</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bounding box coordinates for vector layer.</p>
+<p>Format is [West, South, East, North]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_data">
+<tt class="descname">get_data</tt><big>(</big><em>attribute=None</em>, <em>index=None</em>, <em>copy=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get vector attributes</p>
+<p>Data is returned as a list where each entry is a dictionary of
+attributes for one feature. Entries in get_geometry() and
+get_data() are related as 1-to-1</p>
+<p>If optional argument attribute is specified and a valid name,
+then the list of values for that attribute is returned.</p>
+<p>If optional argument index is specified on the that value will
+be returned. Any value of index is ignored if attribute is None.</p>
+<p>If optional argument copy is True and all attributes are requested,
+a copy will be returned. Otherwise a pointer to the data is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_extrema">
+<tt class="descname">get_extrema</tt><big>(</big><em>attribute=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_extrema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_extrema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get min and max values from specified attribute</p>
+<p>Return min, max</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_geometry">
+<tt class="descname">get_geometry</tt><big>(</big><em>copy=False</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return geometry for vector layer.</p>
+<p>Depending on the feature type, geometry is</p>
+<p>point             list of 2x1 array of longitudes and latitudes)
+line              list of arrays of coordinates
+polygon           list of arrays of coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_geometry_name">
+<tt class="descname">get_geometry_name</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_geometry_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_geometry_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return geometry name for vector layer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_geometry_type">
+<tt class="descname">get_geometry_type</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_geometry_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_geometry_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return geometry type for vector layer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.get_topN">
+<tt class="descname">get_topN</tt><big>(</big><em>attribute</em>, <em>N=10</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.get_topN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.get_topN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get top N features</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>attribute: The name of attribute where values are sought
+N: How many</dd>
+<dt>Output</dt>
+<dd>layer: New vector layer with selected features</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.interpolate">
+<tt class="descname">interpolate</tt><big>(</big><em>X</em>, <em>name=None</em>, <em>attribute_name=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate values of this vector layer to other layer</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">X: Layer object defining target
+name: Optional name of returned interpolated layer
+attribute_name: Optional attribute name to use.</p>
+<blockquote class="last">
+<div><p>If None, all attributes are used.</p>
+<p>FIXME (Ole): Single attribute not tested well yet
+and not implemented for lines</p>
+</div></blockquote>
+</dd>
+<dt>Output</dt>
+<dd><dl class="first last docutils">
+<dt>Y: Layer object with values of this vector layer interpolated to</dt>
+<dd>geometry of input layer X</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.read_from_file">
+<tt class="descname">read_from_file</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.read_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.read_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and unpack vector data.</p>
+<p>It is assumed that the file contains only one layer with the
+pertinent features. Further it is assumed for the moment that
+all geometries are points.</p>
+<ul class="simple">
+<li>A feature is a geometry and a set of attributes.</li>
+<li>A geometry refers to location and can be point, line, polygon or
+combinations thereof.</li>
+<li>The attributes or obtained through GetField()</li>
+</ul>
+<p>The full OGR architecture is documented at
+* <a class="reference external" href="http://www.gdal.org/ogr/ogr_arch.html">http://www.gdal.org/ogr/ogr_arch.html</a>
+* <a class="reference external" href="http://www.gdal.org/ogr/ogr_apitut.html">http://www.gdal.org/ogr/ogr_apitut.html</a></p>
+<p>Examples are at
+* danieljlewis.org/files/2010/09/basicpythonmap.pdf
+* <a class="reference external" href="http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html">http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html</a>
+* <a class="reference external" href="http://www.packtpub.com/article/geospatial-data-python-geometry">http://www.packtpub.com/article/geospatial-data-python-geometry</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="safe.storage.vector.Vector.write_to_file">
+<tt class="descname">write_to_file</tt><big>(</big><em>filename</em>, <em>sublayer=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#Vector.write_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.Vector.write_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save vector data to file</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><p class="first">filename: filename with extension .shp or .gml</p>
+</li>
+<li><dl class="first docutils">
+<dt>sublayer: Optional string for writing a sublayer. Ignored</dt>
+<dd><p class="first last">unless we are writing to an sqlite file.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Shp limitation, if attribute names are longer than 10
+characters they will be truncated. This is due to limitations in
+the shp file driver and has to be done here since gdal v1.7 onwards
+has changed its handling of this issue:
+<a class="reference external" href="http://www.gdal.org/ogr/drv_shapefile.html">http://www.gdal.org/ogr/drv_shapefile.html</a></p>
+<p class="last"><strong>For this reason we recommend writing to spatialite.</strong></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.vector.convert_line_to_points">
+<tt class="descclassname">safe.storage.vector.</tt><tt class="descname">convert_line_to_points</tt><big>(</big><em>V</em>, <em>delta</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#convert_line_to_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.convert_line_to_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert line vector data to point vector data</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>V: Vector layer with line data
+delta: Incremental step to find the points</dd>
+<dt>Output</dt>
+<dd>Vector layer with point data and the same attributes as V</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.storage.vector.convert_polygons_to_centroids">
+<tt class="descclassname">safe.storage.vector.</tt><tt class="descname">convert_polygons_to_centroids</tt><big>(</big><em>V</em><big>)</big><a class="reference internal" href="../../../_modules/safe/storage/vector.html#convert_polygons_to_centroids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.storage.vector.convert_polygons_to_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert polygon vector data to point vector data</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>V: Vector layer with polygon data</dd>
+<dt>Output</dt>
+<dd>Vector layer with point data and the same attributes as V</dd>
+</dl>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="projection.html"
+                        title="previous chapter">Module:  safe.storage.projection</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="core.html"
+                        title="next chapter">Module:  safe.storage.core</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/storage/vector.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="core.html" title="Module: safe.storage.core"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="projection.html" title="Module: safe.storage.projection"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../storage.html" >Package::safe.storage</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

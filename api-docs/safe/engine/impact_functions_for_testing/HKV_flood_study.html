@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.engine.impact_functions_for_testing.HKV_flood_study &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Package::safe.engine.impact_functions_for_testing" href="../impact_functions_for_testing.html" />
+    <link rel="next" title="Package::safe.impact_functions" href="../../impact_functions.html" />
+    <link rel="prev" title="Module: safe.engine.impact_functions_for_testing.empirical_fatality_model" href="empirical_fatality_model.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../../impact_functions.html" title="Package::safe.impact_functions"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="empirical_fatality_model.html" title="Module: safe.engine.impact_functions_for_testing.empirical_fatality_model"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../../engine.html" >Package::safe.engine</a> &raquo;</li>
+          <li><a href="../impact_functions_for_testing.html" accesskey="U">Package::safe.engine.impact_functions_for_testing</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.engine.impact_functions_for_testing.HKV_flood_study">
+<span id="module-safe-engine-impact-functions-for-testing-hkv-flood-study"></span><h1>Module:  safe.engine.impact_functions_for_testing.HKV_flood_study<a class="headerlink" href="#module-safe.engine.impact_functions_for_testing.HKV_flood_study" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="safe.engine.impact_functions_for_testing.HKV_flood_study.HKVFloodImpactFunctionTEST">
+<em class="property">class </em><tt class="descclassname">safe.engine.impact_functions_for_testing.HKV_flood_study.</tt><tt class="descname">HKVFloodImpactFunctionTEST</tt><a class="reference internal" href="../../../../_modules/safe/engine/impact_functions_for_testing/HKV_flood_study.html#HKVFloodImpactFunctionTEST"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.engine.impact_functions_for_testing.HKV_flood_study.HKVFloodImpactFunctionTEST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Risk plugin for flood impact</p>
+<p>:author HKV
+:rating 1
+:param requires category==&#8217;hazard&#8217; and                     subcategory==&#8217;flood&#8217; and                     layertype==&#8217;raster&#8217; and                     unit==&#8217;m&#8217;</p>
+<p>:param requires category==&#8217;exposure&#8217; and                     subcategory==&#8217;population&#8217; and                     layertype==&#8217;raster&#8217; and                     datatype==&#8217;density&#8217;</p>
+<dl class="staticmethod">
+<dt id="safe.engine.impact_functions_for_testing.HKV_flood_study.HKVFloodImpactFunctionTEST.run">
+<em class="property">static </em><tt class="descname">run</tt><big>(</big><em>layers</em><big>)</big><a class="reference internal" href="../../../../_modules/safe/engine/impact_functions_for_testing/HKV_flood_study.html#HKVFloodImpactFunctionTEST.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.engine.impact_functions_for_testing.HKV_flood_study.HKVFloodImpactFunctionTEST.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Risk plugin for earthquake fatalities</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first last docutils">
+<dt>layers: List of layers expected to contain</dt>
+<dd>H: Raster layer of flood depth
+P: Raster layer of population data on the same grid as H</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="empirical_fatality_model.html"
+                        title="previous chapter">Module:  safe.engine.impact_functions_for_testing.empirical_fatality_model</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../impact_functions.html"
+                        title="next chapter">Package::safe.impact_functions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/api-docs/safe/engine/impact_functions_for_testing/HKV_flood_study.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../../impact_functions.html" title="Package::safe.impact_functions"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="empirical_fatality_model.html" title="Module: safe.engine.impact_functions_for_testing.empirical_fatality_model"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../../engine.html" >Package::safe.engine</a> &raquo;</li>
+          <li><a href="../impact_functions_for_testing.html" >Package::safe.engine.impact_functions_for_testing</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

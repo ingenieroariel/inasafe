@@ -1,0 +1,419 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.common.numerics &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.common.numerics</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Numerical tools</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">verify</span>
+
+
+<div class="viewcode-block" id="ensure_numeric"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.ensure_numeric">[docs]</a><span class="k">def</span> <span class="nf">ensure_numeric</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">typecode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensure that sequence is a numeric array.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">        A: Sequence. If A is already a numeric array it will be returned</span>
+<span class="sd">                     unaltered</span>
+<span class="sd">                     If not, an attempt is made to convert it to a numeric</span>
+<span class="sd">                     array</span>
+<span class="sd">        A: Scalar.   Return 0-dimensional array containing that value. Note</span>
+<span class="sd">                     that a 0-dim array DOES NOT HAVE A LENGTH UNDER numpy.</span>
+<span class="sd">        A: String.   Array of ASCII values (numpy can&#39;t handle this)</span>
+
+<span class="sd">        typecode:    numeric type. If specified, use this in the conversion.</span>
+<span class="sd">                     If not, let numeric package decide.</span>
+<span class="sd">                     typecode will always be one of num.float, num.int, etc.</span>
+
+<span class="sd">    Note that numpy.array(A, dtype) will sometimes copy.  Use &#39;copy=False&#39; to</span>
+<span class="sd">    copy only when required.</span>
+
+<span class="sd">    This function is necessary as array(A) can cause memory overflow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Sorry, cannot handle strings in ensure_numeric()&#39;</span>
+        <span class="c"># FIXME (Ole): Change this to whatever is the appropriate exception</span>
+        <span class="c"># for wrong input type</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">typecode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">typecode</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="nanallclose"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.nanallclose">[docs]</a><span class="k">def</span> <span class="nf">nanallclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Numpy allclose function which allows NaN</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        x, y: Either scalars or numpy arrays</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        True or False</span>
+
+<span class="sd">    Returns True if all non-nan elements pass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">xn</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">yn</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">xn</span> <span class="o">!=</span> <span class="n">yn</span><span class="p">):</span>
+        <span class="c"># Presence of NaNs is not the same in x and y</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">xn</span><span class="p">):</span>
+        <span class="c"># Everything is NaN.</span>
+        <span class="c"># This will also take care of x and y being NaN scalars</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c"># Filter NaN&#39;s out</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">xn</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="n">xn</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="n">yn</span><span class="p">]</span>
+
+    <span class="c"># Compare non NaN&#39;s and return</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="normal_cdf"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.normal_cdf">[docs]</a><span class="k">def</span> <span class="nf">normal_cdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cumulative Normal Distribution Function</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        x: scalar or array of real numbers</span>
+<span class="sd">        mu: Mean value. Default 0</span>
+<span class="sd">        sigma: Standard deviation. Default 1</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        An approximation of the cdf of the normal</span>
+
+<span class="sd">    CDF of the normal distribution is defined as</span>
+<span class="sd">    \frac12 [1 + erf(\frac{x - \mu}{\sigma \sqrt{2}})], x \in \R</span>
+
+<span class="sd">    Source: http://en.wikipedia.org/wiki/Normal_distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">arg</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">erf</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+</div>
+<div class="viewcode-block" id="lognormal_cdf"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.lognormal_cdf">[docs]</a><span class="k">def</span> <span class="nf">lognormal_cdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">median</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cumulative Log Normal Distribution Function</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        x: scalar or array of real numbers</span>
+<span class="sd">        mu: Median (exp(mean of log(x)). Default 1</span>
+<span class="sd">        sigma: Log normal standard deviation. Default 1</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        An approximation of the cdf of the normal</span>
+
+<span class="sd">    CDF of the normal distribution is defined as</span>
+<span class="sd">    \frac12 [1 + erf(\frac{x - \mu}{\sigma \sqrt{2}})], x \in \R</span>
+
+<span class="sd">    Source: http://en.wikipedia.org/wiki/Normal_distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">normal_cdf</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">mu</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">median</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="erf"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.erf">[docs]</a><span class="k">def</span> <span class="nf">erf</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Approximation to ERF</span>
+
+<span class="sd">    from:</span>
+<span class="sd">    http://www.cs.princeton.edu/introcs/21function/ErrorFunction.java.html</span>
+<span class="sd">    Implements the Gauss error function.</span>
+<span class="sd">    erf(z) = 2 / sqrt(pi) * integral(exp(-t*t), t = 0..z)</span>
+
+<span class="sd">    Fractional error in math formula less than 1.2 * 10 ^ -7.</span>
+<span class="sd">    although subject to catastrophic cancellation when z in very close to 0</span>
+<span class="sd">    from Chebyshev fitting formula for erf(z) from Numerical Recipes, 6.2</span>
+
+<span class="sd">    Source:</span>
+<span class="sd">    http://stackoverflow.com/questions/457408/</span>
+<span class="sd">    is-there-an-easily-available-implementation-of-erf-for-python</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input check</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">scalar</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">[</span><span class="n">z</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scalar</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="c"># Begin algorithm</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+
+    <span class="c"># Use Horner&#39;s method</span>
+    <span class="n">ans</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">t</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span> <span class="o">*</span> <span class="n">z</span> <span class="o">-</span> <span class="mf">1.26551223</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.00002368</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.37409196</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.09678418</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.18628806</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.27886807</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.13520398</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.48851587</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.82215223</span> <span class="o">+</span>
+                           <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.17087277</span><span class="p">))))))))))</span>
+
+    <span class="n">neg</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span>  <span class="c"># Mask for negative input values</span>
+    <span class="n">ans</span><span class="p">[</span><span class="n">neg</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ans</span><span class="p">[</span><span class="n">neg</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">scalar</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ans</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ans</span>
+
+</div>
+<div class="viewcode-block" id="axes2points"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.axes2points">[docs]</a><span class="k">def</span> <span class="nf">axes2points</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate all combinations of grid point coordinates from x and y axes</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        x: x coordinates (array)</span>
+<span class="sd">        y: y coordinates (array)</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        P: Nx2 array consisting of coordinates for all</span>
+<span class="sd">           grid points defined by x and y axes. The x coordinate</span>
+<span class="sd">           will vary the fastest to match the way 2D numpy</span>
+<span class="sd">           arrays are laid out by default (&#39;C&#39; order). That way,</span>
+<span class="sd">           the x and y coordinates will match a corresponding</span>
+<span class="sd">           2D array A when flattened (A.flat[:] or A.reshape(-1))</span>
+
+<span class="sd">    Example</span>
+
+<span class="sd">    x = [1, 2, 3]</span>
+<span class="sd">    y = [10, 20]</span>
+
+<span class="sd">    P = [[1, 10],</span>
+<span class="sd">         [2, 10],</span>
+<span class="sd">         [3, 10],</span>
+<span class="sd">         [1, 20],</span>
+<span class="sd">         [2, 20],</span>
+<span class="sd">         [3, 20]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Reverse y coordinates to have them start at bottom of array</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c"># Repeat x coordinates for each y (fastest varying)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="c"># Repeat y coordinates for each x (slowest varying)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="c"># Check</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="p">)</span>
+
+    <span class="c"># Create Nx2 array of x and y coordinates</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c"># Return</span>
+    <span class="k">return</span> <span class="n">P</span>
+
+</div>
+<div class="viewcode-block" id="grid2points"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.grid2points">[docs]</a><span class="k">def</span> <span class="nf">grid2points</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert grid data to point data</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        A: Array of pixel values</span>
+<span class="sd">        x: Longitudes corresponding to columns in A (left-&gt;right)</span>
+<span class="sd">        y: Latitudes corresponding to rows in A (top-&gt;bottom)</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        P: Nx2 array of point coordinates</span>
+<span class="sd">        V: N array of point values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Create Nx2 array of x, y points corresponding to each</span>
+    <span class="c"># element in A.</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">axes2points</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c"># Create flat 1D row-major view of A cast as</span>
+    <span class="c"># one column vector of length MxN where M, N = A.shape</span>
+    <span class="c">#values = A.reshape((-1, 1))</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c"># Concatenate coordinates with their values from the grid</span>
+    <span class="c">#P = numpy.concatenate((points, values), axis=1)</span>
+
+    <span class="c"># Return Nx3 array with rows: x, y, value</span>
+    <span class="k">return</span> <span class="n">points</span><span class="p">,</span> <span class="n">values</span>
+
+</div>
+<div class="viewcode-block" id="geotransform2axes"><a class="viewcode-back" href="../../../api-docs/safe/common/numerics.html#safe.common.numerics.geotransform2axes">[docs]</a><span class="k">def</span> <span class="nf">geotransform2axes</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert geotransform to coordinate axes</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        G: GDAL geotransform (6-tuple).</span>
+<span class="sd">           (top left x, w-e pixel resolution, rotation,</span>
+<span class="sd">            top left y, rotation, n-s pixel resolution).</span>
+<span class="sd">        nx: Number of cells in the w-e direction</span>
+<span class="sd">        ny: Number of cells in the n-s direction</span>
+
+
+<span class="sd">    Output</span>
+<span class="sd">        Return two vectors (longitudes and latitudes) representing the grid</span>
+<span class="sd">        defined by the geotransform.</span>
+
+<span class="sd">        The values are offset by half a pixel size to correspond to</span>
+<span class="sd">        pixel registration.</span>
+
+<span class="sd">        I.e. If the grid origin (top left corner) is (105, 10) and the</span>
+<span class="sd">        resolution is 1 degrees in each direction, then the vectors will</span>
+<span class="sd">        take the form</span>
+
+<span class="sd">        longitudes = [100.5, 101.5, ..., 109.5]</span>
+<span class="sd">        latitudes = [0.5, 1.5, ..., 9.5]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lon_ul</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c"># Longitude of upper left corner</span>
+    <span class="n">lat_ul</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c"># Latitude of upper left corner</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>      <span class="c"># Longitudinal resolution</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>    <span class="c"># Latitudinal resolution (always(?) negative)</span>
+
+    <span class="n">verify</span><span class="p">(</span><span class="n">dx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">dy</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c"># Coordinates of lower left corner</span>
+    <span class="n">lon_ll</span> <span class="o">=</span> <span class="n">lon_ul</span>
+    <span class="n">lat_ll</span> <span class="o">=</span> <span class="n">lat_ul</span> <span class="o">-</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">dy</span>
+
+    <span class="c"># Coordinates of upper right corner</span>
+    <span class="n">lon_ur</span> <span class="o">=</span> <span class="n">lon_ul</span> <span class="o">+</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">dx</span>
+
+    <span class="c"># Define pixel centers along each directions</span>
+    <span class="c"># This is to achieve pixel registration rather</span>
+    <span class="c"># than gridline registration</span>
+    <span class="n">dx2</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">dy2</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="c"># Define longitudes and latitudes for each axes</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lon_ll</span> <span class="o">+</span> <span class="n">dx2</span><span class="p">,</span>
+                       <span class="n">lon_ur</span> <span class="o">-</span> <span class="n">dx2</span><span class="p">,</span> <span class="n">nx</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lat_ll</span> <span class="o">+</span> <span class="n">dy2</span><span class="p">,</span>
+                       <span class="n">lat_ul</span> <span class="o">-</span> <span class="n">dy2</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+
+    <span class="c"># Return</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

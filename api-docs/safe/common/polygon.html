@@ -1,0 +1,471 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: safe.common.polygon &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Package::safe.common" href="../common.html" />
+    <link rel="next" title="Package::safe.storage" href="../storage.html" />
+    <link rel="prev" title="Module: safe.common.interpolation1d" href="interpolation1d.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../storage.html" title="Package::safe.storage"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation1d.html" title="Module: safe.common.interpolation1d"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" accesskey="U">Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-safe.common.polygon">
+<span id="module-safe-common-polygon"></span><h1>Module:  safe.common.polygon<a class="headerlink" href="#module-safe.common.polygon" title="Permalink to this headline">¶</a></h1>
+<p><strong>Polygon, line and point algorithms.</strong></p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<dl class="last docutils">
+<dt>The main public functions are:</dt>
+<dd>separate_points_by_polygon: Fundamental clipper
+intersection: Determine intersections of lines</dd>
+<dt>Some more specific or helper functions include:</dt>
+<dd>inside_polygon
+is_inside_polygon
+outside_polygon
+is_outside_polygon
+point_on_line</dd>
+</dl>
+</div>
+<dl class="function">
+<dt id="safe.common.polygon.clip_grid_by_polygons">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">clip_grid_by_polygons</tt><big>(</big><em>A</em>, <em>geotransform</em>, <em>polygons</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#clip_grid_by_polygons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.clip_grid_by_polygons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip raster grid by polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">A: MxN array of grid points
+geotransform: 6-tuple used to locate A geographically</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>(top left x, w-e pixel resolution, rotation,</dt>
+<dd>top left y, rotation, n-s pixel resolution)</dd>
+</dl>
+</div></blockquote>
+<p class="last">polygons: list of polygons, each an array of vertices</p>
+</dd>
+<dt>Output</dt>
+<dd>#List of rasters - one per input polygon.
+List of points, values - one per input polygon.</dd>
+</dl>
+<p>Implementing algorithm suggested in
+<a class="reference external" href="https://github.com/AIFDR/inasafe/issues/91#issuecomment-7025120">https://github.com/AIFDR/inasafe/issues/91#issuecomment-7025120</a></p>
+<dl class="docutils">
+<dt>Note: Grid points are considered to be pixel-registered which means</dt>
+<dd>that each point represents the center of its grid cell.
+The required half cell shifts are taken care of by the
+function geotransform2axes</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.clip_line_by_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">clip_line_by_polygon</tt><big>(</big><em>line</em>, <em>polygon</em>, <em>closed=True</em>, <em>check_input=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#clip_line_by_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.clip_line_by_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip line segments by polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>line: Sequence of line nodes: [[x0, y0], [x1, y1], ...] or</dt>
+<dd>the equivalent Nx2 numpy array</dd>
+</dl>
+<p class="last">polygon: list or Nx2 array of polygon vertices
+closed: (optional) determine whether points on boundary should be
+regarded as belonging to the polygon (closed = True)
+or not (closed = False) - False is not recommended here
+check_input: Allows faster execution if set to False</p>
+</dd>
+<dt>Outputs</dt>
+<dd><p class="first">inside_lines: Clipped lines that are inside polygon
+outside_lines: Clipped lines that are outside polygon</p>
+<p class="last">Both outputs take the form of lists of Nx2 line arrays</p>
+</dd>
+</dl>
+<p>Example:</p>
+<blockquote>
+<div><p>U = [[0,0], [1,0], [1,1], [0,1]]  # Unit square</p>
+<p># Simple horizontal fully intersecting line
+line = [[-1, 0.5], [2, 0.5]]</p>
+<p>inside_line_segments, outside_line_segments =             clip_line_by_polygon(line, polygon)</p>
+<dl class="docutils">
+<dt>print numpy.allclose(inside_line_segments,</dt>
+<dd>[[[0, 0.5], [1, 0.5]]])</dd>
+<dt>print numpy.allclose(outside_line_segments,</dt>
+<dd><dl class="first last docutils">
+<dt>[[[-1, 0.5], [0, 0.5]],</dt>
+<dd>[[1, 0.5], [2, 0.5]]])</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Remarks:</dt>
+<dd><p class="first">The assumptions listed in separate_points_by_polygon apply</p>
+<p class="last">Output line segments are listed as separate lines i.e. not joined</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.clip_lines_by_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">clip_lines_by_polygon</tt><big>(</big><em>lines</em>, <em>polygon</em>, <em>closed=True</em>, <em>check_input=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#clip_lines_by_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.clip_lines_by_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip multiple lines by polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>lines: Sequence of polylines: [[p0, p1, ...], [q0, q1, ...], ...]</dt>
+<dd>where pi and qi are point coordinates (x, y).</dd>
+</dl>
+<p>polygon: list or Nx2 array of polygon vertices
+closed: (optional) determine whether points on boundary should be</p>
+<blockquote>
+<div>regarded as belonging to the polygon (closed = True)
+or not (closed = False) - False is not recommended here</div></blockquote>
+<p class="last">check_input: Allows faster execution if set to False</p>
+</dd>
+<dt>Output</dt>
+<dd>inside_line_segments: Clipped line segments that are inside polygon
+outside_line_segments: Clipped line segments that are outside polygon</dd>
+</dl>
+<p>This is a wrapper around clip_line_by_polygon</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.in_and_outside_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">in_and_outside_polygon</tt><big>(</big><em>points</em>, <em>polygon</em>, <em>closed=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#in_and_outside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.in_and_outside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separate a list of points into two sets inside and outside a polygon</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><p class="first">points: (tuple, list or array) of coordinates
+polygon: list or Nx2 array of polygon vertices
+closed: Set to True if points on boundary are considered</p>
+<blockquote class="last">
+<div>to be &#8216;inside&#8217; polygon</div></blockquote>
+</dd>
+<dt>Output</dt>
+<dd>inside: Array of points inside the polygon
+outside: Array of points outside the polygon</dd>
+</dl>
+<p>See separate_points_by_polygon for more documentation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.inside_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">inside_polygon</tt><big>(</big><em>points</em>, <em>polygon</em>, <em>closed=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#inside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.inside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine points inside a polygon</p>
+<p>Functions inside_polygon and outside_polygon have been defined in
+terms of separate_by_polygon which will put all inside indices in
+the first part of the indices array and outside indices in the last</p>
+<p>See separate_points_by_polygon for documentation</p>
+<p>points and polygon can be a geospatial instance,
+a list or a numeric array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.intersection">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">intersection</tt><big>(</big><em>line0</em>, <em>line1</em>, <em>rtol=1e-12</em>, <em>atol=1e-12</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns intersecting point between two line segments.</p>
+<p>However, if parallel lines coincide partly (i.e. share a common segment),
+the line segment where lines coincide is returned</p>
+<dl class="docutils">
+<dt>Inputs:</dt>
+<dd><dl class="first docutils">
+<dt>line0, line1: Each defined by two end points as in:</dt>
+<dd>[[x0, y0], [x1, y1]]
+A line can also be a 2x2 numpy array with each row
+corresponding to a point.</dd>
+</dl>
+<p class="last">rtol, atol: Tolerances passed onto numpy.allclose</p>
+</dd>
+<dt>Output:</dt>
+<dd><p class="first">status, value - where status and value is interpreted as follows:
+status == 0: no intersection, value set to None.
+status == 1: intersection point found and returned in value as [x,y].
+status == 2: Collinear overlapping lines found.</p>
+<blockquote>
+<div>Value takes the form [[x0,y0], [x1,y1]] which is the
+segment common to both lines.</div></blockquote>
+<p class="last">status == 3: Collinear non-overlapping lines. Value set to None.
+status == 4: Lines are parallel. Value set to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.is_inside_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">is_inside_polygon</tt><big>(</big><em>point</em>, <em>polygon</em>, <em>closed=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#is_inside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.is_inside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if one point is inside a polygon</p>
+<p>See inside_polygon for more details</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.is_outside_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">is_outside_polygon</tt><big>(</big><em>point</em>, <em>polygon</em>, <em>closed=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#is_outside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.is_outside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if one point is outside a polygon</p>
+<p>See outside_polygon for more details</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.join_line_segments">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">join_line_segments</tt><big>(</big><em>segments</em>, <em>rtol=1e-12</em>, <em>atol=1e-12</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#join_line_segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.join_line_segments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join adjacent line segments</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd>segments: List of distinct line segments [[p0, p1], [p2, p3], ...]
+rtol, atol: Optional tolerances passed on to numpy.allclose</dd>
+<dt>Output</dt>
+<dd>list of Nx2 numpy arrays each corresponding to a continuous line
+formed from consecutive segments</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.outside_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">outside_polygon</tt><big>(</big><em>points</em>, <em>polygon</em>, <em>closed=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#outside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.outside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine points outside a polygon</p>
+<p>Functions inside_polygon and outside_polygon have been defined in
+terms of separate_by_polygon which will put all inside indices in
+the first part of the indices array and outside indices in the last</p>
+<p>See separate_points_by_polygon for documentation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.point_on_line">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">point_on_line</tt><big>(</big><em>points</em>, <em>line</em>, <em>rtol=1e-05</em>, <em>atol=1e-08</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#point_on_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.point_on_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a point is on a line segment</p>
+<dl class="docutils">
+<dt>Input</dt>
+<dd><dl class="first docutils">
+<dt>points: Coordinates of either</dt>
+<dd><ul class="first last simple">
+<li>one point given by sequence [x, y]</li>
+<li>multiple points given by list of points or Nx2 array</li>
+</ul>
+</dd>
+<dt>line: Endpoint coordinates [[x0, y0], [x1, y1]] or</dt>
+<dd>the equivalent 2x2 numeric array with each row corresponding
+to a point.</dd>
+</dl>
+<p class="last">rtol: Relative error for how close a point must be to be accepted
+atol: Absolute error for how close a point must be to be accepted</p>
+</dd>
+<dt>Output</dt>
+<dd>True or False</dd>
+</dl>
+<p>Notes</p>
+<p>Line can be degenerate and function still works to discern coinciding
+points from non-coinciding.</p>
+<p>Tolerances rtol and atol are used with numpy.allclose()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.populate_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">populate_polygon</tt><big>(</big><em>polygon</em>, <em>number_of_points</em>, <em>seed=None</em>, <em>exclude=None</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#populate_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.populate_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate given polygon with uniformly distributed points.</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd><p class="first">polygon - list of vertices of polygon
+number_of_points - (optional) number of points
+seed - seed for random number generator (default=None)
+exclude - list of polygons (inside main polygon) from where points</p>
+<blockquote class="last">
+<div>should be excluded</div></blockquote>
+</dd>
+<dt>Output:</dt>
+<dd>points - list of points inside polygon</dd>
+<dt>Examples:</dt>
+<dd>populate_polygon( [[0,0], [1,0], [1,1], [0,1]], 5 )
+will return five randomly selected points inside the unit square</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="safe.common.polygon.separate_points_by_polygon">
+<tt class="descclassname">safe.common.polygon.</tt><tt class="descname">separate_points_by_polygon</tt><big>(</big><em>points</em>, <em>polygon</em>, <em>closed=True</em>, <em>check_input=True</em>, <em>use_numpy=True</em><big>)</big><a class="reference internal" href="../../../_modules/safe/common/polygon.html#separate_points_by_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe.common.polygon.separate_points_by_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether points are inside or outside a polygon.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><p class="first">points: Tuple of (x, y) coordinates, or list of tuples</p>
+</li>
+<li><p class="first">polygon: list or Nx2 array of polygon vertices</p>
+</li>
+<li><dl class="first docutils">
+<dt>closed: (optional) determine whether points on boundary should be</dt>
+<dd><p class="first last">regarded as belonging to the polygon (closed = True)
+or not (closed = False)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">check_input: Allows faster execution if set to False</p>
+</li>
+<li><p class="first">use_numpy: Use the fast numpy implementation</p>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><ul class="first">
+<li><dl class="first docutils">
+<dt>indices: array of same length as points with indices of points</dt>
+<dd><p class="first last">falling inside the polygon listed from the beginning and indices
+of points falling outside listed from the end.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">count: count of points falling inside the polygon</p>
+</li>
+</ul>
+<p class="last">The indices of points inside are obtained as indices[:count]
+The indices of points outside are obtained as indices[count:]</p>
+</dd>
+</dl>
+<p>Raises: A generic Exception is raised for unexpected input.</p>
+<p>Example:</p>
+<blockquote>
+<div><p>U = [[0,0], [1,0], [1,1], [0,1]]  # Unit square
+separate_points_by_polygon( [[0.5, 0.5], [1, -0.5], [0.3, 0.2]], U)</p>
+<p>will return the indices [0, 2, 1] and count == 2 as only the first
+and the last point are inside the unit square</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Remarks:</dt>
+<dd>The vertices may be listed clockwise or counterclockwise and
+the first point may optionally be repeated.
+Polygons do not need to be convex.
+Polygons can have holes in them and points inside a hole is
+regarded as being outside the polygon.</dd>
+</dl>
+<p>Algorithm is based on work by Darel Finley,
+<a class="reference external" href="http://www.alienryderflex.com/polygon/">http://www.alienryderflex.com/polygon/</a></p>
+</dd></dl>
+
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interpolation1d.html"
+                        title="previous chapter">Module:  safe.common.interpolation1d</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../storage.html"
+                        title="next chapter">Package::safe.storage</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api-docs/safe/common/polygon.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="../storage.html" title="Package::safe.storage"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="interpolation1d.html" title="Module: safe.common.interpolation1d"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >InaSAFE&#8217;s API documentation</a> &raquo;</li>
+          <li><a href="../../safe.html" >Package::safe</a> &raquo;</li>
+          <li><a href="../common.html" >Package::safe.common</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

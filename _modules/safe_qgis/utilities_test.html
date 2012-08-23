@@ -1,0 +1,379 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe_qgis.utilities_test &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe_qgis.utilities_test</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Helper module for gui test suite</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">qgis.core</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QgsApplication</span><span class="p">,</span>
+                      <span class="n">QgsVectorLayer</span><span class="p">,</span>
+                      <span class="n">QgsRasterLayer</span><span class="p">,</span>
+                      <span class="n">QgsRectangle</span><span class="p">,</span>
+                      <span class="n">QgsCoordinateReferenceSystem</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qgis.gui</span> <span class="kn">import</span> <span class="n">QgsMapCanvas</span>
+<span class="kn">from</span> <span class="nn">qgis_interface</span> <span class="kn">import</span> <span class="n">QgisInterface</span>
+
+<span class="c"># For testing and demoing</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">TESTDATA</span>
+<span class="kn">from</span> <span class="nn">safe_qgis.safe_interface</span> <span class="kn">import</span> <span class="n">readKeywordsFromFile</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+
+<span class="n">QGISAPP</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Static vainasafele used to hold hand to running QGis app</span>
+<span class="n">CANVAS</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">PARENT</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">IFACE</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">GEOCRS</span> <span class="o">=</span> <span class="mi">4326</span>  <span class="c"># constant for EPSG:GEOCRS Geographic CRS id</span>
+<span class="n">GOOGLECRS</span> <span class="o">=</span> <span class="mi">900913</span>  <span class="c"># constant for EPSG:GOOGLECRS Google Mercator id</span>
+
+
+<div class="viewcode-block" id="assertHashesForFile"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.assertHashesForFile">[docs]</a><span class="k">def</span> <span class="nf">assertHashesForFile</span><span class="p">(</span><span class="n">theHashes</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assert that a files has matches one of a list of expected hashes&quot;&quot;&quot;</span>
+    <span class="n">myHash</span> <span class="o">=</span> <span class="n">hashForFile</span><span class="p">(</span><span class="n">theFilename</span><span class="p">)</span>
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected hash&#39;</span>
+                 <span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="s">&#39;</span>
+                 <span class="s">&#39;</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="s">&#39;</span>
+                 <span class="s">&#39;</span><span class="se">\n</span><span class="s">Please check graphics </span><span class="si">%s</span><span class="s"> visually &#39;</span>
+                 <span class="s">&#39;and add to list of expected hashes &#39;</span>
+                 <span class="s">&#39;if it is OK on this platform.&#39;</span>
+                  <span class="o">%</span> <span class="p">(</span><span class="n">myHash</span><span class="p">,</span> <span class="n">theHashes</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">myHash</span> <span class="ow">in</span> <span class="n">theHashes</span><span class="p">,</span> <span class="n">myMessage</span>
+
+</div>
+<div class="viewcode-block" id="assertHashForFile"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.assertHashForFile">[docs]</a><span class="k">def</span> <span class="nf">assertHashForFile</span><span class="p">(</span><span class="n">theHash</span><span class="p">,</span> <span class="n">theFilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assert that a files has matches its expected hash&quot;&quot;&quot;</span>
+    <span class="n">myHash</span> <span class="o">=</span> <span class="n">hashForFile</span><span class="p">(</span><span class="n">theFilename</span><span class="p">)</span>
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unexpected hash&#39;</span>
+                 <span class="s">&#39;</span><span class="se">\n</span><span class="s">Got: </span><span class="si">%s</span><span class="s">&#39;</span>
+                 <span class="s">&#39;</span><span class="se">\n</span><span class="s">Expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">myHash</span><span class="p">,</span> <span class="n">theHash</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">myHash</span> <span class="o">==</span> <span class="n">theHash</span><span class="p">,</span> <span class="n">myMessage</span>
+
+</div>
+<div class="viewcode-block" id="hashForFile"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.hashForFile">[docs]</a><span class="k">def</span> <span class="nf">hashForFile</span><span class="p">(</span><span class="n">theFilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return an md5 checksum for a file&quot;&quot;&quot;</span>
+    <span class="n">myPath</span> <span class="o">=</span> <span class="n">theFilename</span>
+    <span class="n">myData</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">myHash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    <span class="n">myHash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">myData</span><span class="p">)</span>
+    <span class="n">myHash</span> <span class="o">=</span> <span class="n">myHash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">myHash</span>
+
+</div>
+<div class="viewcode-block" id="getQgisTestApp"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.getQgisTestApp">[docs]</a><span class="k">def</span> <span class="nf">getQgisTestApp</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Start one QGis application to test agaist</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        NIL</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        handle to qgis app</span>
+
+
+<span class="sd">    If QGis is already running the handle to that app will be returned</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">QGISAPP</span>  <span class="c"># pylint: disable=W0603</span>
+
+    <span class="k">if</span> <span class="n">QGISAPP</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myGuiFlag</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c"># All test will run qgis in safe_qgis mode</span>
+        <span class="n">QGISAPP</span> <span class="o">=</span> <span class="n">QgsApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">myGuiFlag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;QGISPATH&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;QGISPATH&#39;</span><span class="p">]</span>
+            <span class="n">myUseDefaultPathFlag</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">QGISAPP</span><span class="o">.</span><span class="n">setPrefixPath</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myUseDefaultPathFlag</span><span class="p">)</span>
+
+        <span class="n">QGISAPP</span><span class="o">.</span><span class="n">initQgis</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">QGISAPP</span><span class="o">.</span><span class="n">showSettings</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">s</span>
+
+    <span class="k">global</span> <span class="n">PARENT</span>  <span class="c"># pylint: disable=W0603</span>
+    <span class="k">if</span> <span class="n">PARENT</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">PARENT</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+
+    <span class="k">global</span> <span class="n">CANVAS</span>  <span class="c"># pylint: disable=W0603</span>
+    <span class="k">if</span> <span class="n">CANVAS</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">CANVAS</span> <span class="o">=</span> <span class="n">QgsMapCanvas</span><span class="p">(</span><span class="n">PARENT</span><span class="p">)</span>
+        <span class="n">CANVAS</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">400</span><span class="p">))</span>
+
+    <span class="k">global</span> <span class="n">IFACE</span>  <span class="c"># pylint: disable=W0603</span>
+    <span class="k">if</span> <span class="n">IFACE</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># QgisInterface is a stub implementation of the QGIS plugin interface</span>
+        <span class="n">IFACE</span> <span class="o">=</span> <span class="n">QgisInterface</span><span class="p">(</span><span class="n">CANVAS</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">QGISAPP</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">,</span> <span class="n">IFACE</span><span class="p">,</span> <span class="n">PARENT</span>
+
+</div>
+<div class="viewcode-block" id="unitTestDataPath"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.unitTestDataPath">[docs]</a><span class="k">def</span> <span class="nf">unitTestDataPath</span><span class="p">(</span><span class="n">theSubdir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the absolute path to the InaSAFE unit test data dir.</span>
+
+<span class="sd">    .. note:: This is not the same thing as the SVN inasafe_data dir. Rather</span>
+<span class="sd">       this is a new dataset where the test datasets are all tiny for fast</span>
+<span class="sd">       testing and the datasets live in the same repo as the code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       * theSubdir: (Optional) Additional subdir to add to the path - typically</span>
+<span class="sd">         &#39;hazard&#39; or &#39;exposure&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">UNITDATA</span>
+
+    <span class="n">myPath</span> <span class="o">=</span> <span class="n">UNITDATA</span>
+
+    <span class="k">if</span> <span class="n">theSubdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span>
+                                              <span class="n">theSubdir</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">myPath</span>
+
+</div>
+<div class="viewcode-block" id="loadLayer"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.loadLayer">[docs]</a><span class="k">def</span> <span class="nf">loadLayer</span><span class="p">(</span><span class="n">theLayerFile</span><span class="p">,</span> <span class="n">theDirectory</span><span class="o">=</span><span class="n">TESTDATA</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to load and return a single QGIS layer</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        theLayerFile: Pathname to raster or vector file</span>
+<span class="sd">        DIR: Optional parameter stating the parent dir. If None,</span>
+<span class="sd">             pathname is assumed to be absolute</span>
+
+<span class="sd">    Returns: QgsMapLayer, str (for layer type)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Extract basename and absolute path</span>
+    <span class="n">myFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">theLayerFile</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c"># In case path was absolute</span>
+    <span class="n">myBaseName</span><span class="p">,</span> <span class="n">myExt</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">myFilename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">theDirectory</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">theLayerFile</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">myPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">theDirectory</span><span class="p">,</span> <span class="n">theLayerFile</span><span class="p">)</span>
+    <span class="n">myKeywordPath</span> <span class="o">=</span> <span class="n">myPath</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span>
+
+    <span class="c"># Determine if layer is hazard or exposure</span>
+    <span class="n">myKeywords</span> <span class="o">=</span> <span class="n">readKeywordsFromFile</span><span class="p">(</span><span class="n">myKeywordPath</span><span class="p">)</span>
+    <span class="n">myType</span> <span class="o">=</span> <span class="s">&#39;undefined&#39;</span>
+    <span class="k">if</span> <span class="s">&#39;category&#39;</span> <span class="ow">in</span> <span class="n">myKeywords</span><span class="p">:</span>
+        <span class="n">myType</span> <span class="o">=</span> <span class="n">myKeywords</span><span class="p">[</span><span class="s">&#39;category&#39;</span><span class="p">]</span>
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Could not read </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">myKeywordPath</span>
+    <span class="k">assert</span> <span class="n">myKeywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">myMessage</span>
+
+    <span class="c"># Create QGis Layer Instance</span>
+    <span class="k">if</span> <span class="n">myExt</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.asc&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">]:</span>
+        <span class="n">myLayer</span> <span class="o">=</span> <span class="n">QgsRasterLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myBaseName</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">myExt</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.shp&#39;</span><span class="p">]:</span>
+        <span class="n">myLayer</span> <span class="o">=</span> <span class="n">QgsVectorLayer</span><span class="p">(</span><span class="n">myPath</span><span class="p">,</span> <span class="n">myBaseName</span><span class="p">,</span> <span class="s">&#39;ogr&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;File </span><span class="si">%s</span><span class="s"> had illegal extension&#39;</span> <span class="o">%</span> <span class="n">myPath</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">myMessage</span><span class="p">)</span>
+
+    <span class="n">myMessage</span> <span class="o">=</span> <span class="s">&#39;Layer &quot;</span><span class="si">%s</span><span class="s">&quot; is not valid&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">myLayer</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+    <span class="k">assert</span> <span class="n">myLayer</span><span class="o">.</span><span class="n">isValid</span><span class="p">(),</span> <span class="n">myMessage</span>
+    <span class="k">return</span> <span class="n">myLayer</span><span class="p">,</span> <span class="n">myType</span>
+
+</div>
+<div class="viewcode-block" id="setCanvasCrs"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setCanvasCrs">[docs]</a><span class="k">def</span> <span class="nf">setCanvasCrs</span><span class="p">(</span><span class="n">theEpsgId</span><span class="p">,</span> <span class="n">theOtfpFlag</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to set the crs for the CANVAS before a test is run.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        * theEpsgId  - Valid EPSG identifier (int)</span>
+<span class="sd">        * theOtfpFlag - whether on the fly projections should be enabled</span>
+<span class="sd">                        on the CANVAS. Default to False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="c"># Enable on-the-fly reprojection</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">mapRenderer</span><span class="p">()</span><span class="o">.</span><span class="n">setProjectionsEnabled</span><span class="p">(</span><span class="n">theOtfpFlag</span><span class="p">)</span>
+
+    <span class="c"># Create CRS Instance</span>
+    <span class="n">myCrs</span> <span class="o">=</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="p">()</span>
+    <span class="n">myCrs</span><span class="o">.</span><span class="n">createFromId</span><span class="p">(</span><span class="n">theEpsgId</span><span class="p">,</span> <span class="n">QgsCoordinateReferenceSystem</span><span class="o">.</span><span class="n">EpsgCrsId</span><span class="p">)</span>
+
+    <span class="c"># Reproject all layers to WGS84 geographic CRS</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">mapRenderer</span><span class="p">()</span><span class="o">.</span><span class="n">setDestinationCrs</span><span class="p">(</span><span class="n">myCrs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setPadangGeoExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setPadangGeoExtent">[docs]</a><span class="k">def</span> <span class="nf">setPadangGeoExtent</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area occupied by both both Padang layers&quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">100.21</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.05</span><span class="p">,</span> <span class="mf">100.63</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.84</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setJakartaGeoExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setJakartaGeoExtent">[docs]</a><span class="k">def</span> <span class="nf">setJakartaGeoExtent</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area occupied by both Jakarta layers in Geo&quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">106.52</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.38</span><span class="p">,</span> <span class="mf">107.14</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.07</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setJakartaGoogleExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setJakartaGoogleExtent">[docs]</a><span class="k">def</span> <span class="nf">setJakartaGoogleExtent</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area occupied by both Jakarta layers in 900913 crs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mi">11873524</span><span class="p">,</span> <span class="o">-</span><span class="mi">695798</span><span class="p">,</span> <span class="mi">11913804</span><span class="p">,</span> <span class="o">-</span><span class="mi">675295</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setBatemansBayGeoExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setBatemansBayGeoExtent">[docs]</a><span class="k">def</span> <span class="nf">setBatemansBayGeoExtent</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area occupied by both Batemans Bay</span>
+<span class="sd">     layers in geo crs&quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">150.152</span><span class="p">,</span> <span class="o">-</span><span class="mf">35.710</span><span class="p">,</span> <span class="mf">150.187</span><span class="p">,</span> <span class="o">-</span><span class="mf">35.7013</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setYogyaGeoExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setYogyaGeoExtent">[docs]</a><span class="k">def</span> <span class="nf">setYogyaGeoExtent</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area occupied by both Jakarta layers in Geo&quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="mf">110.348</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.732</span><span class="p">,</span> <span class="mf">110.368</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.716</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="setGeoExtent"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.setGeoExtent">[docs]</a><span class="k">def</span> <span class="nf">setGeoExtent</span><span class="p">(</span><span class="n">theBoundingBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Zoom to an area specified given bounding box (list)&quot;&quot;&quot;</span>
+    <span class="n">myRect</span> <span class="o">=</span> <span class="n">QgsRectangle</span><span class="p">(</span><span class="o">*</span><span class="n">theBoundingBox</span><span class="p">)</span>
+    <span class="n">CANVAS</span><span class="o">.</span><span class="n">setExtent</span><span class="p">(</span><span class="n">myRect</span><span class="p">)</span>
+
+</div>
+<span class="n">DEVNULL</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RedirectStdStreams"><a class="viewcode-back" href="../../api-docs/safe_qgis/utilities_test.html#safe_qgis.utilities_test.RedirectStdStreams">[docs]</a><span class="k">class</span> <span class="nc">RedirectStdStreams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Context manager for redirection of stdout and stderr</span>
+
+<span class="sd">    This is from</span>
+<span class="sd">    http://stackoverflow.com/questions/6796492/</span>
+<span class="sd">    python-temporarily-redirect-stdout-stderr</span>
+
+<span class="sd">    In this context, the class is used to get rid of QGIS</span>
+<span class="sd">    output in the test suite - BUT IT DOESN&#39;T WORK (Maybe</span>
+<span class="sd">    because QGIS starts its providers in a different process?)</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    devnull = open(os.devnull, &#39;w&#39;)</span>
+<span class="sd">    print(&#39;Fubar&#39;)</span>
+
+<span class="sd">    with RedirectStdStreams(stdout=devnull, stderr=devnull):</span>
+<span class="sd">        print(&quot;You&#39;ll never see me&quot;)</span>
+
+<span class="sd">    print(&quot;I&#39;m back!&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span> <span class="o">=</span> <span class="n">stdout</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stderr</span> <span class="o">=</span> <span class="n">stderr</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_stdout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stderr</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_stdout</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_stderr</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../contents.html">
+          <img class="logo" src="../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

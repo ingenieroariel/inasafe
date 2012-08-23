@@ -31,8 +31,8 @@
     <script type="text/javascript" src="../../_static/toggle_sections.js"></script>
     <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../index.html" />
     <link rel="up" title="Package::safe_qgis" href="../safe_qgis.html" />
-    <link rel="next" title="Module: safe_qgis.keywords_dialog" href="keywords_dialog.html" />
-    <link rel="prev" title="Module: safe_qgis.impact_calculator" href="impact_calculator.html" /> 
+    <link rel="next" title="Module: safe_qgis.safe_interface" href="safe_interface.html" />
+    <link rel="prev" title="Module: safe_qgis.utilities" href="utilities.html" /> 
   </head>
   <body>
     <div class="relbar-top">
@@ -47,10 +47,10 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="keywords_dialog.html" title="Module: safe_qgis.keywords_dialog"
+          <a href="safe_interface.html" title="Module: safe_qgis.safe_interface"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="impact_calculator.html" title="Module: safe_qgis.impact_calculator"
+          <a href="utilities.html" title="Module: safe_qgis.utilities"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="../../index.html">Home</a> &raquo;</li>
     <li><a href="../../contents.html">Contents</a> &raquo;</li>
@@ -67,29 +67,22 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-safe-qgis-keyword-io">
-<h1>Module:  safe_qgis.keyword_io<a class="headerlink" href="#module-safe-qgis-keyword-io" title="Permalink to this headline">¶</a></h1>
-<p>This page contains the documentation for the InaSAFE <strong>safe_qgis.keyword_io</strong>
-module.</p>
-<span class="target" id="module-safe_qgis.keyword_io"></span><dl class="docutils">
-<dt>InaSAFE Disaster risk assessment tool developed by AusAid -</dt>
-<dd><strong>IS Keyword IO implementation.</strong></dd>
-</dl>
-<p>Contact : <a class="reference external" href="mailto:ole&#46;moller&#46;nielsen&#37;&#52;&#48;gmail&#46;com">ole<span>&#46;</span>moller<span>&#46;</span>nielsen<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.</p>
+  <div class="section" id="module-safe_qgis.keyword_io">
+<span id="module-safe-qgis-keyword-io"></span><h1>Module:  safe_qgis.keyword_io<a class="headerlink" href="#module-safe_qgis.keyword_io" title="Permalink to this headline">¶</a></h1>
+<p><strong>Keyword IO implementation.</strong></p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Provides functionality for reading and writing keywords from within
+QGIS. It is an abstration for the keywords system used by the underlying
+library.</p>
 </div>
 <dl class="class">
 <dt id="safe_qgis.keyword_io.KeywordIO">
 <em class="property">class </em><tt class="descclassname">safe_qgis.keyword_io.</tt><tt class="descname">KeywordIO</tt><a class="reference internal" href="../../_modules/safe_qgis/keyword_io.html#KeywordIO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keyword_io.KeywordIO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class for doing keyword read/write operations. It abstracts away
-differences between using SAFE to get keywords from a .keywords file
-and this plugins implemenation of keyword caching in a local sqlite db
-used for supporting keywords for remote datasources.</p>
+<dd><p>Class for doing keyword read/write operations.</p>
+<p>It abstracts away differences between using SAFE to get keywords from a
+.keywords file and this plugins implemenation of keyword caching in a local
+sqlite db used for supporting keywords for remote datasources.</p>
 <dl class="method">
 <dt id="safe_qgis.keyword_io.KeywordIO.areKeywordsFileBased">
 <tt class="descname">areKeywordsFileBased</tt><big>(</big><em>theLayer</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keyword_io.html#KeywordIO.areKeywordsFileBased"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keyword_io.KeywordIO.areKeywordsFileBased" title="Permalink to this definition">¶</a></dt>
@@ -309,8 +302,8 @@ given key if it is present.</dd>
 <dl class="method">
 <dt id="safe_qgis.keyword_io.KeywordIO.setKeywordDbPath">
 <tt class="descname">setKeywordDbPath</tt><big>(</big><em>thePath</em><big>)</big><a class="reference internal" href="../../_modules/safe_qgis/keyword_io.html#KeywordIO.setKeywordDbPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#safe_qgis.keyword_io.KeywordIO.setKeywordDbPath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the path for the keyword database (sqlite) that should be used
-to search for keywords for non local datasets.</p>
+<dd><p>Set the path for the keyword database (sqlite).</p>
+<p>The file will be used to search for keywords for non local datasets.</p>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd>thePath - a valid path to a sqlite database. The database does
@@ -397,6 +390,7 @@ complete keywords dictionary is returned.</dd>
 
 </dd></dl>
 
+<p>This module forms part of the <a class="reference external" href="http://inasafe.org">InaSAFE</a> tool.</p>
 </div>
 
 
@@ -409,11 +403,11 @@ complete keywords dictionary is returned.</dd>
           <img class="logo" src="../../_static/icon.png" alt="Logo"/>
         </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="impact_calculator.html"
-                        title="previous chapter">Module:  safe_qgis.impact_calculator</a></p>
+  <p class="topless"><a href="utilities.html"
+                        title="previous chapter">Module:  safe_qgis.utilities</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="keywords_dialog.html"
-                        title="next chapter">Module:  safe_qgis.keywords_dialog</a></p>
+  <p class="topless"><a href="safe_interface.html"
+                        title="next chapter">Module:  safe_qgis.safe_interface</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../_sources/api-docs/safe_qgis/keyword_io.txt"
@@ -448,10 +442,10 @@ complete keywords dictionary is returned.</dd>
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="keywords_dialog.html" title="Module: safe_qgis.keywords_dialog"
+          <a href="safe_interface.html" title="Module: safe_qgis.safe_interface"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="impact_calculator.html" title="Module: safe_qgis.impact_calculator"
+          <a href="utilities.html" title="Module: safe_qgis.utilities"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="../../index.html">Home</a> &raquo;</li>
     <li><a href="../../contents.html">Contents</a> &raquo;</li>

@@ -1,0 +1,322 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.test_plugin_core &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.test_plugin_core</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">requirements_collect</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">requirement_check</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">requirements_met</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">get_admissible_plugins</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">get_function_title</span>
+<span class="kn">from</span> <span class="nn">core</span> <span class="kn">import</span> <span class="n">get_plugins_as_table</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BasicFunction"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.BasicFunction">[docs]</a><span class="k">class</span> <span class="nc">BasicFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :author Allen</span>
+<span class="sd">    :rating 1</span>
+<span class="sd">    :param requires category==&quot;test_cat1&quot;</span>
+<span class="sd">    :param requires unit==&quot;MMI&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.97429</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">11.037</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="F1"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.F1">[docs]</a><span class="k">class</span> <span class="nc">F1</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :param requires category==&#39;test_cat1&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;flood&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    unit==&#39;m&#39;</span>
+
+<span class="sd">    :param requires category==&#39;test_cat2&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;population&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    datatype==&#39;population&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Title for F1&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="F2"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.F2">[docs]</a><span class="k">class</span> <span class="nc">F2</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :param requires category==&#39;test_cat1&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;flood&#39;) and \</span>
+<span class="sd">                    layertype==&#39;raster&#39; and \</span>
+<span class="sd">                    unit==&#39;m&#39;</span>
+
+<span class="sd">    :param requires category==&#39;test_cat2&#39; and \</span>
+<span class="sd">                    subcategory.startswith(&#39;building&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Title for F2&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="F3"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.F3">[docs]</a><span class="k">class</span> <span class="nc">F3</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :param requires category==&#39;test_cat1&#39;</span>
+<span class="sd">    :param requires category==&#39;test_cat2&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="SyntaxErrorFunction"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.SyntaxErrorFunction">[docs]</a><span class="k">class</span> <span class="nc">SyntaxErrorFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :author Allen</span>
+<span class="sd">    :rating 1</span>
+<span class="sd">    :param requires category==&quot;test_cat1&quot;</span>
+<span class="sd">    :param requires unit=&quot;MMI&quot; #Note the error should be ==</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.97429</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">11.037</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="Test_plugin_core"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core">[docs]</a><span class="k">class</span> <span class="nc">Test_plugin_core</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests of Risiko calculations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Test_plugin_core.test_basic_plugin_requirements"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_basic_plugin_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">test_basic_plugin_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Basic plugin requirements collection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">requirelines</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">BasicFunction</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;test_cat1&#39;</span><span class="p">,</span> <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;MMI&#39;</span><span class="p">}</span>
+        <span class="k">assert</span> <span class="n">requirements_met</span><span class="p">(</span><span class="n">requirelines</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;test_cat2&#39;</span><span class="p">,</span> <span class="s">&#39;unit&#39;</span><span class="p">:</span> <span class="s">&#39;mmi2&#39;</span><span class="p">}</span>
+        <span class="k">assert</span> <span class="n">requirements_met</span><span class="p">(</span><span class="n">requirelines</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="Test_plugin_core.test_basic_plugin_requirements_met"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_basic_plugin_requirements_met">[docs]</a>    <span class="k">def</span> <span class="nf">test_basic_plugin_requirements_met</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Basic plugin requirements met</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">requirelines</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">BasicFunction</span><span class="p">)</span>
+        <span class="n">valid_return</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;category==&quot;test_cat1&quot;&#39;</span><span class="p">,</span> <span class="s">&#39;unit==&quot;MMI&quot;&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ret1</span><span class="p">,</span> <span class="n">ret2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">valid_return</span><span class="p">,</span> <span class="n">requirelines</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">ret1</span> <span class="o">==</span> <span class="n">ret2</span><span class="p">,</span> <span class="s">&quot;Error in requirements extraction&quot;</span>
+</div>
+<div class="viewcode-block" id="Test_plugin_core.test_basic_requirements_check"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_basic_requirements_check">[docs]</a>    <span class="k">def</span> <span class="nf">test_basic_requirements_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Basic plugin requirements check</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">requirelines</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">BasicFunction</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;test_cat2&#39;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">requirelines</span><span class="p">:</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="n">requirement_check</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">check</span> <span class="o">==</span> <span class="bp">False</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;unit=&#39;MMI&#39;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;test_cat2&#39;</span><span class="p">}</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Malformed statement (logged)&#39;</span>
+        <span class="k">assert</span> <span class="n">requirement_check</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="c">#self.assertRaises(SyntaxError, requirement_check, params, line)</span>
+</div>
+<div class="viewcode-block" id="Test_plugin_core.test_keywords_error"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_keywords_error">[docs]</a>    <span class="k">def</span> <span class="nf">test_keywords_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handling of reserved python keywords &quot;&quot;&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;unit==&#39;MMI&#39;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;myclass&#39;</span><span class="p">}</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Reserved keyword in statement (logged)&#39;</span>
+        <span class="k">assert</span> <span class="n">requirement_check</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">,</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="Test_plugin_core.test_filtering_of_impact_functions"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_filtering_of_impact_functions">[docs]</a>    <span class="k">def</span> <span class="nf">test_filtering_of_impact_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Impact functions are filtered correctly</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Keywords matching F1 and F3</span>
+        <span class="n">haz_keywords1</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&#39;test_cat1&#39;</span><span class="p">,</span> <span class="n">subcategory</span><span class="o">=</span><span class="s">&#39;flood&#39;</span><span class="p">,</span>
+                             <span class="n">layertype</span><span class="o">=</span><span class="s">&#39;raster&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;m&#39;</span><span class="p">)</span>
+        <span class="n">exp_keywords1</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&#39;test_cat2&#39;</span><span class="p">,</span> <span class="n">subcategory</span><span class="o">=</span><span class="s">&#39;population&#39;</span><span class="p">,</span>
+                             <span class="n">layertype</span><span class="o">=</span><span class="s">&#39;raster&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s">&#39;population&#39;</span><span class="p">)</span>
+
+        <span class="c"># Keywords matching F2 and F3</span>
+        <span class="n">haz_keywords2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&#39;test_cat1&#39;</span><span class="p">,</span> <span class="n">subcategory</span><span class="o">=</span><span class="s">&#39;flood&#39;</span><span class="p">,</span>
+                             <span class="n">layertype</span><span class="o">=</span><span class="s">&#39;raster&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s">&#39;m&#39;</span><span class="p">)</span>
+        <span class="n">exp_keywords2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&#39;test_cat2&#39;</span><span class="p">,</span> <span class="n">subcategory</span><span class="o">=</span><span class="s">&#39;building&#39;</span><span class="p">)</span>
+
+        <span class="c"># Check correct matching of keyword set 1</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([</span><span class="n">haz_keywords1</span><span class="p">,</span> <span class="n">exp_keywords1</span><span class="p">])</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Expected impact functions F1 and F3 in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="s">&#39;F1&#39;</span> <span class="ow">in</span> <span class="n">P</span> <span class="ow">and</span> <span class="s">&#39;F3&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+
+        <span class="c"># Check correctness of title attribute</span>
+        <span class="k">assert</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="s">&#39;F1&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s">&#39;Title for F1&#39;</span>
+        <span class="k">assert</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="s">&#39;F3&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s">&#39;F3&#39;</span>
+
+        <span class="c"># Check correct matching of keyword set 2</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([</span><span class="n">haz_keywords2</span><span class="p">,</span> <span class="n">exp_keywords2</span><span class="p">])</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Expected impact functions F2 and F3 in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="s">&#39;F2&#39;</span> <span class="ow">in</span> <span class="n">P</span> <span class="ow">and</span> <span class="s">&#39;F3&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+
+        <span class="c"># Check correctness of title attribute</span>
+        <span class="k">assert</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="s">&#39;F2&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s">&#39;Title for F2&#39;</span>
+        <span class="k">assert</span> <span class="n">get_function_title</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="s">&#39;F3&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s">&#39;F3&#39;</span>
+
+        <span class="c"># Check empty call returns all</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">get_admissible_plugins</span><span class="p">([])</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Expected at least impact functions F1, F2 and F3 in </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">assert</span> <span class="s">&#39;F1&#39;</span> <span class="ow">in</span> <span class="n">P</span> <span class="ow">and</span> <span class="s">&#39;F2&#39;</span> <span class="ow">in</span> <span class="n">P</span> <span class="ow">and</span> <span class="s">&#39;F3&#39;</span> <span class="ow">in</span> <span class="n">P</span><span class="p">,</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="Test_plugin_core.test_get_plugins_as_table"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugin_core.html#safe.impact_functions.test_plugin_core.Test_plugin_core.test_get_plugins_as_table">[docs]</a>    <span class="k">def</span> <span class="nf">test_get_plugins_as_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test get plugins as table&quot;&quot;&quot;</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">get_plugins_as_table</span><span class="p">()</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+        <span class="c">#f = file(&#39;/tmp/tbl.html&#39;, &#39;wt&#39;)</span>
+        <span class="c">#f.write(S)</span>
+        <span class="c">#f.close()</span>
+        <span class="c"># Rather arbitrary way to see if the table has some data in it</span>
+        <span class="c"># maybe there is a nicer way to test given that fn list can change? TS</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span>
+
+        <span class="c"># Now test the table for a single nominated fn</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">get_plugins_as_table</span><span class="p">(</span><span class="s">&#39;F1&#39;</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">toNewlineFreeString</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+        <span class="c">#f = file(&#39;/tmp/tbl.html&#39;, &#39;wt&#39;)</span>
+        <span class="c">#f.write(S)</span>
+        <span class="c">#f.close()</span>
+        <span class="c"># Expecting that F1 test wont change and that the table produced for</span>
+        <span class="c"># it is of a deterministic length</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">518</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">Test_plugin_core</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

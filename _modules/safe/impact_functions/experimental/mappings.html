@@ -1,0 +1,536 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.experimental.mappings &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.experimental.mappings</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Collection of mappings for standard vulnerability classes</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">safe.storage.vector</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span>
+
+
+<div class="viewcode-block" id="osm2padang"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/mappings.html#safe.impact_functions.experimental.mappings.osm2padang">[docs]</a><span class="k">def</span> <span class="nf">osm2padang</span><span class="p">(</span><span class="n">E</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map OSM attributes to Padang vulnerability classes</span>
+
+<span class="sd">    This maps attributes collected in the OpenStreetMap exposure data</span>
+<span class="sd">    (data.kompetisiosm.org) to 9 vulnerability classes identified by</span>
+<span class="sd">    Geoscience Australia and ITB in the post 2009 Padang earthquake</span>
+<span class="sd">    survey (http://trove.nla.gov.au/work/38470066).</span>
+<span class="sd">    The mapping was developed by Abigail Baca, GFDRR.</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        E: Vector object representing the OSM data</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Vector object like E, but with one new attribute (&#39;VCLASS&#39;)</span>
+<span class="sd">        representing the vulnerability class used in the Padang dataset</span>
+
+
+<span class="sd">    Algorithm</span>
+
+<span class="sd">    1. Class the &quot;levels&quot; field into height bands where 1-3 = low,</span>
+<span class="sd">       4-10 = mid, &gt;10 = high</span>
+<span class="sd">    2. Where height band = mid then building type = 4</span>
+<span class="sd">       &quot;RC medium rise Frame with Masonry in-fill walls&quot;</span>
+<span class="sd">    3. Where height band = high then building type = 6</span>
+<span class="sd">       &quot;Concrete Shear wall high rise* Hazus C2H&quot;</span>
+<span class="sd">    4. Where height band = low and structure = (plastered or</span>
+<span class="sd">       reinforced_masonry) then building type = 7</span>
+<span class="sd">       &quot;RC low rise Frame with Masonry in-fill walls&quot;</span>
+<span class="sd">    5. Where height band = low and structure = confined_masonry then</span>
+<span class="sd">       building type = 8 &quot;Confined Masonry&quot;</span>
+<span class="sd">    6. Where height band = low and structure = unreinforced_masonry then</span>
+<span class="sd">       building type = 2 &quot;URM with Metal Roof&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input check</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;levels&#39;</span><span class="p">,</span> <span class="s">&#39;structure&#39;</span><span class="p">]</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input data to osm2padang must have attributes </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;It has </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">required</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">actual</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="ow">in</span> <span class="n">actual</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Start mapping</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;levels&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;structure&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">structure</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Map string variable levels to integer</span>
+            <span class="k">if</span> <span class="n">levels</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">):</span>
+                <span class="n">levels</span> <span class="o">=</span> <span class="mi">100</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">levels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c"># E.g. &#39;ILP jalan&#39;</span>
+                <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Start mapping depending on levels</span>
+                <span class="k">if</span> <span class="n">levels</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="c"># High</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c"># Concrete shear</span>
+                <span class="k">elif</span> <span class="mi">4</span> <span class="o">&lt;=</span> <span class="n">levels</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="c"># Mid</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c"># RC mid</span>
+                <span class="k">elif</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">levels</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="c"># Low</span>
+                    <span class="k">if</span> <span class="n">structure</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;plastered&#39;</span><span class="p">,</span>
+                                     <span class="s">&#39;reinforced masonry&#39;</span><span class="p">,</span>
+                                     <span class="s">&#39;reinforced_masonry&#39;</span><span class="p">]:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c"># RC low</span>
+                    <span class="k">elif</span> <span class="n">structure</span> <span class="o">==</span> <span class="s">&#39;confined_masonry&#39;</span><span class="p">:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c"># Confined</span>
+                    <span class="k">elif</span> <span class="s">&#39;kayu&#39;</span> <span class="ow">in</span> <span class="n">structure</span> <span class="ow">or</span> <span class="s">&#39;wood&#39;</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">9</span>  <span class="c"># Wood</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c"># URM</span>
+                <span class="k">elif</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="c"># A few buildings exist with 0 levels.</span>
+
+                    <span class="c"># In general, we should be assigning here the most</span>
+                    <span class="c"># frequent building in the area which could be defined</span>
+                    <span class="c"># by admin boundaries.</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Unknown number of levels: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">levels</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Store new attribute value</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;VCLASS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vulnerability_class</span>
+
+        <span class="c"># Selfcheck for use with osm_080811.shp</span>
+        <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;osm_080811&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">levels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Got </span><span class="si">%s</span><span class="s"> expected </span><span class="si">%s</span><span class="s">. levels = </span><span class="si">%f</span><span class="s">, structure = </span><span class="si">%s</span><span class="s">&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">vulnerability_class</span><span class="p">,</span>
+                          <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;TestBLDGCl&#39;</span><span class="p">],</span>
+                          <span class="n">levels</span><span class="p">,</span>
+                          <span class="n">structure</span><span class="p">))</span>
+                <span class="n">verify</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;TestBLDGCl&#39;</span><span class="p">],</span>
+                                      <span class="n">vulnerability_class</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c">#print &#39;Got %i without levels or structure (out of %i total)&#39; % (count, N)</span>
+
+    <span class="c"># Create new vector instance and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+               <span class="n">name</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39; mapped to Padang vulnerability classes&#39;</span><span class="p">,</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+</div>
+<div class="viewcode-block" id="sigab2padang"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/mappings.html#safe.impact_functions.experimental.mappings.sigab2padang">[docs]</a><span class="k">def</span> <span class="nf">sigab2padang</span><span class="p">(</span><span class="n">E</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map SIGAB attributes to Padang vulnerability classes</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        E: Vector object representing the SIGAB data</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Vector object like E, but with one new attribute (&#39;VCLASS&#39;)</span>
+<span class="sd">        representing the vulnerability class used in the Padang dataset</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input check</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Struktur_B&#39;</span><span class="p">,</span> <span class="s">&#39;Lantai&#39;</span><span class="p">,</span> <span class="s">&#39;Atap&#39;</span><span class="p">,</span> <span class="s">&#39;Dinding&#39;</span><span class="p">,</span> <span class="s">&#39;Tingkat&#39;</span><span class="p">]</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input data to sigab2bnpb must have attributes </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;It has </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">required</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">actual</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="ow">in</span> <span class="n">actual</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Start mapping</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Tingkat&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Struktur_B&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">roof_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Atap&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">wall_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Dinding&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">floor_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Lantai&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="o">==</span> <span class="s">&#39;none&#39;</span> <span class="ow">or</span> <span class="n">structure</span> <span class="o">==</span> <span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c"># RC low</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Low</span>
+                <span class="k">if</span> <span class="n">structure</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;beton bertulang&#39;</span><span class="p">]:</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c"># Concrete shear</span>
+                <span class="k">elif</span> <span class="n">structure</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;rangka&#39;</span><span class="p">):</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c"># Confined</span>
+                <span class="k">elif</span> <span class="s">&#39;kayu&#39;</span> <span class="ow">in</span> <span class="n">structure</span> <span class="ow">or</span> <span class="s">&#39;wood&#39;</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">9</span>  <span class="c"># Wood</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c"># URM</span>
+
+        <span class="c"># Store new attribute value</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;VCLASS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vulnerability_class</span>
+
+        <span class="c"># Selfcheck for use with osm_080811.shp</span>
+        <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;osm_080811&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">levels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Got </span><span class="si">%s</span><span class="s"> expected </span><span class="si">%s</span><span class="s">. levels = </span><span class="si">%f</span><span class="s">, structure = </span><span class="si">%s</span><span class="s">&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">vulnerability_class</span><span class="p">,</span>
+                          <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;TestBLDGCl&#39;</span><span class="p">],</span>
+                          <span class="n">levels</span><span class="p">,</span>
+                          <span class="n">structure</span><span class="p">))</span>
+                <span class="n">verify</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;TestBLDGCl&#39;</span><span class="p">],</span>
+                                      <span class="n">vulnerability_class</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Create new vector instance and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+               <span class="n">name</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39; mapped to Padang vulnerability classes&#39;</span><span class="p">,</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+</div>
+<div class="viewcode-block" id="osm2bnpb"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/mappings.html#safe.impact_functions.experimental.mappings.osm2bnpb">[docs]</a><span class="k">def</span> <span class="nf">osm2bnpb</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">target_attribute</span><span class="o">=</span><span class="s">&#39;VCLASS&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map OSM attributes to BNPB vulnerability classes</span>
+
+<span class="sd">    This maps attributes collected in the OpenStreetMap exposure data</span>
+<span class="sd">    (data.kompetisiosm.org) to 2 vulnerability classes identified by</span>
+<span class="sd">    BNPB in Kajian Risiko Gempabumi VERS 1.0, 2011. They are</span>
+<span class="sd">    URM: Unreinforced Masonry and RM: Reinforced Masonry</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        E: Vector object representing the OSM data</span>
+<span class="sd">        target_attribute: Optional name of the attribute containing</span>
+<span class="sd">                          the mapped vulnerability class. Default</span>
+<span class="sd">                          value is &#39;VCLASS&#39;</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Vector object like E, but with one new attribute (e.g. &#39;VCLASS&#39;)</span>
+<span class="sd">        representing the vulnerability class used in the guidelines</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input check</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;levels&#39;</span><span class="p">,</span> <span class="s">&#39;structure&#39;</span><span class="p">]</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input data to osm2bnpb must have attributes </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;It has </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">required</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">actual</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="ow">in</span> <span class="n">actual</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Start mapping</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;levels&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;structure&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">structure</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Map string variable levels to integer</span>
+            <span class="k">if</span> <span class="n">levels</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">):</span>
+                <span class="n">levels</span> <span class="o">=</span> <span class="mi">100</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">levels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c"># E.g. &#39;ILP jalan&#39;</span>
+                <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Start mapping depending on levels</span>
+                <span class="k">if</span> <span class="n">levels</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="c"># High</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;RM&#39;</span>
+                <span class="k">elif</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">levels</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="c"># Low</span>
+                    <span class="k">if</span> <span class="n">structure</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;reinforced_masonry&#39;</span><span class="p">,</span> <span class="s">&#39;confined_masonry&#39;</span><span class="p">]:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;RM&#39;</span>
+                    <span class="k">elif</span> <span class="s">&#39;kayu&#39;</span> <span class="ow">in</span> <span class="n">structure</span> <span class="ow">or</span> <span class="s">&#39;wood&#39;</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;RM&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+                <span class="k">elif</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="c"># A few buildings exist with 0 levels.</span>
+
+                    <span class="c"># In general, we should be assigning here the most</span>
+                    <span class="c"># frequent building in the area which could be defined</span>
+                    <span class="c"># by admin boundaries.</span>
+                    <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Unknown number of levels: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">levels</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Store new attribute value</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">target_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">vulnerability_class</span>
+
+    <span class="c">#print &#39;Got %i without levels or structure (out of %i total)&#39; % (count, N)</span>
+
+    <span class="c"># Create new vector instance and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+               <span class="n">name</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39; mapped to BNPB vulnerability classes&#39;</span><span class="p">,</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+</div>
+<div class="viewcode-block" id="unspecific2bnpb"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/mappings.html#safe.impact_functions.experimental.mappings.unspecific2bnpb">[docs]</a><span class="k">def</span> <span class="nf">unspecific2bnpb</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">target_attribute</span><span class="o">=</span><span class="s">&#39;VCLASS&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map Unspecific point data to BNPB vulnerability classes</span>
+
+<span class="sd">    This makes no assumptions about attributes and maps everything to</span>
+<span class="sd">    URM: Unreinforced Masonry</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        E: Vector object representing the OSM data</span>
+<span class="sd">        target_attribute: Optional name of the attribute containing</span>
+<span class="sd">                          the mapped vulnerability class. Default</span>
+<span class="sd">                          value is &#39;VCLASS&#39;</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Vector object like E, but with one new attribute (e.g. &#39;VCLASS&#39;)</span>
+<span class="sd">        representing the vulnerability class used in the guidelines</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Start mapping</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="c"># Store new attribute value</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">target_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+
+    <span class="c"># Create new vector instance and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+               <span class="n">name</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39; mapped to BNPB vulnerability class URM&#39;</span><span class="p">,</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+</div>
+<div class="viewcode-block" id="sigab2bnpb"><a class="viewcode-back" href="../../../../api-docs/safe/impact_functions/experimental/mappings.html#safe.impact_functions.experimental.mappings.sigab2bnpb">[docs]</a><span class="k">def</span> <span class="nf">sigab2bnpb</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">target_attribute</span><span class="o">=</span><span class="s">&#39;VCLASS&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map SIGAB point data to BNPB vulnerability classes</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        E: Vector object representing the OSM data</span>
+<span class="sd">        target_attribute: Optional name of the attribute containing</span>
+<span class="sd">                          the mapped vulnerability class. Default</span>
+<span class="sd">                          value is &#39;VCLASS&#39;</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">        Vector object like E, but with one new attribute (e.g. &#39;VCLASS&#39;)</span>
+<span class="sd">        representing the vulnerability class used in the guidelines</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Input check</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Struktur_B&#39;</span><span class="p">,</span> <span class="s">&#39;Lantai&#39;</span><span class="p">,</span> <span class="s">&#39;Atap&#39;</span><span class="p">,</span> <span class="s">&#39;Dinding&#39;</span><span class="p">,</span> <span class="s">&#39;Tingkat&#39;</span><span class="p">]</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input data to sigab2bnpb must have attributes </span><span class="si">%s</span><span class="s">. &#39;</span>
+           <span class="s">&#39;It has </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">required</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">actual</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="ow">in</span> <span class="n">actual</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="c"># Start mapping</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Tingkat&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Struktur_B&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">roof_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Atap&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">wall_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Dinding&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">floor_type</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s">&#39;Lantai&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="o">==</span> <span class="s">&#39;none&#39;</span> <span class="ow">or</span> <span class="n">structure</span> <span class="o">==</span> <span class="s">&#39;none&#39;</span><span class="p">:</span>
+            <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+        <span class="k">elif</span> <span class="n">structure</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;beton&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">structure</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;kayu&#39;</span><span class="p">):</span>
+            <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;RM&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;RM&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vulnerability_class</span> <span class="o">=</span> <span class="s">&#39;URM&#39;</span>
+
+        <span class="c"># Store new attribute value</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">target_attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">vulnerability_class</span>
+
+    <span class="c"># Create new vector instance and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(),</span>
+               <span class="n">name</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39; mapped to BNPB vulnerability classes&#39;</span><span class="p">,</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">E</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+
+<span class="c"># def XX_printout_stats_only_sigab2bnpb(E, target_attribute=&#39;VCLASS&#39;):</span>
+<span class="c">#     &quot;&quot;&quot;Map SIGAB point data to BNPB vulnerability classes</span>
+
+<span class="c">#     Input</span>
+<span class="c">#         E: Vector object representing the OSM data</span>
+<span class="c">#         target_attribute: Optional name of the attribute containing</span>
+<span class="c">#                           the mapped vulnerability class. Default</span>
+<span class="c">#                           value is &#39;VCLASS&#39;</span>
+
+<span class="c">#     Output:</span>
+<span class="c">#         Vector object like E, but with one new attribute (e.g. &#39;VCLASS&#39;)</span>
+<span class="c">#         representing the vulnerability class used in the guidelines</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+
+<span class="c">#     # Input check</span>
+<span class="c">#     #required = [&#39;Bangunan&#39;, &#39;Halaman&#39;, &#39;Struktur_B&#39;, &#39;Level&#39;,</span>
+<span class="c">#     #            &#39;Lantai&#39;, &#39;Atap&#39;, &#39;Dinding&#39;, &#39;Tingkat&#39;]</span>
+<span class="c">#     actual = E.get_attribute_names()</span>
+<span class="c">#     #print actual</span>
+
+<span class="c">#     #msg = (&#39;Input data to osm2bnpb must have attributes %s. &#39;</span>
+<span class="c">#     #       &#39;It has %s&#39; % (str(required), str(actual)))</span>
+<span class="c">#     #for attribute in required:</span>
+<span class="c">#     #    verify(attribute in actual, msg)</span>
+
+<span class="c">#     # Start mapping</span>
+<span class="c">#     fields = {}</span>
+<span class="c">#     N = len(E)</span>
+<span class="c">#     print &#39;Total number of attributes&#39;, N</span>
+<span class="c">#     attributes = E.get_data()</span>
+<span class="c">#     count = 0</span>
+<span class="c">#     for i in range(N):</span>
+<span class="c">#         for key in actual:  # Required:</span>
+<span class="c">#             if key not in fields:</span>
+<span class="c">#                 fields[key] = {}</span>
+
+<span class="c">#             val = E.get_data(key, i).lower()</span>
+<span class="c">#             if val not in fields[key]:</span>
+<span class="c">#                 fields[key][val] = 0</span>
+
+<span class="c">#             # Count incidences of each value</span>
+<span class="c">#             fields[key][val] += 1</span>
+
+<span class="c">#     fid = open(&#39;/home/nielso/sigab_stats.txt&#39;, &#39;w&#39;)</span>
+<span class="c">#     for key in actual:  # Required:</span>
+<span class="c">#         print</span>
+<span class="c">#         print key</span>
+<span class="c">#         fid.write(&#39;\n%s\n&#39; % key)</span>
+<span class="c">#         for val in fields[key]:</span>
+<span class="c">#             print &#39;    %s: %i&#39; % (str(val), fields[key][val])</span>
+<span class="c">#             fid.write(&#39;    %s: %i\n&#39; % (str(val), fields[key][val]))</span>
+
+<span class="c">#     fid.close()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../contents.html">
+          <img class="logo" src="../../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

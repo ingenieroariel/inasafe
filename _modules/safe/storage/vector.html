@@ -1,0 +1,1140 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.storage.vector &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.storage.vector</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;**Vector Module**</span>
+
+<span class="sd">.. tip:: Provides functionality for manipulation of vector data. The data can</span>
+<span class="sd">   be in-memory or file based.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Ole Nielsen &lt;ole.moller.nielsen@gmail.com&gt;&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.5.0&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Format:%H$&#39;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&#39;01/11/2010&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;GPL&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&#39;Copyright 2012, Australia Indonesia Facility for &#39;</span>
+<span class="n">__copyright__</span> <span class="o">+=</span> <span class="s">&#39;Disaster Reduction&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">copy</span> <span class="kn">as</span> <span class="nn">copy_module</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span><span class="p">,</span> <span class="n">gdal</span>
+<span class="kn">from</span> <span class="nn">safe.common.polygon</span> <span class="kn">import</span> <span class="n">inside_polygon</span><span class="p">,</span> <span class="n">clip_line_by_polygon</span>
+<span class="kn">from</span> <span class="nn">safe.common.numerics</span> <span class="kn">import</span> <span class="n">ensure_numeric</span>
+<span class="kn">from</span> <span class="nn">safe.common.utilities</span> <span class="kn">import</span> <span class="n">verify</span>
+<span class="kn">from</span> <span class="nn">safe.common.dynamic_translations</span> <span class="kn">import</span> <span class="n">names</span> <span class="k">as</span> <span class="n">internationalised_titles</span>
+
+<span class="kn">from</span> <span class="nn">layer</span> <span class="kn">import</span> <span class="n">Layer</span>
+<span class="kn">from</span> <span class="nn">projection</span> <span class="kn">import</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">DRIVER_MAP</span><span class="p">,</span> <span class="n">TYPE_MAP</span><span class="p">,</span> <span class="n">DEFAULT_ATTRIBUTE</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">read_keywords</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">write_keywords</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">get_geometry_type</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">is_sequence</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">array2wkt</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">calculate_polygon_centroid</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">points_along_line</span>
+<span class="kn">from</span> <span class="nn">utilities</span> <span class="kn">import</span> <span class="n">geometrytype2string</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;InaSAFE&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vector"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector">[docs]</a><span class="k">class</span> <span class="nc">Vector</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for abstraction of vector data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">geometry_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style_info</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise object with either geometry or filename</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Can be either</span>
+<span class="sd">                * A filename of a vector file format known to GDAL.</span>
+<span class="sd">                * List of dictionaries of field names and attribute values</span>
+<span class="sd">                  associated with each point coordinate.</span>
+<span class="sd">                * None</span>
+<span class="sd">            projection: Geospatial reference in WKT format.</span>
+<span class="sd">                Only used if geometry is provided as a numeric array,</span>
+<span class="sd">                if None, WGS84 geographic is assumed.</span>
+<span class="sd">            geometry: A list of either point coordinates or polygons/lines</span>
+<span class="sd">                (see note below).</span>
+<span class="sd">            geometry_type: Desired interpretation of geometry.</span>
+<span class="sd">                Valid options are &#39;point&#39;, &#39;line&#39;, &#39;polygon&#39; or</span>
+<span class="sd">                the ogr types: 1, 2, 3.</span>
+<span class="sd">                If None, a geometry_type will be inferred from the data.</span>
+<span class="sd">            name: Optional name for layer.</span>
+<span class="sd">                Only used if geometry is provided as a numeric array.</span>
+<span class="sd">            keywords: Optional dictionary with keywords that describe the</span>
+<span class="sd">                layer. When the layer is stored, these keywords will</span>
+<span class="sd">                be written into an associated file with extension</span>
+<span class="sd">                &#39;.keywords&#39;.</span>
+
+<span class="sd">                Keywords can for example be used to display text about the</span>
+<span class="sd">                layer in an application.</span>
+<span class="sd">            style_info: Dictionary with information about how this layer</span>
+<span class="sd">                should be styled. See impact_functions/styles.py</span>
+<span class="sd">                for examples.</span>
+
+<span class="sd">        Returns: An instance of class Vector.</span>
+
+<span class="sd">        Raises: Propogates any exceptions encountered.</span>
+
+<span class="sd">        Notes:</span>
+
+<span class="sd">        If data is a filename, all other arguments are ignored</span>
+<span class="sd">        as they will be inferred from the file.</span>
+
+<span class="sd">        The geometry type will be inferred from the dimensions of geometry.</span>
+<span class="sd">        If each entry is one set of coordinates the type will be ogr.wkbPoint,</span>
+<span class="sd">        if it is an array of coordinates the type will be ogr.wkbPolygon.</span>
+
+<span class="sd">        To cast array entries as lines set geometry_type explicitly to &#39;line&#39;</span>
+<span class="sd">        in the call to Vector. Otherwise, they will default to polygons.</span>
+
+<span class="sd">        Each polygon or line feature take the form of an Nx2 array representing</span>
+<span class="sd">        vertices where line segments are joined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Invoke common layer constructor</span>
+        <span class="n">Layer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                       <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+                       <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">,</span>
+                       <span class="n">style_info</span><span class="o">=</span><span class="n">style_info</span><span class="p">)</span>
+
+        <span class="c"># Input checks</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Instantiate empty object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Assume that data is provided as sequences provided as</span>
+            <span class="c"># arguments to the Vector constructor</span>
+            <span class="c"># with extra keyword arguments supplying metadata</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Geometry must be specified&#39;</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Geometry must be a sequence&#39;</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">=</span> <span class="n">get_geometry_type</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">geometry_type</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Generate default attribute as OGR will do that anyway</span>
+                <span class="c"># when writing</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">)):</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;ID&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">})</span>
+
+            <span class="c"># Check data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Data must be a sequence&#39;</span>
+                <span class="n">verify</span><span class="p">(</span><span class="n">is_sequence</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;The number of entries in geometry and data &#39;</span>
+                       <span class="s">&#39;must be the same&#39;</span><span class="p">)</span>
+                <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+            <span class="c"># FIXME: Need to establish extent here</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render as name, number of features, geometry type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">g_type_str</span> <span class="o">=</span> <span class="n">geometrytype2string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;Vector data set: </span><span class="si">%s</span><span class="s">, </span><span class="si">%i</span><span class="s"> features, geometry type &#39;</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">),</span>
+                             <span class="n">g_type_str</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Size of vector layer defined as number of features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;geometry&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Override &#39;==&#39; to allow comparison with other vector objecs</span>
+
+<span class="sd">        Input</span>
+<span class="sd">           other: Vector instance to compare to</span>
+<span class="sd">           rtol, atol: Relative and absolute tolerance.</span>
+<span class="sd">                       See numpy.allclose for details</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Vector</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Vector instance cannot be compared to </span><span class="si">%s</span><span class="s">&#39;</span>
+                   <span class="s">&#39; as its type is </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Check number of features match</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check projection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check geometry type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check geometry</span>
+        <span class="n">geom0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">geom1</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">geom0</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">geom1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">geom0</span><span class="p">,</span> <span class="n">geom1</span><span class="p">,</span>
+                                  <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Line or Polygon data</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geom0</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">geom0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">geom1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                      <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check keys</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="c"># Check data</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="n">Y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">X</span> <span class="o">!=</span> <span class="n">Y</span><span class="p">:</span>
+                        <span class="c"># Not obviously equal, try some special cases</span>
+
+                        <span class="n">res</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c"># Try numerical comparison with tolerances</span>
+                            <span class="n">res</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span>
+                                                 <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="bp">False</span>
+
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c"># Try to cast as booleans. This will take care of</span>
+                            <span class="c"># None, &#39;&#39;, True, False, ...</span>
+                            <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="bp">False</span>
+
+                        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="c"># None of the comparisons could be done</span>
+                            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Check keywords</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">keywords</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># Vector layers are identical up to the specified tolerance</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="Vector.read_from_file"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.read_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read and unpack vector data.</span>
+
+<span class="sd">        It is assumed that the file contains only one layer with the</span>
+<span class="sd">        pertinent features. Further it is assumed for the moment that</span>
+<span class="sd">        all geometries are points.</span>
+
+<span class="sd">        * A feature is a geometry and a set of attributes.</span>
+<span class="sd">        * A geometry refers to location and can be point, line, polygon or</span>
+<span class="sd">          combinations thereof.</span>
+<span class="sd">        * The attributes or obtained through GetField()</span>
+
+<span class="sd">        The full OGR architecture is documented at</span>
+<span class="sd">        * http://www.gdal.org/ogr/ogr_arch.html</span>
+<span class="sd">        * http://www.gdal.org/ogr/ogr_apitut.html</span>
+
+<span class="sd">        Examples are at</span>
+<span class="sd">        * danieljlewis.org/files/2010/09/basicpythonmap.pdf</span>
+<span class="sd">        * http://invisibleroads.com/tutorials/gdal-shapefile-points-save.html</span>
+<span class="sd">        * http://www.packtpub.com/article/geospatial-data-python-geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">basename</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c"># Look for any keywords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="n">read_keywords</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span><span class="p">)</span>
+
+        <span class="c"># FIXME (Ole): Should also look for style file to populate style_info</span>
+
+        <span class="c"># Determine name</span>
+        <span class="k">if</span> <span class="s">&#39;title&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;title&#39;</span><span class="p">]</span>
+
+            <span class="c"># Lookup internationalised title if available</span>
+            <span class="k">if</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">internationalised_titles</span><span class="p">:</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">internationalised_titles</span><span class="p">[</span><span class="n">title</span><span class="p">]</span>
+
+            <span class="n">vectorname</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c"># Use basename without leading directories as name</span>
+            <span class="n">vectorname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">basename</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">vectorname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># In case there are no features</span>
+
+        <span class="n">fid</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not open </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Assume that file contains all data in one layer</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Only one vector layer currently allowed&#39;</span>
+        <span class="k">if</span> <span class="n">fid</span><span class="o">.</span><span class="n">GetLayerCount</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: Number of layers in </span><span class="si">%s</span><span class="s"> are </span><span class="si">%i</span><span class="s">. &#39;</span>
+                   <span class="s">&#39;Only the first layer will currently be &#39;</span>
+                   <span class="s">&#39;used.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fid</span><span class="o">.</span><span class="n">GetLayerCount</span><span class="p">()))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">GetLayerByIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Get spatial extent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetExtent</span><span class="p">()</span>
+
+        <span class="c"># Get projection</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetSpatialRef</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">Projection</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c"># Get number of features</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetFeatureCount</span><span class="p">()</span>
+
+        <span class="c"># Extract coordinates and attributes for all features</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetFeature</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">feature</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not get feature </span><span class="si">%i</span><span class="s"> from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c"># Record coordinates ordered as Longitude, Latitude</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Geometry was None in filename </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">GetGeometryType</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">:</span>
+                    <span class="n">geometry</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">G</span><span class="o">.</span><span class="n">GetX</span><span class="p">(),</span> <span class="n">G</span><span class="o">.</span><span class="n">GetY</span><span class="p">()))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_line_data</span><span class="p">:</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">GetPointCount</span><span class="p">()</span>
+                    <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+                        <span class="n">coordinates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">G</span><span class="o">.</span><span class="n">GetX</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">G</span><span class="o">.</span><span class="n">GetY</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span>
+
+                    <span class="c"># Record entire line as an Mx2 numpy array</span>
+                    <span class="n">geometry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span>
+                                                <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">,</span>
+                                                <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">:</span>
+                    <span class="n">ring</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="n">ring</span><span class="o">.</span><span class="n">GetPointCount</span><span class="p">()</span>
+                    <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+                        <span class="n">coordinates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ring</span><span class="o">.</span><span class="n">GetX</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">ring</span><span class="o">.</span><span class="n">GetY</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span>
+
+                    <span class="c"># Record entire polygon ring as an Mx2 numpy array</span>
+                    <span class="n">geometry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span>
+                                                <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">,</span>
+                                                <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_multi_polygon_data</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Got geometry type Multipolygon (</span><span class="si">%s</span><span class="s">) for filename &#39;</span>
+                           <span class="s">&#39;</span><span class="si">%s</span><span class="s"> which is not yet supported. Only point, line &#39;</span>
+                           <span class="s">&#39;and polygon geometries are supported. However, &#39;</span>
+                           <span class="s">&#39;you can use QGIS functionality to convert &#39;</span>
+                           <span class="s">&#39;multipart vector data to singlepart (Vector -&gt; &#39;</span>
+                           <span class="s">&#39;Geometry Tools -&gt; Multipart to Singleparts and &#39;</span>
+                           <span class="s">&#39;use the resulting dataset.&#39;</span>
+                           <span class="o">%</span> <span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPolygon</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+                <span class="c">#    # FIXME: Unpact multiple polygons to simple polygons</span>
+                <span class="c">#    # For hints on how to unpack see</span>
+<span class="c">#http://osgeo-org.1803224.n2.nabble.com/</span>
+<span class="c">#gdal-dev-Shapefile-Multipolygon-with-interior-rings-td5391090.html</span>
+<span class="c">#http://osdir.com/ml/gdal-development-gis-osgeo/2010-12/msg00107.html</span>
+
+                <span class="c">#    ring = G.GetGeometryRef(0)</span>
+                <span class="c">#    M = ring.GetPointCount()</span>
+                <span class="c">#    coordinates = []</span>
+                <span class="c">#    for j in range(M):</span>
+                <span class="c">#        coordinates.append((ring.GetX(j), ring.GetY(j)))</span>
+
+                <span class="c">#    # Record entire polygon ring as an Mx2 numpy array</span>
+                <span class="c">#    geometry.append(numpy.array(coordinates,</span>
+                <span class="c">#                                dtype=&#39;d&#39;,</span>
+                <span class="c">#                                copy=False))</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Only point, line and polygon geometries are &#39;</span>
+                           <span class="s">&#39;supported. &#39;</span>
+                           <span class="s">&#39;Geometry type in filename </span><span class="si">%s</span><span class="s"> &#39;</span>
+                           <span class="s">&#39;was </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c"># Record attributes by name</span>
+            <span class="n">number_of_fields</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetFieldCount</span><span class="p">()</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_fields</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetFieldDefnRef</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
+
+                <span class="c"># FIXME (Ole): Ascertain the type of each field?</span>
+                <span class="c">#              We need to cast each appropriately?</span>
+                <span class="c">#              This is issue #66</span>
+                <span class="c">#              (https://github.com/AIFDR/riab/issues/66)</span>
+                <span class="c">#feature_type = feature.GetFieldDefnRef(j).GetType()</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="c">#print &#39;Field&#39;, name, feature_type, j, fields[name]</span>
+
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+        <span class="c"># Store geometry coordinates as a compact numeric array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+</div>
+<div class="viewcode-block" id="Vector.write_to_file"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.write_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save vector data to file</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            filename: filename with extension .shp or .gml</span>
+
+<span class="sd">        Note, if attribute names are longer than 10 characters they will be</span>
+<span class="sd">        truncated. This is due to limitations in the shp file driver and has</span>
+<span class="sd">        to be done here since gdal v1.7 onwards has changed its handling of</span>
+<span class="sd">        this issue: http://www.gdal.org/ogr/drv_shapefile.html</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check file format</span>
+        <span class="n">basename</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Invalid file type for file </span><span class="si">%s</span><span class="s">. Only extensions &#39;</span>
+               <span class="s">&#39;shp or gml allowed.&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">extension</span> <span class="o">==</span> <span class="s">&#39;.shp&#39;</span> <span class="ow">or</span> <span class="n">extension</span> <span class="o">==</span> <span class="s">&#39;.gml&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">DRIVER_MAP</span><span class="p">[</span><span class="n">extension</span><span class="p">]</span>
+
+        <span class="c"># FIXME (Ole): Tempory flagging of GML issue (ticket #18)</span>
+        <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s">&#39;.gml&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;OGR GML driver does not store geospatial reference.&#39;</span>
+                   <span class="s">&#39;This format is disabled for the time being. See &#39;</span>
+                   <span class="s">&#39;https://github.com/AIFDR/riab/issues/18&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Derive layername from filename (excluding preceding dirs)</span>
+        <span class="n">layername</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">basename</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c"># Get vector data</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+
+        <span class="c"># Clear any previous file of this name (ogr does not overwrite)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c"># Create new file with one layer</span>
+        <span class="n">drv</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drv</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;OGR driver </span><span class="si">%s</span><span class="s"> not available&#39;</span> <span class="o">%</span> <span class="n">driver</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">drv</span><span class="o">.</span><span class="n">CreateDataSource</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Creation of output file </span><span class="si">%s</span><span class="s"> failed&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">lyr</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">CreateLayer</span><span class="p">(</span><span class="n">layername</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">spatial_reference</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lyr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not create layer </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">layername</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Define attributes if any</span>
+        <span class="n">store_attributes</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fields</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Input parameter &quot;attributes&quot; was specified &#39;</span>
+                           <span class="s">&#39;but it does not contain list of dictionaries &#39;</span>
+                           <span class="s">&#39;with field information as expected. The first &#39;</span>
+                           <span class="s">&#39;element is </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Establish OGR types for each element</span>
+                    <span class="n">ogrtypes</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                        <span class="n">att</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+                        <span class="n">py_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">att</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Unknown type for storing vector &#39;</span>
+                               <span class="s">&#39;data: </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">py_type</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="n">verify</span><span class="p">(</span><span class="n">py_type</span> <span class="ow">in</span> <span class="n">TYPE_MAP</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                        <span class="n">ogrtypes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TYPE_MAP</span><span class="p">[</span><span class="n">py_type</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#msg = (&#39;Input parameter &quot;data&quot; was specified &#39;</span>
+                <span class="c">#       &#39;but appears to be empty&#39;)</span>
+                <span class="c">#raise Exception(msg)</span>
+                <span class="k">pass</span>
+
+            <span class="c"># Create attribute fields in layer</span>
+            <span class="n">store_attributes</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">fd</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ogrtypes</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                <span class="c"># FIXME (Ole): Trying to address issue #16</span>
+                <span class="c">#              But it doesn&#39;t work and</span>
+                <span class="c">#              somehow changes the values of MMI in test</span>
+                <span class="c">#width = max(128, len(name))</span>
+                <span class="c">#print name, width</span>
+                <span class="c">#fd.SetWidth(width)</span>
+
+                <span class="c"># Silent handling of warnings like</span>
+                <span class="c"># Warning 6: Normalized/laundered field name:</span>
+                <span class="c">#&#39;CONTENTS_LOSS_AUD&#39; to &#39;CONTENTS_L&#39;</span>
+                <span class="n">gdal</span><span class="o">.</span><span class="n">PushErrorHandler</span><span class="p">(</span><span class="s">&#39;CPLQuietErrorHandler&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">lyr</span><span class="o">.</span><span class="n">CreateField</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not create field </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+                <span class="c"># Restore error handler</span>
+                <span class="n">gdal</span><span class="o">.</span><span class="n">PopErrorHandler</span><span class="p">()</span>
+
+        <span class="c"># Store geometry</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">)</span>
+        <span class="n">layer_def</span> <span class="o">=</span> <span class="n">lyr</span><span class="o">.</span><span class="n">GetLayerDefn</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="c"># Create new feature instance</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">layer_def</span><span class="p">)</span>
+
+            <span class="c"># Store geometry and check</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">geom</span><span class="o">.</span><span class="n">SetPoint_2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">:</span>
+                <span class="n">wkt</span> <span class="o">=</span> <span class="n">array2wkt</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">geom_type</span><span class="o">=</span><span class="s">&#39;POLYGON&#39;</span><span class="p">)</span>
+                <span class="n">geom</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">CreateGeometryFromWkt</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_line_data</span><span class="p">:</span>
+                <span class="n">wkt</span> <span class="o">=</span> <span class="n">array2wkt</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">geom_type</span><span class="o">=</span><span class="s">&#39;LINESTRING&#39;</span><span class="p">)</span>
+                <span class="n">geom</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">CreateGeometryFromWkt</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Geometry type </span><span class="si">%s</span><span class="s"> not implemented&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">feature</span><span class="o">.</span><span class="n">SetGeometry</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+
+            <span class="n">G</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Could not create GeometryRef for file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">filename</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c"># Store attributes</span>
+            <span class="k">if</span> <span class="n">store_attributes</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+                    <span class="n">actual_field_name</span> <span class="o">=</span> <span class="n">layer_def</span><span class="o">.</span><span class="n">GetFieldDefn</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">GetNameRef</span><span class="p">()</span>
+
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                        <span class="c"># A singleton of type &lt;type &#39;numpy.ndarray&#39;&gt; works</span>
+                        <span class="c"># for gdal version 1.6 but fails for version 1.8</span>
+                        <span class="c"># in SetField with error: NotImplementedError:</span>
+                        <span class="c"># Wrong number of arguments for overloaded function</span>
+                        <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">val</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+                    <span class="n">feature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="n">actual_field_name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+            <span class="c"># Save this feature</span>
+            <span class="k">if</span> <span class="n">lyr</span><span class="o">.</span><span class="n">CreateFeature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Failed to create feature </span><span class="si">%i</span><span class="s"> in file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">feature</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span>
+
+        <span class="c"># Write keywords if any</span>
+        <span class="n">write_keywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="n">basename</span> <span class="o">+</span> <span class="s">&#39;.keywords&#39;</span><span class="p">)</span>
+
+        <span class="c"># FIXME (Ole): Maybe store style_info</span>
+</div>
+<div class="viewcode-block" id="Vector.copy"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return copy of vector layer</span>
+
+<span class="sd">        This copy will be equal to self in the sense defined by __eq__</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                      <span class="n">keywords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="Vector.get_attribute_names"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_attribute_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_attribute_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get available attribute names</span>
+
+<span class="sd">        These are the ones that can be used with get_data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Vector.get_data"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get vector attributes</span>
+
+<span class="sd">        Data is returned as a list where each entry is a dictionary of</span>
+<span class="sd">        attributes for one feature. Entries in get_geometry() and</span>
+<span class="sd">        get_data() are related as 1-to-1</span>
+
+<span class="sd">        If optional argument attribute is specified and a valid name,</span>
+<span class="sd">        then the list of values for that attribute is returned.</span>
+
+<span class="sd">        If optional argument index is specified on the that value will</span>
+<span class="sd">        be returned. Any value of index is ignored if attribute is None.</span>
+
+<span class="sd">        If optional argument copy is True and all attributes are requested,</span>
+<span class="sd">        a copy will be returned. Otherwise a pointer to the data is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">copy_module</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Specified attribute </span><span class="si">%s</span><span class="s"> does not exist in &#39;</span>
+                       <span class="s">&#39;vector layer </span><span class="si">%s</span><span class="s">. Valid names are </span><span class="si">%s</span><span class="s">&#39;</span>
+                       <span class="s">&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+                <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">msg</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># Return all values for specified attribute</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Return value for specified attribute and index</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Specified index must be either None or &#39;</span>
+                           <span class="s">&#39;an integer. I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">)</span>
+                    <span class="n">verify</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+                    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Specified index must lie within the bounds &#39;</span>
+                           <span class="s">&#39;of vector layer </span><span class="si">%s</span><span class="s"> which is [</span><span class="si">%i</span><span class="s">, </span><span class="si">%i</span><span class="s">]&#39;</span>
+                           <span class="s">&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">verify</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">attribute</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Vector data instance does not have any attributes&#39;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Vector.get_geometry_type"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_geometry_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_geometry_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return geometry type for vector layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span>
+</div>
+<div class="viewcode-block" id="Vector.get_geometry_name"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_geometry_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_geometry_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return geometry name for vector layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">geometrytype2string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Vector.get_geometry"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return geometry for vector layer.</span>
+
+<span class="sd">        Depending on the feature type, geometry is</span>
+
+<span class="sd">        geometry type     output type</span>
+<span class="sd">        -----------------------------</span>
+<span class="sd">        point             list of 2x1 array of longitudes and latitudes)</span>
+<span class="sd">        line              list of arrays of coordinates</span>
+<span class="sd">        polygon           list of arrays of coordinates</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">copy_module</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span>
+</div>
+<div class="viewcode-block" id="Vector.get_bounding_box"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get bounding box coordinates for vector layer.</span>
+
+<span class="sd">        Format is [West, South, East, North]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c"># West</span>
+                <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="c"># South</span>
+                <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c"># East</span>
+                <span class="n">e</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>  <span class="c"># North</span>
+</div>
+<div class="viewcode-block" id="Vector.get_extrema"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_extrema">[docs]</a>    <span class="k">def</span> <span class="nf">get_extrema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get min and max values from specified attribute</span>
+
+<span class="sd">        Return min, max</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Valid attribute name must be specified in get_extrema &#39;</span>
+                   <span class="s">&#39;for vector layers. I got None.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Vector.get_topN"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.get_topN">[docs]</a>    <span class="k">def</span> <span class="nf">get_topN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get top N features</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            attribute: The name of attribute where values are sought</span>
+<span class="sd">            N: How many</span>
+
+<span class="sd">        Output</span>
+<span class="sd">            layer: New vector layer with selected features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># FIXME (Ole): Maybe generalise this to arbitrary expressions</span>
+
+        <span class="c"># Input checks</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Specfied attribute must be a string. &#39;</span>
+               <span class="s">&#39;I got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">attribute</span><span class="p">)))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Specified attribute was empty&#39;</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;N must be a positive number. I got </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">N</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">N</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Create list of values for specified attribute</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+
+        <span class="c"># Sort and select using Schwarzian transform</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">A</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="c"># Pick top N and unpack</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geometry</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">A</span><span class="p">[</span><span class="o">-</span><span class="n">N</span><span class="p">:])</span>
+
+        <span class="c"># Create new Vector instance and return</span>
+        <span class="k">return</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                      <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                      <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">)</span>
+
+    <span class="c"># FIXME (Ole): Name should be layer_name</span></div>
+<div class="viewcode-block" id="Vector.interpolate"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.Vector.interpolate">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">attribute_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Interpolate values of this vector layer to other layer</span>
+
+<span class="sd">        Input</span>
+<span class="sd">            X: Layer object defining target</span>
+<span class="sd">            name: Optional name of returned interpolated layer</span>
+<span class="sd">            attribute_name: Optional attribute name to use.</span>
+<span class="sd">                            If None, all attributes are used.</span>
+
+<span class="sd">                            FIXME (Ole): Single attribute not tested well yet</span>
+<span class="sd">                            and not implemented for lines</span>
+
+<span class="sd">        Output</span>
+<span class="sd">            Y: Layer object with values of this vector layer interpolated to</span>
+<span class="sd">               geometry of input layer X</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input to Vector.interpolate must be a vector layer instance&#39;</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">is_vector</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Projections must be the same: I got </span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">projection</span><span class="p">))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">==</span> <span class="n">X</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Vector layer to interpolate from must be polygon geometry. &#39;</span>
+               <span class="s">&#39;I got OGR geometry type </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="n">geometrytype2string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># FIXME (Ole): Organise this the same way it is done with rasters</span>
+        <span class="n">original_geometry</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>  <span class="c"># Geometry for returned data</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">:</span>
+            <span class="c"># Use centroids, in case of polygons</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">convert_polygons_to_centroids</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">X</span><span class="o">.</span><span class="n">is_line_data</span><span class="p">:</span>
+
+            <span class="c"># Clip lines to polygon and return centroids</span>
+
+            <span class="c"># FIXME (Ole): Need to separate this out, but identify what is</span>
+            <span class="c">#              common with points and lines</span>
+            <span class="c">#</span>
+
+            <span class="c">#X.write_to_file(&#39;line_data.shp&#39;)</span>
+            <span class="c">#self.write_to_file(&#39;poly_data.shp&#39;)</span>
+
+            <span class="c"># Extract line features</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+            <span class="n">line_attributes</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="p">)</span>
+            <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line_attributes</span><span class="p">)</span> <span class="o">==</span> <span class="n">N</span><span class="p">)</span>
+
+            <span class="c"># Extract polygon features</span>
+            <span class="n">polygons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+            <span class="n">poly_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+            <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly_attributes</span><span class="p">))</span>
+
+            <span class="c"># Data structure for resulting line segments</span>
+            <span class="n">clipped_geometry</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">clipped_attributes</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c"># Clip line lines to polygons</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">polygons</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                    <span class="n">inside</span><span class="p">,</span> <span class="n">outside</span> <span class="o">=</span> <span class="n">clip_line_by_polygon</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+
+                    <span class="c"># Create new attributes</span>
+                    <span class="c"># FIXME (Ole): Not done single specified polygon</span>
+                    <span class="c">#              attribute</span>
+                    <span class="n">inside_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">outside_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">line_attributes</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                        <span class="n">inside_attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_attributes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+                        <span class="n">outside_attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_attributes</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">poly_attributes</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="n">inside_attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">poly_attributes</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+                        <span class="n">outside_attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+                    <span class="c"># Always create default attribute flagging if segment was</span>
+                    <span class="c"># inside any of the polygons</span>
+                    <span class="n">inside_attributes</span><span class="p">[</span><span class="n">DEFAULT_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">outside_attributes</span><span class="p">[</span><span class="n">DEFAULT_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+                    <span class="c"># Assign new attribute set to clipped lines</span>
+                    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">inside</span><span class="p">:</span>
+                        <span class="n">clipped_geometry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                        <span class="n">clipped_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inside_attributes</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">outside</span><span class="p">:</span>
+                        <span class="n">clipped_geometry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                        <span class="n">clipped_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outside_attributes</span><span class="p">)</span>
+
+            <span class="c"># Create new Vector instance and return</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">clipped_attributes</span><span class="p">,</span>
+                       <span class="n">projection</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                       <span class="n">geometry</span><span class="o">=</span><span class="n">clipped_geometry</span><span class="p">,</span>
+                       <span class="n">geometry_type</span><span class="o">=</span><span class="s">&#39;line&#39;</span><span class="p">)</span>
+            <span class="c">#V.write_to_file(&#39;clipped_and_tagged.shp&#39;)</span>
+            <span class="k">return</span> <span class="n">V</span>
+
+        <span class="c"># The following applies only to Polygon-Point interpolation</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Vector layer to interpolate to must be point geometry. &#39;</span>
+               <span class="s">&#39;I got OGR geometry type </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="n">geometrytype2string</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">geometry_type</span><span class="p">))</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">is_point_data</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Name must be either a string or None. I got </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Attribute must be either a string or None. I got </span><span class="si">%s</span><span class="s">&#39;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">verify</span><span class="p">(</span><span class="n">attribute_name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span>
+               <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">attribute_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_attribute_names</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">attribute_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Requested attribute &quot;</span><span class="si">%s</span><span class="s">&quot; did not exist in </span><span class="si">%s</span><span class="s">&#39;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">attribute_names</span><span class="p">))</span>
+            <span class="n">verify</span><span class="p">(</span><span class="n">attribute_name</span> <span class="ow">in</span> <span class="n">attribute_names</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c">#----------------</span>
+        <span class="c"># Start algorithm</span>
+        <span class="c">#----------------</span>
+
+        <span class="c"># Extract point features</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">ensure_numeric</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">())</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c"># Extract polygon features</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="n">verify</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="c"># Augment point features with empty attributes from polygon</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attribute_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Use all attributes</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attribute_names</span><span class="p">:</span>
+                    <span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Use only requested attribute</span>
+                <span class="c"># FIXME (Ole): Test for this is not finished</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">attribute_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="c"># Always create default attribute flagging if point was</span>
+            <span class="c"># inside any of the polygons</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">DEFAULT_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Traverse polygons and assign attributes to points that fall inside</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geom</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attribute_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Use all attributes</span>
+                <span class="n">poly_attr</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Use only requested attribute</span>
+                <span class="n">poly_attr</span> <span class="o">=</span> <span class="p">{</span><span class="n">attribute_name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">attribute_name</span><span class="p">]}</span>
+
+            <span class="c"># Assign default attribute to indicate points inside</span>
+            <span class="n">poly_attr</span><span class="p">[</span><span class="n">DEFAULT_ATTRIBUTE</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="c"># Clip data points by polygons and add polygon attributes</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">inside_polygon</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">polygon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">poly_attr</span><span class="p">:</span>
+                    <span class="c"># Assign attributes from polygon to points</span>
+                    <span class="n">attributes</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">poly_attr</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c"># Create new Vector instance and return</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+                   <span class="n">projection</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+                   <span class="n">geometry</span><span class="o">=</span><span class="n">original_geometry</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">get_name</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">V</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_point_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_vector</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_line_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_vector</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbLineString</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_polygon_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_vector</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPolygon</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_multi_polygon_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_vector</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbMultiPolygon</span>
+
+
+<span class="c">#----------------------------------</span>
+<span class="c"># Helper functions for class Vector</span>
+<span class="c">#----------------------------------</span></div>
+<div class="viewcode-block" id="convert_line_to_points"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.convert_line_to_points">[docs]</a><span class="k">def</span> <span class="nf">convert_line_to_points</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert line vector data to point vector data</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        V: Vector layer with line data</span>
+<span class="sd">        delta: Incremental step to find the points</span>
+<span class="sd">    Output</span>
+<span class="sd">        Vector layer with point data and the same attributes as V</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input data </span><span class="si">%s</span><span class="s"> must be line vector data&#39;</span> <span class="o">%</span> <span class="n">V</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">is_line_data</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="c"># Calculate centroids for each polygon</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">points_along_line</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="c"># We need to create a data entry for each point.</span>
+        <span class="n">new_data</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">c</span><span class="p">])</span>
+        <span class="n">points</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c"># Create new point vector layer with same attributes and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">new_data</span><span class="p">,</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_point_data&#39;</span> <span class="o">%</span> <span class="n">V</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span>
+
+</div>
+<div class="viewcode-block" id="convert_polygons_to_centroids"><a class="viewcode-back" href="../../../api-docs/safe/storage/vector.html#safe.storage.vector.convert_polygons_to_centroids">[docs]</a><span class="k">def</span> <span class="nf">convert_polygons_to_centroids</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert polygon vector data to point vector data</span>
+
+<span class="sd">    Input</span>
+<span class="sd">        V: Vector layer with polygon data</span>
+
+<span class="sd">    Output</span>
+<span class="sd">        Vector layer with point data and the same attributes as V</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input data </span><span class="si">%s</span><span class="s"> must be polygon vector data&#39;</span> <span class="o">%</span> <span class="n">V</span>
+    <span class="n">verify</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">is_polygon_data</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">get_geometry</span><span class="p">()</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="c"># Calculate points for each polygon</span>
+    <span class="n">centroids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">calculate_polygon_centroid</span><span class="p">(</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">centroids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c"># Create new point vector layer with same attributes and return</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span>
+               <span class="n">projection</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">get_projection</span><span class="p">(),</span>
+               <span class="n">geometry</span><span class="o">=</span><span class="n">centroids</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_centroid_data&#39;</span> <span class="o">%</span> <span class="n">V</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span>
+               <span class="n">keywords</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">get_keywords</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>

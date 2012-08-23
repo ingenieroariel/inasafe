@@ -1,0 +1,355 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>safe.impact_functions.test_plugins &mdash; InaSAFE 0.5.0-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.5.0-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../../../_static/toggle_sections.js"></script>
+    <link rel="top" title="InaSAFE 0.5.0-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for safe.impact_functions.test_plugins</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="c"># FIXME (Ole): Must use fully qualified path for these</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">FunctionProvider</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">get_plugins</span>
+
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">requirements_collect</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">requirement_check</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">compatible_layers</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.core</span> <span class="kn">import</span> <span class="n">aggregate</span>
+<span class="kn">from</span> <span class="nn">safe.impact_functions.utilities</span> <span class="kn">import</span> <span class="n">Damage_curve</span>
+
+<span class="kn">from</span> <span class="nn">safe.storage.core</span> <span class="kn">import</span> <span class="n">read_layer</span>
+<span class="kn">from</span> <span class="nn">safe.common.testing</span> <span class="kn">import</span> <span class="n">TESTDATA</span>
+
+<span class="n">DEFAULT_PLUGINS</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Earthquake Fatality Function&#39;</span><span class="p">,)</span>
+
+<span class="c"># These imports are needed for impact function registration if this test</span>
+<span class="c"># is to be run independently - dont remove</span>
+<span class="c"># If any of these get reinstated as &quot;official&quot; public impact functions,</span>
+<span class="c"># remove from here and update test to use the real one.</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">empirical_fatality_model</span>
+<span class="kn">from</span> <span class="nn">safe.engine.impact_functions_for_testing</span> <span class="kn">import</span> <span class="n">allen_fatality_model</span>
+
+
+<span class="c"># FIXME (Ole): Change H, E to layers.</span>
+<div class="viewcode-block" id="BasicFunction"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.BasicFunction">[docs]</a><span class="k">class</span> <span class="nc">BasicFunction</span><span class="p">(</span><span class="n">FunctionProvider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Risk plugin for testing</span>
+
+<span class="sd">    :author Allen</span>
+<span class="sd">    :rating 1</span>
+<span class="sd">    :param requires category==&quot;hazard&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.97429</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">11.037</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="Test_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins">[docs]</a><span class="k">class</span> <span class="nc">Test_plugins</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests of Risiko calculations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_get_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It is possible to retrieve the list of functions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">plugins</span><span class="o">.</span><span class="n">get_plugins</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;No plugins were found, not even the built-in ones&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">msg</span>
+
+<div class="viewcode-block" id="Test_plugins.test_single_get_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_single_get_plugins">[docs]</a>    <span class="k">def</span> <span class="nf">test_single_get_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Named plugin can be retrieved</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plugin_name</span> <span class="o">=</span> <span class="n">DEFAULT_PLUGINS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;No plugins were found matching </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">plugin_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="Test_plugins.test_get_plugins"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_get_plugins">[docs]</a>    <span class="k">def</span> <span class="nf">test_get_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plugins can be collected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">()</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Check that every plugin has a requires line</span>
+        <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugin_list</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">requirements</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;There were no requirements in plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">plugin</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">requirements</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">msg</span>
+
+            <span class="k">for</span> <span class="n">req_str</span> <span class="ow">in</span> <span class="n">requirements</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;All plugins should return True or False&#39;</span>
+                <span class="k">assert</span><span class="p">(</span><span class="n">requirement_check</span><span class="p">({</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                                          <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                                          <span class="s">&#39;layerType&#39;</span><span class="p">:</span> <span class="s">&#39;raster&#39;</span><span class="p">},</span>
+                                         <span class="n">req_str</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]),</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="Test_plugins.test_requirements_check"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_requirements_check">[docs]</a>    <span class="k">def</span> <span class="nf">test_requirements_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plugins are correctly filtered based on requirements&quot;&quot;&quot;</span>
+
+        <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">(</span><span class="s">&#39;BasicFunction&#39;</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">requirements</span> <span class="o">=</span> <span class="n">requirements_collect</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Requirements are </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">requirements</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">requirements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span> <span class="n">msg</span>
+        <span class="k">for</span> <span class="n">req_str</span> <span class="ow">in</span> <span class="n">requirements</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Should eval to True&#39;</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">requirement_check</span><span class="p">({</span><span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">},</span>
+                                     <span class="n">req_str</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">),</span> <span class="n">msg</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Should eval to False&#39;</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">requirement_check</span><span class="p">({</span><span class="s">&#39;broke&#39;</span><span class="p">:</span> <span class="s">&#39;broke&#39;</span><span class="p">},</span>
+                                     <span class="n">req_str</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">),</span> <span class="n">msg</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">(</span><span class="s">&#39;NotRegistered&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Search should fail&#39;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Test_plugins.test_plugin_compatibility"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_plugin_compatibility">[docs]</a>    <span class="k">def</span> <span class="nf">test_plugin_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Default plugins perform as expected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Get list of plugins</span>
+        <span class="n">plugin_list</span> <span class="o">=</span> <span class="n">get_plugins</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">plugin_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="c"># Characterisation test to preserve the behaviour of</span>
+        <span class="c"># get_layer_descriptors. FIXME: I think we should change this to be</span>
+        <span class="c"># a dictionary of metadata entries (ticket #126).</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;lembang_schools&#39;</span><span class="p">,</span>
+                      <span class="p">{</span><span class="s">&#39;layertype&#39;</span><span class="p">:</span> <span class="s">&#39;vector&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;exposure&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;building&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;lembang_schools&#39;</span><span class="p">}],</span>
+                     <span class="p">[</span><span class="s">&#39;shakemap_padang_20090930&#39;</span><span class="p">,</span>
+                      <span class="p">{</span><span class="s">&#39;layertype&#39;</span><span class="p">:</span> <span class="s">&#39;raster&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;hazard&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;subcategory&#39;</span><span class="p">:</span> <span class="s">&#39;earthquake&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;shakemap_padang_20090930&#39;</span><span class="p">}]]</span>
+
+        <span class="c"># Check plugins are returned</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">reference</span>
+        <span class="n">annotated_plugins</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                              <span class="s">&#39;doc&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">__doc__</span><span class="p">,</span>
+                              <span class="s">&#39;layers&#39;</span><span class="p">:</span> <span class="n">compatible_layers</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)}</span>
+                             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">plugin_list</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;No compatible layers returned&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotated_plugins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="Test_plugins.test_damage_curve"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_damage_curve">[docs]</a>    <span class="k">def</span> <span class="nf">test_damage_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Damage curve class works</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Make data</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>
+
+        <span class="c"># Define array with corresponding values</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;f&#39;</span><span class="p">)</span>
+        <span class="n">A</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="c"># Define values for each x</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">3</span>
+
+        <span class="c"># Instantiate</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">Damage_curve</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+        <span class="c"># Check</span>
+        <span class="k">assert</span> <span class="n">D</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+        <span class="k">assert</span> <span class="n">D</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+        <span class="k">assert</span> <span class="n">D</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9</span>
+
+        <span class="c"># Check exceptions</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Damage_curve</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Damage_curve should have raised exception for None&#39;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Damage_curve</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Damage_curve should have raised exception for invalid input&#39;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Damage_curve</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Damage_curve should have raised exception for 1d array&#39;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Damage_curve</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Damage_curve should have raised exception for &#39;</span>
+                   <span class="s">&#39;more than two dimensions&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Damage_curve</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Damage_curve should have raised exception for &#39;</span>
+                   <span class="s">&#39;more than two colums&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Test_plugins.test_aggregate"><a class="viewcode-back" href="../../../api-docs/safe/impact_functions/test_plugins.html#safe.impact_functions.test_plugins.Test_plugins.test_aggregate">[docs]</a>    <span class="k">def</span> <span class="nf">test_aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Aggregation by boundaries works</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Name file names for hazard level and exposure</span>
+        <span class="n">boundary_filename</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/kecamatan_jakarta_osm.shp&#39;</span> <span class="o">%</span> <span class="n">TESTDATA</span><span class="p">)</span>
+        <span class="c">#data_filename = (&#39;%s/Population_Jakarta_geographic.asc&#39; % TESTDATA)</span>
+
+        <span class="c"># Get reference building impact data</span>
+        <span class="n">building_filename</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/building_impact_scenario.shp&#39;</span> <span class="o">%</span> <span class="n">TESTDATA</span><span class="p">)</span>
+
+        <span class="n">boundary_layer</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">boundary_filename</span><span class="p">)</span>
+        <span class="n">building_layer</span> <span class="o">=</span> <span class="n">read_layer</span><span class="p">(</span><span class="n">building_filename</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">aggregate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">building_layer</span><span class="p">,</span>
+                        <span class="n">boundaries</span><span class="o">=</span><span class="n">boundary_layer</span><span class="p">,</span>
+                        <span class="n">attribute_name</span><span class="o">=</span><span class="s">&#39;AFFECTED&#39;</span><span class="p">,</span>
+                        <span class="n">aggregation_function</span><span class="o">=</span><span class="s">&#39;count&#39;</span><span class="p">)</span>
+
+        <span class="c">#print res, len(res)</span>
+        <span class="c">#print boundary_layer, len(boundary_layer)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Number of aggregations </span><span class="si">%i</span><span class="s"> should be the same as the &#39;</span>
+               <span class="s">&#39;number of specified boundaries </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">),</span>
+                                                      <span class="nb">len</span><span class="p">(</span><span class="n">boundary_layer</span><span class="p">)))</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_layer</span><span class="p">),</span> <span class="n">msg</span>
+
+        <span class="c"># FIXME (Ole): Need test by manual inspection in QGis</span>
+        <span class="c">#print res</span></div>
+    <span class="n">test_aggregate</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="mi">1</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">Test_plugins</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../contents.html">
+          <img class="logo" src="../../../_static/icon.png" alt="Logo"/>
+        </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../../index.html">Home</a> &raquo;</li>
+    <li><a href="../../../contents.html">Contents</a> &raquo;</li>
+
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, BNPB/AIFDR/GFDRR.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+    <!-- cloud_sptheme 1.3 -->
+  </body>
+</html>
