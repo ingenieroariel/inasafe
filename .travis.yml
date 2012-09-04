@@ -1,12 +1,11 @@
 language: python
-env:
-  - PYTHON=python PYSUF=''
-# command to install dependencies
+python:
+  - 2.7
 before_install:
    - sudo apt-get install python-numpy
    - sudo apt-get install python-gdal
    - sudo apt-get install python-nose
 install:
    - pip install . --use-mirrors
-# command to run tests
-script: nosetests -A 'not slow' -v safe --stop
+script:
+   - nosetests -A 'not slow' -v safe --stop
